@@ -7,8 +7,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover'
-}
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: 'PLOT',
@@ -28,7 +28,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
-      <JotaiProvider>{children}</JotaiProvider>
+      <body>
+        <JotaiProvider>{children}</JotaiProvider>
+      </body>
     </html>
   );
 }
