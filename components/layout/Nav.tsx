@@ -7,14 +7,14 @@ import { usePathname } from 'next/navigation';
 import { FaList, FaPlus } from 'react-icons/fa6';
 
 const NAV_DATA: { [key: string]: any }[] = [
-  { path: 'list', icon: <FaList />, title: 'List' },
-  // { path: 'calendar', icon: <FaRegClock />, title: 'Schedule' },
-  // { path: 'cateogries', icon: <FaRegCalendar />, title: 'Calendar' },
-  // { path: 'tracker', icon: <FaChartBar />, title: 'Statistics' },
+  { path: 'home/list', icon: <FaList />, title: 'List' },
+  // { path: 'home/calendar', icon: <FaRegClock />, title: 'Schedule' },
+  // { path: 'home/cateogries', icon: <FaRegCalendar />, title: 'Calendar' },
+  // { path: 'home/tracker', icon: <FaChartBar />, title: 'Statistics' },
   {
     plus: (pathname: string) => (
       <Link
-        href={`${pathname}?profile-select=show`}
+        href={`${pathname}?log-input=show`}
         key="add"
         className="bg-primary w-9 h-9 mb-2 rounded-md"
       >

@@ -3,7 +3,6 @@
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { cn } from '@/util/cn';
 import { AnimatePresence, motion } from 'framer-motion';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { BiX } from 'react-icons/bi';
