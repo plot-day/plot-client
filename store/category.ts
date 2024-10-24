@@ -5,6 +5,8 @@ export interface CategoryType {
   id: string;
   icon: string;
   title: string;
+  group: string;
+  groupId: string;
   userId?: string;
   fields: { icon: string; label: string; value?: string }[];
 }
@@ -18,6 +20,7 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
         {
           title: 'Bass',
           group: 'Hobby',
+          groupId: '4',
           icon: '🎸',
           fields: [
             { icon: 'fa6/FaItunesNote', label: 'Song', value: '' },
@@ -28,20 +31,43 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
         {
           title: 'Home Training',
           group: 'Fitness',
+          groupId: '5',
           icon: '💪',
           fields: [{ icon: 'io5/IoBarbell', label: 'Excercise', value: '' }],
           id: '2',
         },
-        { title: 'Schedule', group: 'Lifestyle', icon: '📆', fields: [], id: '3' },
+        {
+          title: 'Schedule',
+          group: 'Lifestyle',
+          groupId: '6',
+          icon: '📆',
+          fields: [],
+          id: '3',
+        },
         {
           title: 'Sleep',
           group: 'Lifestyle',
+          groupId: '6',
           icon: '🌙',
           fields: [{ icon: 'fa6/FaClock', label: 'Time' }],
           id: '5',
         },
-        { title: 'Expense', group: 'Lifestyle', icon: '💸', fields: [], id: '6' },
-        { title: 'Mood', group: 'Lifestyle', icon: '🙂', fields: [], id: '7' },
+        {
+          title: 'Expense',
+          group: 'Lifestyle',
+          groupId: '6',
+          icon: '💸',
+          fields: [],
+          id: '6',
+        },
+        {
+          title: 'Mood',
+          group: 'Lifestyle',
+          groupId: '6',
+          icon: '🙂',
+          fields: [],
+          id: '7',
+        },
       ];
       //   const categories = await res.json();
 

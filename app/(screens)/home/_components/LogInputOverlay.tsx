@@ -98,7 +98,6 @@ const LogInputOverlay = () => {
     if (showEmojiInput) {
       setIsAutoEmoji(!logId);
     } else {
-      console.log('reset');
       form.reset();
     }
   }, [showEmojiInput]);
@@ -130,7 +129,7 @@ const LogInputOverlay = () => {
           }`}
         />
         <div className="w-full font-bold">
-          <Link href="">
+          <Link href="?category-select=show">
             <p className="text-sm">
               {categories?.find((category) => category.id === categoryId)?.title || (
                 <span className="text-gray-300">Select category</span>

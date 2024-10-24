@@ -14,7 +14,7 @@ const NAV_DATA: { [key: string]: any }[] = [
   {
     plus: (pathname: string) => (
       <Link
-        href={`${pathname}?log-input=show`}
+        href={`${pathname}?category-select=show`}
         key="add"
         className="bg-primary w-9 h-9 mb-2 rounded-md"
       >

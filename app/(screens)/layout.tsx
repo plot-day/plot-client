@@ -1,6 +1,7 @@
 import Nav from '@/components/layout/Nav';
 import LogInputOverlay from './home/_components/LogInputOverlay';
 import EmojiOverlay from '@/components/emoji/EmojiOverlay';
+import CategorySelectOverlay from './home/_components/CategorySelectOverlay';
 
 export default function RootLayout({
   children,
@@ -16,6 +17,7 @@ export default function RootLayout({
       {/* overlays */}
       <div id="overlay-container" className="absolute sm:bottom-0" />
       <LogInputOverlay />
+      <CategorySelectOverlay />
       <EmojiOverlay />
     </div>
   );
