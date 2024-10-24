@@ -33,6 +33,22 @@ const CategorySelectOverlay = () => {
           </ul>
         );
       })}
+      <div className="mb-4">
+        <Link
+          href="/home/list?category-input=show"
+          className="w-full p-4 flex gap-1 justify-center items-center text-xs text-center font-extrabold"
+        >
+          <FaPlus />
+          Add category
+        </Link>
+        {/* <Link
+          href="/home/list?category-list=show"
+          className="w-full p-4 flex gap-1 justify-center items-center text-xs text-center font-extrabold"
+        >
+          <FaPencil />
+          Edit categories
+        </Link> */}
+      </div>
     </Overlay>
   );
 };
@@ -41,7 +57,7 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
   const router = useRouter();
 
   const selectCategoryHandler = () => {
-    router.replace(`?log-input=show&categoryId=${id}`);
+    router.replace(`/home/list?log-input=show&categoryId=${id}`);
   };
 
   return (
@@ -52,9 +68,12 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
           <p className="font-bold leading-tight">{title}</p>
         </div>
       </div>
-      {/* <Button className="px-2 py-1 text-xs rounded-md shrink-0" onClick={addLogHandler}>
+      <Button
+        className="px-2 py-1 text-xs rounded-md shrink-0"
+        onClick={selectCategoryHandler}
+      >
         Add Log
-      </Button> */}
+      </Button>
     </li>
   );
 };
