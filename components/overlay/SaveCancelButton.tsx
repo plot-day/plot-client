@@ -6,9 +6,10 @@ interface SaveCancelButtonProps {
   isPending?: boolean;
   onSave?: () => void;
   onCancel?: () => void;
+  saveStr?: string;
 }
 
-const SaveCancelButton = ({ isPending, onSave, onCancel }: SaveCancelButtonProps) => {
+const SaveCancelButton = ({ isPending, onSave, saveStr, onCancel }: SaveCancelButtonProps) => {
   return (
     <div className="w-full flex gap-4 mt-8 font-extrabold">
       <button
@@ -25,7 +26,7 @@ const SaveCancelButton = ({ isPending, onSave, onCancel }: SaveCancelButtonProps
         onClick={onSave}
         disabled={isPending}
       >
-        {isPending ? <Loader isDark={true} className="w-6 h-6" /> : 'Save'}
+        {isPending ? <Loader isDark={true} className="w-6 h-6" /> : saveStr || 'Save'}
       </Button>
     </div>
   );

@@ -17,6 +17,7 @@ const EmojiInput = ({
   children,
 }: PropsWithChildren<EmojiInputProps>) => {
   const emoji = useAtomValue(emojiAtom);
+
   return (
     <Link
       className={cn(
