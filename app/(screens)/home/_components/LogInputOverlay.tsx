@@ -40,7 +40,7 @@ const LogInputOverlay = () => {
   const params = useSearchParams();
   const logId = params.get('logId') || '';
   const categoryId = params.get('categoryId') || '';
-  const showEmojiInput = params.get('');
+  const showLogInput = params.get('log-input');
 
   const fields = categories?.find((category) => category.id === categoryId)?.fields;
 
@@ -95,12 +95,23 @@ const LogInputOverlay = () => {
   };
 
   useEffect(() => {
-    if (showEmojiInput) {
-      setIsAutoEmoji(!logId);
+    if (showLogInput) {
+      if (logId) {
+        const categoryEmoji = categories?.find(
+          (category) => category.id === categoryId
+        )?.icon;
+        if (emoji === categoryEmoji) {
+          setIsAutoEmoji(true);
+        } else {
+          setIsAutoEmoji(false);
+        }
+      } else {
+        setIsAutoEmoji(true);
+      }
     } else {
       form.reset();
     }
-  }, [showEmojiInput]);
+  }, [showLogInput]);
 
   useEffect(() => {
     if (isAutoEmoji) {
@@ -129,7 +140,7 @@ const LogInputOverlay = () => {
           }`}
         />
         <div className="w-full font-bold">
-          <Link href="?category-select=show">
+          <Link href="?category-select=show&has-prev=true">
             <p className="text-sm">
               {categories?.find((category) => category.id === categoryId)?.title || (
                 <span className="text-gray-300">Select category</span>

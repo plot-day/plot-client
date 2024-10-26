@@ -3,6 +3,8 @@ import LogInputOverlay from './home/_components/LogInputOverlay';
 import EmojiOverlay from '@/components/emoji/EmojiOverlay';
 import CategorySelectOverlay from './home/_components/CategorySelectOverlay';
 import CategoryInputOverlay from './home/_components/CategoryInputOverlay';
+import CategoryListOverlay from './home/_components/CategoryListOverlay';
+import GroupListOverlay from './home/_components/GroupListOverlay';
 
 export default function RootLayout({
   children,
@@ -19,7 +21,9 @@ export default function RootLayout({
       <div id="overlay-container" className="absolute sm:bottom-0" />
       <LogInputOverlay />
       <CategorySelectOverlay />
+      <CategoryListOverlay />
       <CategoryInputOverlay />
+      <GroupListOverlay />
       <EmojiOverlay />
     </div>
   );

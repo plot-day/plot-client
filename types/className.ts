@@ -1,3 +1,5 @@
+import { HTMLAttributes } from 'react';
+
 export interface ClassNameProps {
-  className?: string;
+  className?: HTMLAttributes<HTMLElement>['className'];
 }

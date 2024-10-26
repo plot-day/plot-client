@@ -73,7 +73,6 @@ const CategoryInputOverlay = () => {
         form.setValue('title', category?.title || '');
       }
     } else {
-      setEmoji('');
       form.reset();
     }
   }, [showOverlay, categoryId]);
