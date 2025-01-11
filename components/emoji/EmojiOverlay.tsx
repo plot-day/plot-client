@@ -1,9 +1,9 @@
 'use client';
 
-import { emojiAtom, isAutoEmojiAtom } from '@/store/emoji';
+import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import data from '@emoji-mart-kr/data';
 import Picker from '@emoji-mart/react';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
 import Overlay from '../overlay/Overlay';
 
@@ -18,12 +18,13 @@ interface EmojiValueType {
 
 const EmojiOverlay = () => {
   const router = useRouter();
+
+  const emojiIdMemory = useAtomValue(emojiIdMemoryAtom);
+
   const setEmoji = useSetAtom(emojiAtom);
-  const setIsAutoEmoji = useSetAtom(isAutoEmojiAtom);
 
   const emojiSelectHandler = (value: EmojiValueType) => {
-    setEmoji(value.native);
-    setIsAutoEmoji(false);
+    emojiIdMemory.length && setEmoji(emojiIdMemory[emojiIdMemory.length - 1], value.native);
     router.back();
   };
 
@@ -32,8 +33,8 @@ const EmojiOverlay = () => {
       id="emoji-select"
       isRight={true}
       backdropOpacity={0.2}
-      backdropZindex={101}
       className="z-[102] p-4 flex flex-col items-center [&_em-emoji-picker]:w-full [&_em-emoji-picker]:shadow-none [&>div]:w-full"
+      hideX={true}
     >
       <Picker
         data={data}

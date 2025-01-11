@@ -5,16 +5,18 @@ import Loader from '@/components/loader/Loader';
 import OverlayForm from '@/components/overlay/OverlayForm';
 import Tab from '@/components/tab/Tab';
 import { categoriesAtom } from '@/store/category';
-import { emojiAtom } from '@/store/emoji';
+import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import { groupsAtom } from '@/store/group';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaPencil } from 'react-icons/fa6';
 import * as z from 'zod';
+
+const EMOJI_ID = 'category-emoji';
 
 const formSchema = z.object({
   icon: z.string().min(1, 'Please select icon.'),
@@ -26,9 +28,12 @@ const formSchema = z.object({
 type formSchemaType = z.infer<typeof formSchema>;
 
 const CategoryInputOverlay = () => {
+  const pathname = usePathname();
+  
   const { data: groups, isPending, isError } = useAtomValue(groupsAtom);
   const { data: categories, refetch: refetchCategories } = useAtomValue(categoriesAtom);
   const [emoji, setEmoji] = useAtom(emojiAtom);
+  const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
   const [type, setType] = useState('task');
   const [group, setGroup] = useState('');
@@ -66,22 +71,26 @@ const CategoryInputOverlay = () => {
 
   useEffect(() => {
     if (showOverlay) {
+      setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (categoryId) {
         const category = categories?.find((category) => category.id === categoryId);
-        setEmoji(category?.icon || '');
+        setEmoji(EMOJI_ID, category?.icon || '');
         setGroup(category?.groupId || '');
         form.setValue('title', category?.title || '');
+      } else {
+        setEmoji(EMOJI_ID, '');
+        form.reset();
       }
     } else {
-      form.reset();
+      setEmojiIdMemeory((prev) => prev.length && [...prev].slice(0, prev.length - 1) || []);
     }
   }, [showOverlay, categoryId]);
 
   useEffect(() => {
-    if (showOverlay && emoji) {
-      form.setValue('icon', emoji, { shouldValidate: true });
+    if (emoji.get(EMOJI_ID)) {
+      form.setValue('icon', emoji.get(EMOJI_ID) || '', { shouldValidate: true });
     }
-  }, [emoji, showOverlay]);
+  }, [emoji.get(EMOJI_ID)]);
 
   useEffect(() => {
     form.setValue('groupId', group);
@@ -103,10 +112,11 @@ const CategoryInputOverlay = () => {
       <div className="my-4 flex flex-col gap-4 items-center">
         {/* Emoji */}
         <EmojiInput
-          params={`&category-input=show${group ? '&groupId=' + group : ''}`}
+          id={EMOJI_ID}
+          params={`${params.toString()}&category-input=show${group ? '&groupId=' + group : ''}`}
           isCircle={true}
+          register={form.register('icon')}
         >
-          <input {...form.register('icon')} value={emoji} hidden />
         </EmojiInput>
         {/* Title */}
         <input
@@ -147,7 +157,7 @@ const CategoryInputOverlay = () => {
       <div className="w-full flex flex-col items-center">
         <div className="w-full pb-1 mb-2 flex justify-between items-center border-b-2 border-black">
           <h6 className="font-extrabold">Group</h6>
-          <Link href="/home/list?group-list=show">
+          <Link href={`${pathname}?${params.toString() + '&'}group-list=show`}>
             <FaPencil className="text-xs" />
           </Link>
         </div>
@@ -173,25 +183,29 @@ const CategoryInputOverlay = () => {
       {/* <div className="w-full flex flex-col items-center">
         <div className="w-full pb-1 mb-2 flex justify-between items-center border-b-2 border-black">
           <h6 className="font-extrabold">Fields</h6>
-          <Link href="&group-list=show">
+          <Link href={`${pathname}?${params.toString() + '&'}group-list=show`}>
             <FaPencil className="text-xs" />
           </Link>
         </div>
       </div> */}
-      {/* 에러 메시지 */}
-      {!!Object.keys(form.formState.errors).length && (
-        <div className="w-full p-2 mt-4 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg">
-          {form.formState.errors?.icon?.message && (
-            <p>{form.formState.errors?.icon?.message}</p>
-          )}
-          {form.formState.errors?.title?.message && (
-            <p>{form.formState.errors?.title?.message}</p>
-          )}
-          {form.formState.errors?.groupId?.message && (
-            <p>{form.formState.errors?.groupId?.message}</p>
-          )}
-        </div>
-      )}
+      {/* Errors */}
+      <div className="space-y-2 my-2">
+        {Object.keys(form.formState.errors).map((key) => (
+          <div
+            key={key}
+            className="w-full p-2 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg"
+          >
+            {form.formState.errors[key as keyof formSchemaType]?.message
+              ?.split('\n')
+              .map((line, i) => (
+                <p key={i}>
+                  <strong>{key}: </strong>
+                  {line}
+                </p>
+              ))}
+          </div>
+        ))}
+      </div>
     </OverlayForm>
   );
 };

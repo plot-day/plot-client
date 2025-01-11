@@ -10,8 +10,12 @@ import React, { useEffect, useState } from 'react';
 import { FaPencil, FaPlus, FaTrashCan } from 'react-icons/fa6';
 import DraggableList from '@/components/draggable/DraggableList';
 import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 const CategoryListOverlay = () => {
+  const pathname = usePathname();
+  const params = useSearchParams();
+
   const { data } = useAtomValue(categoriesAtom);
   const [categories, setCategories] = useState(data || []);
 
@@ -36,7 +40,12 @@ const CategoryListOverlay = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 text-xs">
-              <Link href={`?category-input=show&categoryId=${id}`} className="p-2">
+              <Link
+                href={`${pathname}?${
+                  params.toString() + '&'
+                }category-input=show&categoryId=${id}`}
+                className="p-2"
+              >
                 <FaPencil />
               </Link>
               <div
@@ -52,7 +61,7 @@ const CategoryListOverlay = () => {
         )}
       />
       <Link
-        href="/home/list?category-input=show"
+        href={`${pathname}?${params.toString() + '&'}category-input=show`}
         className="w-full p-4 flex gap-1 justify-center items-center text-xs text-center font-extrabold"
       >
         <FaPlus />

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { PropsWithChildren } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 import Overlay from './Overlay';
-import { OverlayProps } from './OverlayContent';
+import { OverlayProps } from './Overlay';
 import SaveCancelButton from './SaveCancelButton';
 interface OverlayFormProps<T extends FieldValues> extends OverlayProps {
   form: UseFormReturn<T, any, undefined>;

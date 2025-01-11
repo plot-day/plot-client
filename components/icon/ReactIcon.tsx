@@ -169,7 +169,7 @@ export function ReactIcon({ nameIcon, propsIcon }: typesPropsIcon): JSX.Element 
       });
       break;
     default:
-      console.log('icon not found');
+      console.error('icon not found');
       Icon = dynamic(() => import('react-icons/fa').then((icons) => icons.FaCircle), {
         loading: () => <span className="text-white">ㅁ</span>,
       });

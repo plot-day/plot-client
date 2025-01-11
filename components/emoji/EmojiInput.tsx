@@ -3,19 +3,27 @@ import { ClassNameProps } from '@/types/className';
 import { cn } from '@/util/cn';
 import { useAtomValue } from 'jotai';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { PropsWithChildren } from 'react';
+import { FieldValues, Path, UseFormRegisterReturn, UseFormReturn } from 'react-hook-form';
 
-interface EmojiInputProps extends ClassNameProps {
+interface EmojiInputProps<T extends FieldValues> extends ClassNameProps {
+  id: string;
   params?: string;
   isCircle?: boolean;
+  register?: UseFormRegisterReturn<Path<T>>;
 }
 
-const EmojiInput = ({
+const EmojiInput = <T extends FieldValues>({
+  id,
   params,
   isCircle,
+  register,
   className,
   children,
-}: PropsWithChildren<EmojiInputProps>) => {
+}: PropsWithChildren<EmojiInputProps<T>>) => {
+  const pathname = usePathname();
+  
   const emoji = useAtomValue(emojiAtom);
 
   return (
@@ -25,10 +33,11 @@ const EmojiInput = ({
         isCircle ? 'rounded-full' : '',
         className
       )}
-      href={`/home/list?emoji-select=show${params || ''}`}
+      href={`${pathname}?${params ? params + '&' : ''}emoji-select=show&emoji-id=${id}`}
     >
-      {emoji}
+      {emoji.get(id)}
       {children}
+      <input {...register} hidden />
     </Link>
   );
 };

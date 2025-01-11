@@ -1,4 +1,5 @@
 'use client';
+import PlayButton from '@/components/button/PlayButton';
 import DayNav from '@/components/date/DayNav';
 import YearMonthNav from '@/components/date/YearMonthNav';
 import IconHolder from '@/components/icon/IconHolder';
@@ -43,7 +44,8 @@ const page = () => {
 const LogItem = ({ title, category, icon, customFields, type, isDone }: LogType) => {
   return (
     <div className="flex justify-between items-center">
-      <div className="flex gap-4">
+      <div className="flex items-center gap-4">
+        <PlayButton />
         <IconHolder>{icon}</IconHolder>
         <div>
           <p className="text-xs font-extrabold">{category}</p>

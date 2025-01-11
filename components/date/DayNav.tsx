@@ -42,7 +42,7 @@ const DayNav = ({ isVertical, className }: DayNavProps) => {
   return (
     <div
       className={cn(
-        `daynav flex ${isVertical ? 'flex-col' : ''} gap-4 items-center font-extrabold`,
+        `daynav relative flex ${isVertical ? 'flex-col' : ''} gap-4 items-center font-extrabold`,
         className
       )}
     >
@@ -58,7 +58,7 @@ const DayNav = ({ isVertical, className }: DayNavProps) => {
         type="date"
         onChange={dateChangeHandler}
         value={getDashDate(today)}
-        className="absolute invisible"
+        className="absolute invisible left-1 w-16"
         required
       />
     </div>

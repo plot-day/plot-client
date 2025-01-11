@@ -4,15 +4,18 @@ import Button from '@/components/button/Button';
 import IconHolder from '@/components/icon/IconHolder';
 import Loader from '@/components/loader/Loader';
 import Overlay from '@/components/overlay/Overlay';
-import { categoriesAtom, CategoryType } from '@/store/category';
+import { categoriesAtom, CategoryType, selectedCategoryAtom } from '@/store/category';
 import { groupsAtom } from '@/store/group';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { FaPencil, FaPlus } from 'react-icons/fa6';
 
 const CategorySelectOverlay = () => {
+  const pathname = usePathname();
+  const params = useSearchParams();
+
   const { data: categories } = useAtomValue(categoriesAtom);
 
   return (
@@ -20,20 +23,20 @@ const CategorySelectOverlay = () => {
       <Suspense fallback={<Loader />}>
         <ul className="mb-8 space-y-2">
           {categories?.map((category) => (
-            <CategorySelectItem {...category} />
+            <CategorySelectItem key={category.id} {...category} />
           ))}
         </ul>
       </Suspense>
       <div className="flex gap-6 mb-4">
         <Link
-          href="/home/list?category-input=show"
+          href={`${pathname}?${params.toString() + '&'}category-input=show`}
           className="w-full p-4 flex gap-1 justify-center items-center text-xs text-center font-extrabold"
         >
           <FaPlus />
           Add category
         </Link>
         <Link
-          href="/home/list?category-list=show"
+          href={`${pathname}?${params.toString() + '&'}category-list=show`}
           className="w-full p-4 flex gap-1 justify-center items-center text-xs text-center font-extrabold"
         >
           <FaPencil />
@@ -47,12 +50,21 @@ const CategorySelectOverlay = () => {
 const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) => {
   const router = useRouter();
 
+  const pathname = usePathname();
   const params = useSearchParams();
   const hasPrev = params.get('has-prev') || '';
 
+  const { data: categories } = useAtomValue(categoriesAtom);
+  const setCategory = useSetAtom(selectedCategoryAtom);
+
   const selectCategoryHandler = () => {
+    const category = categories?.find((item) => item.id === id) || null;
+    setCategory(category);
+
     setTimeout(() => {
-      router.replace(`/home/list?log-input=show&categoryId=${id}`);
+      const currentPath = `${pathname}?${params.toString()}`;
+      const currentSplit = currentPath.split('&category-select=show');
+      currentSplit[0] && router.replace(currentSplit[0]);
     }, 100);
 
     if (hasPrev) {
