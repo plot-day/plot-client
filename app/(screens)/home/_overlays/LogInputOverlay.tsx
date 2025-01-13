@@ -53,18 +53,18 @@ const LogInputOverlay = () => {
 
     const url = process.env.NEXT_PUBLIC_BASE_URL + '/api/log';
     try {
-      const fieldInputs = document.getElementsByClassName('field-input') || [];
-      for (let i = 0; i < fieldInputs.length; i++) {
-        if (category?.fields) {
-          category.fields[i].value = (fieldInputs[i] as HTMLInputElement).value;
-        }
-      }
+      // const fieldInputs = document.getElementsByClassName('field-input') || [];
+      // for (let i = 0; i < fieldInputs.length; i++) {
+      //   if (category?.fields) {
+      //     category.fields[i].value = (fieldInputs[i] as HTMLInputElement).value;
+      //   }
+      // }
 
       const body = JSON.stringify({
         ...values,
         icon: emoji.get(EMOJI_ID) || '',
         categoryId: category?.id,
-        fields: category?.fields,
+        // fields: category?.fields,
         type,
       });
 
