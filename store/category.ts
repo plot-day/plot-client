@@ -14,9 +14,11 @@ export interface CategoryType {
 }
 
 export interface FieldType {
+  id: string;
   icon: string; 
   label: string; 
-  value?: string 
+  type: string;
+  option: any[];
 }
 
 export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
@@ -41,8 +43,8 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
           defaultLogType: 'task',
           icon: '🎸',
           fields: [
-            { icon: 'fa6/FaItunesNote', label: 'Song', value: '' },
-            { icon: 'gi/GiMetronome', label: 'bpm', value: '' },
+            { id: 'a1', icon: 'fa6/FaItunesNote', label: 'Song', type: 'text', option: [] },
+            { id: 'a2', icon: 'gi/GiMetronome', label: 'bpm', type: 'number', option: [] },
           ],
           id: '1',
         },
@@ -52,7 +54,7 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
           groupId: '5',
           defaultLogType: 'task',
           icon: '💪',
-          fields: [{ icon: 'io5/IoBarbell', label: 'Excercise', value: '' }],
+          fields: [{ id: 'b1', icon: 'io5/IoBarbell', label: 'Excercise', type: 'text', option: [] }],
           id: '2',
         },
         {
@@ -70,7 +72,7 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
           groupId: '6',
           defaultLogType: 'note',
           icon: '🌙',
-          fields: [{ icon: 'fa6/FaClock', label: 'Time' }],
+          fields: [{ id: 'c1', icon: 'fa6/FaClock', label: 'Duration',  type: "timestamp", option: [] }, ],
           id: '5',
         },
         {
