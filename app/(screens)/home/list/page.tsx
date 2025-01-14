@@ -3,7 +3,7 @@ import PlayButton from '@/components/button/PlayButton';
 import DayNav from '@/components/date/DayNav';
 import YearMonthNav from '@/components/date/YearMonthNav';
 import IconHolder from '@/components/icon/IconHolder';
-import { ReactIcon } from '@/components/icon/ReactIcon';
+import { IconPickerItem } from 'react-icons-picker-more';
 import { logsTodayAtom, LogType } from '@/store/log';
 import { useAtomValue } from 'jotai';
 import React from 'react';
@@ -53,7 +53,7 @@ const LogItem = ({ title, category, icon, customFields, type, isDone }: LogType)
           <ul className="flex gap-2 text-xs font-light mt-2">
             {customFields.map(({ icon, value }, i) => (
               <li key={i} className="flex gap-1 items-center">
-                <ReactIcon nameIcon={icon} />
+                <IconPickerItem value={icon} />
                 <span>{value}</span>
               </li>
             ))}

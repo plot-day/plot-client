@@ -39,8 +39,8 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
           isDone: false,
           date: new Date(),
           customFields: [
-            { icon: 'fa6/FaItunesNote', label: 'Song', value: 'Rio Funk' },
-            { icon: 'gi/GiMetronome', label: 'bpm', value: '85' },
+            { icon: 'FaItunesNote', label: 'Song', value: 'Rio Funk' },
+            { icon: 'GiMetronome', label: 'bpm', value: '85' },
           ],
         },
         {
@@ -54,8 +54,8 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
           isDone: false,
           date: new Date(),
           customFields: [
-            { icon: 'fa6/FaItunesNote', label: 'Song', value: 'Hysteria' },
-            { icon: 'gi/GiMetronome', label: 'bpm', value: '85' },
+            { icon: 'FaItunesNote', label: 'Song', value: 'Hysteria' },
+            { icon: 'GiMetronome', label: 'bpm', value: '85' },
           ],
         },
         {
@@ -69,7 +69,7 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
           isDone: false,
           date: new Date(),
           customFields: [
-            { icon: 'io5/IoBarbell', label: 'Excercise', value: 'Stretching' },
+            { icon: 'IoBarbell', label: 'Excercise', value: 'Stretching' },
           ],
         },
         {
@@ -81,7 +81,7 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
           category: 'Sleep',
           type: 'note',
           date: new Date(),
-          customFields: [{ icon: 'fa6/FaClock', label: 'Time', value: 'Stretching' }],
+          customFields: [{ icon: 'FaClock', label: 'Time', value: 'Stretching' }],
         },
       ];
     },
