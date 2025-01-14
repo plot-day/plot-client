@@ -43,8 +43,8 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
           defaultLogType: 'task',
           icon: '🎸',
           fields: [
-            { id: 'a1', icon: 'fa6/FaItunesNote', label: 'Song', type: 'text', option: [] },
-            { id: 'a2', icon: 'gi/GiMetronome', label: 'bpm', type: 'number', option: [] },
+            { id: 'a1', icon: 'FaItunesNote', label: 'Song', type: 'text', option: [] },
+            { id: 'a2', icon: 'GiMetronome', label: 'bpm', type: 'number', option: [] },
           ],
           id: '1',
         },
@@ -54,7 +54,7 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
           groupId: '5',
           defaultLogType: 'task',
           icon: '💪',
-          fields: [{ id: 'b1', icon: 'io5/IoBarbell', label: 'Excercise', type: 'text', option: [] }],
+          fields: [{ id: 'b1', icon: 'TbBarbellFilled', label: 'Excercise', type: 'text', option: [] }],
           id: '2',
         },
         {
@@ -72,7 +72,7 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
           groupId: '6',
           defaultLogType: 'note',
           icon: '🌙',
-          fields: [{ id: 'c1', icon: 'fa6/FaClock', label: 'Duration',  type: "timestamp", option: [] }, ],
+          fields: [{ id: 'c1', icon: 'FaClock', label: 'Duration',  type: "timestamp", option: [] }, ],
           id: '5',
         },
         {

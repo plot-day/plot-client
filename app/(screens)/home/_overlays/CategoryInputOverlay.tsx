@@ -1,7 +1,7 @@
 'use client';
 
 import EmojiInput from '@/components/emoji/EmojiInput';
-import { ReactIcon } from '@/components/icon/ReactIcon';
+import IconPicker from '@/components/icon/IconPicker';
 import Loader from '@/components/loader/Loader';
 import OverlayForm from '@/components/overlay/OverlayForm';
 import Tab from '@/components/tab/Tab';
@@ -12,12 +12,12 @@ import { groupsAtom } from '@/store/group';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaPencil, FaPlus, FaTrashCan } from 'react-icons/fa6';
-import * as z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import * as z from 'zod';
 
 const EMOJI_ID = 'category-emoji';
 
@@ -210,7 +210,7 @@ const CategoryInputOverlay = () => {
         </div>
         <ul className="max-h-36 overflow-y-scroll">
           {fields.map((field, i) => (
-            <FieldItem key={field.id} {...field} idx={i} setFields={setFields} />
+            <FieldItem key={field.id} {...field} idx={i} setFields={setFields} base={`${pathname}?${params.toString()}`} />
           ))}
         </ul>
         <button
@@ -250,22 +250,24 @@ const FieldItem = ({
   label,
   option,
   idx,
+  base,
   setFields,
-}: FieldType & { idx: number; setFields: Dispatch<SetStateAction<FieldType[]>> }) => {
-  const pathname = usePathname();
-  const params = useParams();
-
+}: FieldType & { base: string; idx: number; setFields: Dispatch<SetStateAction<FieldType[]>> }) => {
   const removeHandler = (i: number) => {
     setFields((prev) => [...prev.slice(0, i), ...prev.slice(i + 1, prev.length)]);
   };
 
-  const changeLabelHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const labelChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     changeHandler('label', e.target.value);
   };
 
   const typeChangeHandler = (e: React.ChangeEvent<HTMLSelectElement>) => {
     changeHandler('type', e.target.value);
   };
+
+  const iconChangeHandler = (v: string) => {
+    changeHandler('icon', v);
+  }
 
   const changeHandler = (key: string, value: string) => {
     setFields((prev) => {
@@ -283,17 +285,15 @@ const FieldItem = ({
           </option>
         ))}
       </select>
-      <div className="bg-gray-100 rounded-full flex justify-center items-center shrink-0 w-8 h-8">
-        <ReactIcon nameIcon={icon} />
-      </div>
+      <IconPicker value={icon} onChange={iconChangeHandler} />
       <input
         type="text"
         className="mr-1 w-full bg-gray-100 rounded-md py-[0.375rem] px-2 text-sm"
         placeholder="Enter the label"
         value={label}
-        onChange={changeLabelHandler}
+        onChange={labelChangeHandler}
       />
-      <Link href={`${pathname}?${params.toString() + '&'}group-list=show`}>
+      <Link href={`${base + '&'}group-list=show`}>
         <FaPencil className="text-xs" />
       </Link>
       <button

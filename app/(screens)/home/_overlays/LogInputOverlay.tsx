@@ -1,7 +1,7 @@
 'use client';
 
 import EmojiInput from '@/components/emoji/EmojiInput';
-import { ReactIcon } from '@/components/icon/ReactIcon';
+import { IconPickerItem } from 'react-icons-picker-more';
 import AutoSizeInput from '@/components/input/AutoSizeInput';
 import OverlayForm from '@/components/overlay/OverlayForm';
 import { selectedCategoryAtom } from '@/store/category';
@@ -132,7 +132,7 @@ const LogInputOverlay = () => {
           params={params.toString()}
         />
         <div className="w-full font-bold">
-          <Link href={`${pathname}?${params.toString() + '&'}category-select=show&has-prev=true`}>
+          <Link href={`${pathname}?${params.toString() + '&'}category-select=show`}>
             <p className="text-sm">
               {category?.title || (
                 <span className="text-gray-300">Select category</span>
@@ -174,7 +174,7 @@ const LogInputOverlay = () => {
         <ul className="flex gap-3">
           {category?.fields?.map((field, i) => (
             <li key={i} className="flex gap-1 items-center">
-              <ReactIcon nameIcon={field.icon} />
+              <IconPickerItem value={field.icon} />
               <AutoSizeInput
                 className="field-input"
                 minWidth={`No ${field.label}`.length + 'ch'}

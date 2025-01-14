@@ -52,7 +52,6 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
 
   const pathname = usePathname();
   const params = useSearchParams();
-  const hasPrev = params.get('has-prev') || '';
 
   const { data: categories } = useAtomValue(categoriesAtom);
   const setCategory = useSetAtom(selectedCategoryAtom);
@@ -67,9 +66,7 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
       currentSplit[0] && router.replace(currentSplit[0]);
     }, 100);
 
-    if (hasPrev) {
-      router.back();
-    }
+    router.back();
   };
 
   return (
