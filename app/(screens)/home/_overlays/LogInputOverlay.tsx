@@ -16,6 +16,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import TextFieldInput from '@/components/field/TextFieldInput';
+import NumberFieldInput from '@/components/field/NumberFieldInput';
+import DateFieldInput from '@/components/field/DateFieldInput';
+import TimestampFieldInput from '@/components/field/TimestampFieldInput';
 
 const EMOJI_ID = 'log-emoji';
 
@@ -39,6 +43,7 @@ const LogInputOverlay = () => {
 
   const [type, setType] = useState('');
   const [error, setError] = useState('');
+  const [field, setField] = useState<any>({});
 
   const params = useSearchParams();
   const logId = params.get('logId') || '';
@@ -47,6 +52,14 @@ const LogInputOverlay = () => {
   const form = useForm<formSchemaType>({
     resolver: zodResolver(formSchema),
   });
+
+  const fieldInputHandler = (label: string) => {
+    const setFieldFunc = (v: string) => {
+      setField((prev: any) => ({...prev, [label]: v}));
+    };
+    return setFieldFunc;
+  }
+
 
   const submitHandler = async (values: formSchemaType) => {
     setError('');
@@ -86,13 +99,12 @@ const LogInputOverlay = () => {
       form.reset();
       setCategory(null);
     } catch (error) {
-      console.error(error);
       if (typeof error === 'string') {
         setError(error);
       } else if ((error as Error)?.message) {
         setError((error as Error).message);
       }
-      return;
+      throw error;
     }
   };
 
@@ -171,18 +183,17 @@ const LogInputOverlay = () => {
             />
           </div>
         </div>
-        <ul className="flex gap-3">
-          {category?.fields?.map((field, i) => (
+        {!!category?.fields.length && <ul className="flex gap-3 flex-wrap">
+          {category?.fields?.map(({icon, type, label, option}, i) => (
             <li key={i} className="flex gap-1 items-center">
-              <IconPickerItem value={field.icon} />
-              <AutoSizeInput
-                className="field-input"
-                minWidth={`No ${field.label}`.length + 'ch'}
-                placeholder={`No ${field.label}`}
-              />
+              <IconPickerItem value={icon} />
+              {(type === 'text' || type === 'url') && <TextFieldInput label={label} value={field[label] as string} setValue={fieldInputHandler(label)} />}
+              {type === 'number' && <NumberFieldInput value={field[label] as string} setValue={fieldInputHandler(label)} label={label} {...option} />}
+              {type === 'date' && <DateFieldInput value={field[label] as string} setValue={fieldInputHandler(label)} {...option} />}
+              {type === 'timestamp' && <TimestampFieldInput value={field[label] as string} setValue={fieldInputHandler(label)} {...option} />}
             </li>
           ))}
-        </ul>
+        </ul>}
       </div>
       {error && (
         <div className="w-full p-2 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg">
@@ -191,7 +202,7 @@ const LogInputOverlay = () => {
           ))}
         </div>
       )}
-      <div className="space-y-2 my-2">
+      {!!Object.keys(form.formState.errors).length && <div className="space-y-2 my-2">
         {Object.keys(form.formState.errors).map((key) => (
           <div
             key={key}
@@ -207,7 +218,7 @@ const LogInputOverlay = () => {
               ))}
           </div>
         ))}
-      </div>
+      </div>}
     </OverlayForm>
   );
 };

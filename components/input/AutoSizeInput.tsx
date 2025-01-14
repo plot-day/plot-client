@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 
-interface AutoSizeInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  minWidth: string;
+export interface AutoSizeInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  placeholder?: string;
+  value: string;
+  setValue: (v: string) => void;
 }
 
-const AutoSizeInput = ({ minWidth, ...props }: AutoSizeInputProps) => {
-  const [value, setValue] = useState('');
+const AutoSizeInput = ({ placeholder, value, setValue, ...props }: AutoSizeInputProps) => {
   return (
     <input
       {...props}
-      style={{ width: value.length + 1 + 'ch', minWidth: value ? undefined : minWidth }}
+      style={{ width: (value?.length || 0) + 1 + 'ch', minWidth: value ? undefined : placeholder?.length + 'ch' }}
       value={value}
       onChange={(e) => {
         setValue(e.target.value);
       }}
+      placeholder={placeholder}
     />
   );
 };
