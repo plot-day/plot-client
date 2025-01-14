@@ -1,5 +1,7 @@
 'use client';
 
+import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
+import DraggableList from '@/components/draggable/DraggableList';
 import EmojiInput from '@/components/emoji/EmojiInput';
 import IconPicker from '@/components/icon/IconPicker';
 import Loader from '@/components/loader/Loader';
@@ -41,6 +43,7 @@ const CategoryInputOverlay = () => {
   const [type, setType] = useState('task');
   const [group, setGroup] = useState('');
   const [fields, setFields] = useState<FieldType[]>([]);
+  const [error, setError] = useState('');
 
   const params = useSearchParams();
   const categoryId = params.get('categoryId') || '';
@@ -57,16 +60,32 @@ const CategoryInputOverlay = () => {
   });
 
   const submitHandler = async (values: formSchemaType) => {
+    setError('');
     const url = process.env.NEXT_PUBLIC_BASE_URL + '/api/profile';
 
-    const body = JSON.stringify({ ...values, fields });
+    try {
+      fields.forEach(({ label }) => {
+        if (!label) {
+          throw new Error('Please enter the label of field');
+        }
+      });
 
-    alert(body);
+      const body = JSON.stringify({ ...values, fields });
 
-    if (categoryId) {
-      //   await fetch(`${url}/${categoryId}`, { method: 'PATCH', body });
-    } else {
-      //   await fetch(url, { method: 'POST', body });
+      alert(body);
+
+      if (categoryId) {
+        //   await fetch(`${url}/${categoryId}`, { method: 'PATCH', body });
+      } else {
+        //   await fetch(url, { method: 'POST', body });
+      }
+    } catch (error: any) {
+      setError(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'An Error occured.'
+      );
+      throw error;
     }
 
     refetchCategories();
@@ -75,7 +94,7 @@ const CategoryInputOverlay = () => {
   const addFieldHandler = () => {
     const newField = {
       id: uuidv4(),
-      icon: 'fa6/FaEllipsis',
+      icon: 'FaEllipsis',
       label: '',
       type: 'text',
       option: [],
@@ -85,6 +104,7 @@ const CategoryInputOverlay = () => {
 
   useEffect(() => {
     if (showOverlay) {
+      setError('');
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (categoryId) {
         const category = categories?.find((category) => category.id === categoryId);
@@ -208,11 +228,17 @@ const CategoryInputOverlay = () => {
         <div className="w-full pb-1 mb-2 flex justify-between items-center border-b-2 border-black">
           <h6 className="font-extrabold">Fields</h6>
         </div>
-        <ul className="max-h-36 overflow-y-scroll">
-          {fields.map((field, i) => (
-            <FieldItem key={field.id} {...field} idx={i} setFields={setFields} base={`${pathname}?${params.toString()}`} />
-          ))}
-        </ul>
+        <DraggableList className="max-h-36 overflow-y-scroll" items={fields} onChange={setFields}
+          renderItem={(field, i) => (
+            <FieldItem
+              key={field.id}
+              {...field}
+              idx={i}
+              setFields={setFields}
+              base={`${pathname}?${params.toString()}`} />
+          )}
+        >
+        </DraggableList>
         <button
           type="button"
           onClick={addFieldHandler}
@@ -223,6 +249,13 @@ const CategoryInputOverlay = () => {
         </button>
       </div>
       {/* Errors */}
+      {error && (
+        <div className="w-full mt-6 p-2 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg">
+          {error.split('\n').map((line, i) => (
+            <p key={i}>{line}</p>
+          ))}
+        </div>
+      )}
       <div className="space-y-2 my-2">
         {Object.keys(form.formState.errors).map((key) => (
           <div
@@ -245,6 +278,7 @@ const CategoryInputOverlay = () => {
 };
 
 const FieldItem = ({
+  id,
   type,
   icon,
   label,
@@ -252,7 +286,11 @@ const FieldItem = ({
   idx,
   base,
   setFields,
-}: FieldType & { base: string; idx: number; setFields: Dispatch<SetStateAction<FieldType[]>> }) => {
+}: FieldType & {
+  base: string;
+  idx: number;
+  setFields: Dispatch<SetStateAction<FieldType[]>>;
+}) => {
   const removeHandler = (i: number) => {
     setFields((prev) => [...prev.slice(0, i), ...prev.slice(i + 1, prev.length)]);
   };
@@ -267,7 +305,7 @@ const FieldItem = ({
 
   const iconChangeHandler = (v: string) => {
     changeHandler('icon', v);
-  }
+  };
 
   const changeHandler = (key: string, value: string) => {
     setFields((prev) => {
@@ -277,13 +315,17 @@ const FieldItem = ({
   };
 
   return (
-    <li className="w-full flex justify-between gap-2 items-center text-sm mb-2">
+    <DraggableItem id={id} className="w-full flex justify-between gap-2 items-center text-sm mb-2">
+      <DragHandle />
       <select onChange={typeChangeHandler} value={type}>
-        {FIELD_TYPES.map((item) => (
-          <option key={item.toLowerCase()} value={item.toLowerCase()}>
-            {item}
-          </option>
-        ))}
+        {FIELD_TYPES.map(
+          (item) =>
+            item && (
+              <option key={item.toLowerCase()} value={item.toLowerCase()}>
+                {item}
+              </option>
+            )
+        )}
       </select>
       <IconPicker value={icon} onChange={iconChangeHandler} />
       <input
@@ -293,9 +335,9 @@ const FieldItem = ({
         value={label}
         onChange={labelChangeHandler}
       />
-      <Link href={`${base + '&'}group-list=show`}>
+      {/* <Link href={`${base + '&'}group-list=show`}>
         <FaPencil className="text-xs" />
-      </Link>
+      </Link> */}
       <button
         type="button"
         className="p-2 text-xs"
@@ -305,7 +347,7 @@ const FieldItem = ({
       >
         <FaTrashCan />
       </button>
-    </li>
+    </DraggableItem>
   );
 };
 

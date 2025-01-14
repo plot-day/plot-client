@@ -24,7 +24,7 @@ interface BaseItem {
 interface Props<T extends BaseItem> extends ClassNameProps {
   items: T[];
   onChange(items: T[]): void;
-  renderItem(item: T): ReactNode;
+  renderItem(item: T, i: number): ReactNode;
 }
 
 const DraggableList = <T extends BaseItem>({
@@ -64,8 +64,8 @@ const DraggableList = <T extends BaseItem>({
     >
       <SortableContext items={items}>
         <ul className={className}>
-          {items.map((item) => (
-            <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
+          {items.map((item, i) => (
+            <React.Fragment key={item.id}>{renderItem(item, i)}</React.Fragment>
           ))}
         </ul>
       </SortableContext>

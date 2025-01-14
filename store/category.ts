@@ -93,6 +93,23 @@ export const categoriesAtom = atomWithQuery<CategoryType[]>(() => {
           fields: [],
           id: '7',
         },
+        {
+          title: 'Test',
+          group: '',
+          groupId: '',
+          icon: '🧪',
+          defaultLogType: 'task',
+          fields: [
+            { id: 'd1', icon: 'MdTextFields', label: 'Text',  type: "text", option: [] },
+            { id: 'd2', icon: 'GoNumber', label: 'Number',  type: "number", option: [] },
+            { id: 'd3', icon: 'IoCalendarNumber', label: 'Date',  type: "date", option: [] },
+            { id: 'd4', icon: 'MdTimer', label: 'Timestamp',  type: "timestamp", option: [] },
+            { id: 'd5', icon: 'FaTag', label: 'Tags',  type: "tags", option: [] },
+            { id: 'd6', icon: 'MdRadioButtonChecked', label: 'Options',  type: "options", option: [] },
+            { id: 'd7', icon: 'FaLink', label: 'URL',  type: "url", option: [] },
+          ],
+          id: '9',
+        },
       ];
       //   const categories = await res.json();
 
