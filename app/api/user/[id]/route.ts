@@ -5,19 +5,16 @@ export const GET = async (req: NextRequest, { params }: { params: { id: string }
   const id = params.id;
 
   try {
-    const category = await prisma.category.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         id,
       },
-      include: {
-        group: true
-      }
     });
 
-    return NextResponse.json({ category });
+    return NextResponse.json({ user });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to get category', { status: 500 });
+    return new Response('Failed to get user', { status: 500 });
   }
 };
 
@@ -28,12 +25,9 @@ export async function PATCH(
   try {
     const data = await req.json();
 
-    const res = await prisma.category.update({
+    const res = await prisma.user.update({
       where: {
         id: id,
-      },
-      include: {
-        group: true,
       },
       data,
     });
@@ -41,7 +35,7 @@ export async function PATCH(
     return NextResponse.json(res, { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to update category:' + id, { status: 500 });
+    return new Response('Failed to update user:' + id, { status: 500 });
   }
 }
 
@@ -49,7 +43,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const id = params.id;
 
   try {
-    const res = await prisma.category.delete({
+    const res = await prisma.user.delete({
       where: {
         id: id,
       },
@@ -58,6 +52,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json(res, { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to delete category:' + id, { status: 500 });
+    return new Response('Failed to delete user:' + id, { status: 500 });
   }
 }

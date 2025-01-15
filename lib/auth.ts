@@ -21,6 +21,17 @@ export const authOptions: AuthOptions = {
       },
     }),
   },
+  events: {
+    createUser: async ({ user }) => {
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/onboard`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId: user.id }),
+        })
+    }
+  }
 };
 
 export const handler = NextAuth(authOptions);

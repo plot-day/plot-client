@@ -10,18 +10,21 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   icon          String?
   image         String?
   birthDate     DateTime?
   tel           String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   Account       Account[]
   Session       Session[]
+  Log           Log[]
+  Category      Category[]
+  Group         Group[]
 }
 
 model Account {
@@ -59,4 +62,56 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Log {
+  id          String    @id @default(cuid())
+  icon        String?
+  title       String
+  content     String?
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  type        String
+  isDone      Boolean
+  date        DateTime?
+  dueDate     DateTime?
+  fieldValues Json[]
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id             String  @id @default(cuid())
+  icon           String
+  title          String
+  group          Group   @relation(fields: [groupId], references: [id])
+  groupId        String
+  defaultLogType String
+  fields         Json[]
+  isDefault      Boolean
+  rank           String
+
+  Log Log[]
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Group {
+  id        String  @id @default(cuid())
+  title     String
+  isDefault Boolean
+  rank      String
+
+  Category Category[]
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -15,7 +15,10 @@ export async function GET(req: NextRequest) {
   try {
     const data = await prisma.category.findMany({
       where: { userId: session.user.id },
-      orderBy: [{ createdAt: 'asc' }],
+      orderBy: [{ rank: 'asc' }],
+      include: {
+        group: true,
+      }
     });
 
     return new Response(JSON.stringify(data), { status: 201 });

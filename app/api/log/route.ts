@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         ...reqData,
         userId: session.user.id,
       },
-      include: { goal: true }
+      include: { category: true }
     });
 
     return new Response(JSON.stringify(data), { status: 201 });

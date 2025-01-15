@@ -1,4 +1,3 @@
-import { getDashDate } from '@/util/date';
 import { atomWithQuery } from 'jotai-tanstack-query';
 import { todayAtom } from './ui';
 
@@ -7,7 +6,7 @@ export interface LogType {
   icon: string;
   title: string;
   content?: string;
-  category: string;
+  category: string; // TODO: CategoryType
   type: string;
   isDone?: boolean;
   date?: Date;
@@ -22,9 +21,9 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
       //     const res = await fetch(
       //       process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(today as Date)}`
       //     );
-      //     const logs = await res.json();
+      //     const data = await res.json();
 
-      //   return convertLogData(logs);
+      //   return convertLogData(data);
       return [
         {
           id: '1',

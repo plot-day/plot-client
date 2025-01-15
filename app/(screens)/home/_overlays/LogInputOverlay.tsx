@@ -4,7 +4,7 @@ import EmojiInput from '@/components/emoji/EmojiInput';
 import { IconPickerItem } from 'react-icons-picker-more';
 import AutoSizeInput from '@/components/input/AutoSizeInput';
 import OverlayForm from '@/components/overlay/OverlayForm';
-import { selectedCategoryAtom } from '@/store/category';
+import { defaultCategoryAtom, selectedCategoryAtom } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import { logsTodayAtom } from '@/store/log';
 import { todayAtom } from '@/store/ui';
@@ -40,6 +40,7 @@ const LogInputOverlay = () => {
   const [category, setCategory] = useAtom(selectedCategoryAtom);
   const today = useAtomValue(todayAtom);
   const { refetch: refetchLogs } = useAtomValue(logsTodayAtom);
+  const defaultCategory = useAtomValue(defaultCategoryAtom);
 
   const [type, setType] = useState('');
   const [error, setError] = useState('');
@@ -112,7 +113,7 @@ const LogInputOverlay = () => {
     if (showLogInput) {
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (!logId) {
-        setEmoji(EMOJI_ID, '');
+        setEmoji(EMOJI_ID, defaultCategory?.icon || '');
         setCategory(null);
       }
     } else {
@@ -122,10 +123,10 @@ const LogInputOverlay = () => {
   }, [showLogInput]);
 
   useEffect(() => {
-    const categoryEmoji = category?.icon;
-    setEmoji(EMOJI_ID, categoryEmoji || '');
-    setType(category?.defaultLogType || 'task');
-  }, [category]);
+    // console.log(category?.icon || defaultCategory?.icon);
+    setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
+    setType(category?.defaultLogType || defaultCategory?.defaultLogType || 'task');
+  }, [category, defaultCategory]);
 
   return (
     <OverlayForm<formSchemaType>
@@ -146,7 +147,7 @@ const LogInputOverlay = () => {
         <div className="w-full font-bold">
           <Link href={`${pathname}?${params.toString() + '&'}category-select=show`}>
             <p className="text-sm">
-              {category?.title || (
+              {category?.title || defaultCategory?.title || (
                 <span className="text-gray-300">Select category</span>
               )}
             </p>
