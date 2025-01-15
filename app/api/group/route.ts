@@ -12,10 +12,13 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  const searchParams = req.nextUrl.searchParams;
+  const title = searchParams.get('title') || undefined;
+
   try {
     const data = await prisma.group.findMany({
-      where: { userId: session.user.id },
-      orderBy: [{ createdAt: 'asc' }],
+      where: { userId: session.user.id, title },
+      orderBy: [{ rank: 'asc' }],
     });
 
     return new Response(JSON.stringify(data), { status: 201 });

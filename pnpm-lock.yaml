@@ -53,6 +53,9 @@ dependencies:
   jotai-tanstack-query:
     specifier: ^0.8.8
     version: 0.8.8(@tanstack/query-core@5.56.2)(jotai@2.9.3)
+  lexorank:
+    specifier: ^1.0.5
+    version: 1.0.5
   next:
     specifier: 14.2.10
     version: 14.2.10(@babel/core@7.26.0)(react-dom@18.3.1)(react@18.3.1)
@@ -2584,6 +2587,10 @@ packages:
       prelude-ls: 1.2.1
       type-check: 0.4.0
     dev: true
+
+  /lexorank@1.0.5:
+    resolution: {integrity: sha512-K1B/Yr/gIU0wm68hk/yB0p/mv6xM3ShD5aci42vOwcjof8slG8Kpo3Q7+1WTv7DaRHKWRgLPqrFDt+4GtuFAtA==}
+    dev: false
 
   /lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}

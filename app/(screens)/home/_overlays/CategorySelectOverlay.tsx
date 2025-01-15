@@ -74,7 +74,7 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
       <div className="w-full flex gap-2 items-center" onClick={selectCategoryHandler}>
         <IconHolder isCircle={true}>{icon}</IconHolder>
         <div className="text-left w-full">
-          <p className="text-xs font-semibold">{group}</p>
+          <p className="text-xs font-semibold">{group?.title || 'etc.'}</p>
           <p className="font-bold leading-tight">{title}</p>
         </div>
       </div>

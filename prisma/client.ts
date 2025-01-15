@@ -3,7 +3,6 @@ import { Pool } from '@neondatabase/serverless';
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
-// Neon 연결 풀 설정
 const neonPool = new Pool({
   connectionString: process.env.DIRECT_URL,
   max: 10,
@@ -11,7 +10,6 @@ const neonPool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-// 연결 풀 에러 처리
 neonPool.on('error', (err) => {
   if (err.message.includes('SASL')) {
     console.error('Neon SASL error detected. Resetting connection pool...');
@@ -19,7 +17,6 @@ neonPool.on('error', (err) => {
   }
 });
 
-// Prisma 클라이언트 초기화
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
