@@ -5,6 +5,7 @@ import CategorySelectOverlay from './home/_overlays/CategorySelectOverlay';
 import CategoryInputOverlay from './home/_overlays/CategoryInputOverlay';
 import CategoryListOverlay from './home/_overlays/CategoryListOverlay';
 import GroupListOverlay from './home/_overlays/GroupListOverlay';
+import { Suspense } from 'react';
 
 export default function RootLayout({
   children,
@@ -19,12 +20,14 @@ export default function RootLayout({
       <Nav className="h-[6rem]" />
       {/* overlays */}
       <div id="overlay-container" className="absolute w-full sm:bottom-0">
-        <LogInputOverlay />
-        <CategorySelectOverlay />
-        <CategoryListOverlay />
-        <CategoryInputOverlay />
-        <GroupListOverlay />
-        <EmojiOverlay />
+        <Suspense>
+          <LogInputOverlay />
+          <CategorySelectOverlay />
+          <CategoryListOverlay />
+          <CategoryInputOverlay />
+          <GroupListOverlay />
+          <EmojiOverlay />
+        </Suspense>
       </div>
     </div>
   );
