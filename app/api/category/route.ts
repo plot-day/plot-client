@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       orderBy: [{ rank: 'asc' }],
       include: {
         group: true,
-      }
+      },
     });
 
     return new Response(JSON.stringify(data), { status: 201 });
@@ -50,5 +50,37 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error(error);
     return new Response('Failed to create category', { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new Response('Session not found', {
+      status: 401,
+    });
+  }
+
+  const reqData = await req.json();
+  const resData: any[] = [];
+
+  try {
+    for (let i = 0; i < reqData.length; i++) {
+      const data = await prisma.category.update({
+        where: {
+          id: reqData[i].id,
+        },
+        data: reqData[i],
+        include: {
+          group: true
+        }
+      });
+      resData.push(data);
+    }
+    return new Response(JSON.stringify(resData), { status: 201 });
+  } catch (error) {
+    console.error(error);
+    return new Response('Failed to put categoris', { status: 500 });
   }
 }

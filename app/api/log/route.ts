@@ -1,5 +1,6 @@
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/prisma/client';
+import dayjs from 'dayjs';
 import { getServerSession } from 'next-auth';
 import { NextRequest } from 'next/server';
 
@@ -14,11 +15,13 @@ export async function GET(req: NextRequest) {
 
   const searchParams = req.nextUrl.searchParams;
   const dateParam = searchParams.get('date');
-  const date = dateParam ? new Date(dateParam) : undefined;
+  const date = dateParam ? dayjs(dateParam) : undefined;
+  const dateStart = date ? new Date(date.startOf('day').toISOString()) : undefined;
+  const dateEnd = date ? new Date(date.endOf('day').toISOString()) : undefined;
 
   try {
     const data = await prisma.log.findMany({
-      where: { userId: session.user.id, date },
+      where: { userId: session.user.id, date: { gte: dateStart, lte: dateEnd } },
       include: { category: true },
       orderBy: [{ createdAt: 'asc' }],
     });
@@ -46,7 +49,7 @@ export async function POST(req: Request) {
         ...reqData,
         userId: session.user.id,
       },
-      include: { category: true }
+      include: { category: true },
     });
 
     return new Response(JSON.stringify(data), { status: 201 });

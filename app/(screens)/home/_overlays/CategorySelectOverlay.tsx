@@ -4,8 +4,8 @@ import Button from '@/components/button/Button';
 import IconHolder from '@/components/icon/IconHolder';
 import Loader from '@/components/loader/Loader';
 import Overlay from '@/components/overlay/Overlay';
-import { categoriesAtom, CategoryType, selectedCategoryAtom } from '@/store/category';
-import { groupsAtom } from '@/store/group';
+import { categoryAtom, CategoryType, selectedCategoryAtom } from '@/store/category';
+import { groupAtom } from '@/store/group';
 import { useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -16,7 +16,7 @@ const CategorySelectOverlay = () => {
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const { data: categories } = useAtomValue(categoriesAtom);
+  const { data: categories } = useAtomValue(categoryAtom);
 
   return (
     <Overlay id="category-select" title="Select category" isRight={true}>
@@ -53,7 +53,7 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const { data: categories } = useAtomValue(categoriesAtom);
+  const { data: categories } = useAtomValue(categoryAtom);
   const setCategory = useSetAtom(selectedCategoryAtom);
 
   const selectCategoryHandler = () => {

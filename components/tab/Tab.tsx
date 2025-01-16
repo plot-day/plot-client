@@ -41,7 +41,7 @@ const Tab = <T extends FieldValues>({
 
         return (
           <li
-            key={tabData.value}
+            key={`${id}-${tabData.value}`}
             className="font-extrabold [&_label]:opacity-20 [&>input:checked+label]:opacity-100"
           >
             <input

@@ -1,6 +1,7 @@
-import JotaiProvider from '@/components/provider/JotaiProvider';
+import JotaiProvider from '@/app/_provider/JotaiProvider';
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import JotaiQueryClientProvider from './_provider/JotaiQueryClientProvider';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -29,7 +30,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
       <body>
-        <JotaiProvider>{children}</JotaiProvider>
+        <JotaiQueryClientProvider>
+          <JotaiProvider>{children}</JotaiProvider>
+        </JotaiQueryClientProvider>
       </body>
     </html>
   );

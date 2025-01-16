@@ -1,82 +1,59 @@
-import { atomWithQuery } from 'jotai-tanstack-query';
+import { logFormSchemaType } from '@/app/(screens)/home/_overlays/LogInputOverlay';
+import { parseRank } from '@/util/convert';
+import { getDashDate } from '@/util/date';
+import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
+import { CategoryType } from './category';
 import { todayAtom } from './ui';
+import { LexoRank } from 'lexorank';
+import { updateAtom } from '@/util/query';
 
 export interface LogType {
   id: string;
   icon: string;
   title: string;
   content?: string;
-  category: string; // TODO: CategoryType
+  category: CategoryType;
   type: string;
   isDone?: boolean;
   date?: Date;
   dueDate?: Date;
-  customFields: { icon: any; label: string; value: string }[];
+  fieldValues: any;
+  rank: LexoRank;
 }
 
 export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
   return {
-    queryKey: ['logs', get(todayAtom)],
+    queryKey: ['log', get(todayAtom)],
     queryFn: async ({ queryKey: [, today] }) => {
-      //     const res = await fetch(
-      //       process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(today as Date)}`
-      //     );
-      //     const data = await res.json();
-
-      //   return convertLogData(data);
-      return [
-        {
-          id: '1',
-          icon: '🎸',
-          title: 'Rio Funk (Slap practice)',
-          category: 'Bass',
-          type: 'task',
-          isDone: false,
-          date: new Date(),
-          customFields: [
-            { icon: 'FaItunesNote', label: 'Song', value: 'Rio Funk' },
-            { icon: 'GiMetronome', label: 'bpm', value: '85' },
-          ],
-        },
-        {
-          id: '2',
-          icon: '🎸',
-          title: 'Hysteria (85bpm)',
-          category: 'Bass',
-          type: 'task',
-          isDone: false,
-          date: new Date(),
-          customFields: [
-            { icon: 'FaItunesNote', label: 'Song', value: 'Hysteria' },
-            { icon: 'GiMetronome', label: 'bpm', value: '85' },
-          ],
-        },
-        {
-          id: '3',
-          icon: '💪',
-          title: 'Morning Stretching',
-          category: 'Home Training',
-          type: 'task',
-          isDone: false,
-          date: new Date(),
-          customFields: [
-            { icon: 'IoBarbell', label: 'Excercise', value: 'Stretching' },
-          ],
-        },
-        {
-          id: '4',
-          icon: '🌙',
-          title: 'Woke up early',
-          category: 'Sleep',
-          type: 'note',
-          date: new Date(),
-          customFields: [{ icon: 'FaClock', label: 'Time', value: 'Stretching' }],
-        },
-      ];
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(today as Date)}`
+      );
+      const data = await res.json();
+      return data.map((item: any) => parseRank(item));
     },
   };
 });
 
-const convertLogData = (logs: LogType[]) => {
-  return logs;
-};
+export const logMutation = atomWithMutation<LogType, Partial<logFormSchemaType>>((get) => ({
+  mutationKey: ['log'],
+  mutationFn: async (log) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/log${log.id ? '/' + log.id : ''}`,
+        {
+          method: log.id ? 'PATCH' : 'POST',
+          body: JSON.stringify({
+            ...log,
+            date: log.date && new Date(log.date),
+          }),
+        }
+      );
+      return await res.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+  onSuccess: (data) => {
+    updateAtom(data, ['log', get(todayAtom)]);
+  },
+}));

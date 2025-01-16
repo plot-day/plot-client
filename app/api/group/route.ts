@@ -28,6 +28,46 @@ export async function GET(req: NextRequest) {
   }
 }
 
+export async function PUT(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new Response('Session not found', {
+      status: 401,
+    });
+  }
+
+  const reqData = await req.json();
+  const resData: any[] = [];
+
+  try {
+    for (let i = 0; i < reqData.length; i++) {
+      if (reqData[i].id) {
+        const data = await prisma.group.update({
+          where: {
+            id: reqData[i].id,
+          },
+          data: reqData[i],
+        });
+        resData.push(data);
+      } else {
+        const data = await prisma.group.create({
+          data: {
+            ...reqData[i],
+            userId: session.user.id,
+          },
+        });
+        resData.push(data);
+      }
+    }
+
+    return new Response(JSON.stringify(resData), { status: 201 });
+  } catch (error) {
+    console.error(error);
+    return new Response('Failed to put groups', { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 

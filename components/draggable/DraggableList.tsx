@@ -16,21 +16,26 @@ import React, { useMemo, useState } from 'react';
 
 import { ClassNameProps } from '@/types/className';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { LexoRank } from 'lexorank';
 
 interface BaseItem {
-  id: UniqueIdentifier;
+  id: string;
 }
 
 interface Props<T extends BaseItem> extends ClassNameProps {
   items: T[];
-  onChange(items: T[]): void;
-  renderItem(item: T, i: number): ReactNode;
+  onChange: (items: T[]) => void;
+  updateChange?: (items: T) => void;
+  rankKey?: string;
+  renderItem: (item: T, i: number) => ReactNode;
 }
 
 const DraggableList = <T extends BaseItem>({
   className,
   items,
+  rankKey,
   onChange,
+  updateChange,
   renderItem,
 }: Props<T>) => {
   const [active, setActive] = useState<Active | null>(null);
@@ -53,7 +58,22 @@ const DraggableList = <T extends BaseItem>({
           const activeIndex = items.findIndex(({ id }) => id === active.id);
           const overIndex = items.findIndex(({ id }) => id === over.id);
 
-          onChange(arrayMove(items, activeIndex, overIndex));
+          const newItem = rankKey && {
+            ...items[activeIndex],
+            [rankKey]: getRank(overIndex, items, rankKey, activeIndex < overIndex),
+          };
+          updateChange && newItem && updateChange(newItem);
+
+          const newArray = arrayMove(items, activeIndex, overIndex);
+          onChange(
+            newItem
+              ? [
+                  ...newArray.slice(0, overIndex),
+                  newItem,
+                  ...newArray.slice(overIndex + 1, newArray.length),
+                ]
+              : newArray
+          );
         }
         setActive(null);
       }}
@@ -71,6 +91,27 @@ const DraggableList = <T extends BaseItem>({
       </SortableContext>
     </DndContext>
   );
+};
+
+const getRank = (
+  to: number,
+  items: any[],
+  key: string | number | symbol,
+  isNext: boolean
+) => {
+  if (to === 0) {
+    if (items.length !== 1) {
+      return (items[to][key] as LexoRank)?.genPrev() || LexoRank.middle();
+    }
+  } else if (to === items.length - 1) {
+    return (items[to][key] as LexoRank)?.genNext() || LexoRank.middle();
+  } else {
+    return (
+      (items[to][key] as LexoRank)?.between(
+        items[to + (isNext ? 1 : -1)][key] as LexoRank
+      ) || LexoRank.middle()
+    );
+  }
 };
 
 export default DraggableList;

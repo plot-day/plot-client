@@ -1,20 +1,45 @@
-import { atomWithQuery } from 'jotai-tanstack-query';
-// import { LexoRank } from 'lexorank';
+import { parseRank } from '@/util/convert';
+import { replaceAtom } from '@/util/query';
+import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
+import { LexoRank } from 'lexorank';
 
 export interface GroupType {
   id: string;
   title: string;
   userId?: string;
   isDefault: boolean;
+  isUuid?: boolean;
+  rank: LexoRank;
 }
 
-export const groupsAtom = atomWithQuery<GroupType[]>(() => {
+export const groupAtom = atomWithQuery<GroupType[]>(() => {
   return {
-    queryKey: ['groups'],
+    queryKey: ['group'],
     queryFn: async () => {
       const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/api/group');
       const data = await res.json();
-      return data;
+      return data.map((item: any) => parseRank(item));
     },
   };
 });
+
+export const groupMutation = atomWithMutation<GroupType, any>(() => ({
+  mutationKey: ['group'],
+  mutationFn: async (groups) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/group`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(groups),
+        }
+      );
+      return await res.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+  onSuccess: (data) => {
+    replaceAtom(data, 'group');
+  },
+}));

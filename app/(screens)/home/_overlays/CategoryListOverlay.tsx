@@ -1,23 +1,34 @@
 'use client';
 
+import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
+import DraggableList from '@/components/draggable/DraggableList';
 import IconHolder from '@/components/icon/IconHolder';
 import Overlay from '@/components/overlay/Overlay';
 import SaveCancelButton from '@/components/overlay/SaveCancelButton';
-import { categoriesAtom } from '@/store/category';
+import { categoryAtom, categoriesMutation } from '@/store/category';
 import { useAtomValue } from 'jotai';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { FaPencil, FaPlus, FaTrashCan } from 'react-icons/fa6';
-import DraggableList from '@/components/draggable/DraggableList';
-import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
-import { usePathname, useSearchParams } from 'next/navigation';
 
 const CategoryListOverlay = () => {
+  const router = useRouter();
+
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const { data } = useAtomValue(categoriesAtom);
+  const { data } = useAtomValue(categoryAtom);
+  const { mutate, isPending } = useAtomValue(categoriesMutation);
   const [categories, setCategories] = useState(data || []);
+
+  const submitHandler = async () => {
+      await mutate(categories.map((item) => ({
+        id: item.id,
+        rank: item.rank.toString()
+      })));
+    router.back();
+  };
 
   useEffect(() => {
     setCategories(data || []);
@@ -27,15 +38,16 @@ const CategoryListOverlay = () => {
     <Overlay title="Edit category list" id="category-list" isRight={true} hideX={true}>
       <DraggableList
         className="space-y-2"
-        items={categories}
+        items={categories.sort((a, b) => a?.rank?.compareTo(b?.rank))}
         onChange={setCategories}
+        rankKey="rank"
         renderItem={({ id, title, icon, group }) => (
-          <DraggableItem id={id} className="flex gap-2">
+          <DraggableItem key={id} id={id} className="flex gap-2">
             <DragHandle />
             <div className="w-full flex gap-2 items-center">
               <IconHolder isCircle={true}>{icon}</IconHolder>
               <div className="text-left w-full">
-                <p className="text-xs font-semibold">{group}</p>
+                <p className="text-xs font-semibold">{group?.title}</p>
                 <p className="font-bold leading-tight">{title}</p>
               </div>
             </div>
@@ -67,7 +79,11 @@ const CategoryListOverlay = () => {
         <FaPlus />
         Add category
       </Link>
-      <SaveCancelButton saveStr="Save the order" />
+      <SaveCancelButton
+        saveStr="Save the order"
+        onSave={submitHandler}
+        isPending={isPending}
+      />
     </Overlay>
   );
 };

@@ -65,17 +65,20 @@ model VerificationToken {
 }
 
 model Log {
-  id          String    @id @default(cuid())
-  icon        String?
-  title       String
-  content     String?
-  categoryId  String
-  category    Category  @relation(fields: [categoryId], references: [id])
-  type        String
-  isDone      Boolean
-  date        DateTime?
-  dueDate     DateTime?
-  fieldValues Json[]
+  id           String    @id @default(cuid())
+  icon         String?
+  title        String
+  content      String?
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+  type         String
+  isDone       Boolean
+  date         DateTime?
+  dueDate      DateTime?
+  fieldValues  Json
+  todayRank    String?
+  inboxRank    String?
+  categoryRank String?
 
   userId    String
   user      User     @relation(fields: [userId], references: [id])
