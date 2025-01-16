@@ -11,6 +11,7 @@ interface OverlayFormProps<T extends FieldValues> extends OverlayProps {
   onSubmit: (values: T) => Promise<void>;
   disableReset?: boolean;
   disalbeBackOnSubmit?: boolean;
+  isPending?: boolean;
 }
 
 const OverlayForm = <T extends FieldValues>({
@@ -20,6 +21,7 @@ const OverlayForm = <T extends FieldValues>({
   disableReset,
   disalbeBackOnSubmit,
   onClose,
+  isPending,
   className,
   ...props
 }: PropsWithChildren<OverlayFormProps<T>>) => {
@@ -56,7 +58,7 @@ const OverlayForm = <T extends FieldValues>({
         <div className={className}>{children}</div>
         <SaveCancelButton
           onCancel={cancleHandler}
-          isPending={form.formState.isSubmitting}
+          isPending={form.formState.isSubmitting || isPending}
         />
       </form>
     </Overlay>

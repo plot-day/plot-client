@@ -8,11 +8,12 @@ import Loader from '@/components/loader/Loader';
 import OverlayForm from '@/components/overlay/OverlayForm';
 import Tab from '@/components/tab/Tab';
 import { FIELD_TYPES } from '@/constants/field';
-import { categoriesAtom, FieldType } from '@/store/category';
+import { categoryAtom, categoryMutation, FieldType } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
-import { groupsAtom } from '@/store/group';
+import { groupAtom } from '@/store/group';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { LexoRank } from 'lexorank';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
@@ -24,24 +25,29 @@ import * as z from 'zod';
 const EMOJI_ID = 'category-emoji';
 
 const formSchema = z.object({
+  id: z.string().optional(),
   icon: z.string().min(1, 'Please select icon.'),
   title: z.string().min(1, 'Please enter the title.'),
-  groupId: z.string(),
-  type: z.string(),
+  groupId: z.string().optional(),
+  defaultLogType: z.string().optional(),
+  fields: z.array(z.any()).optional(),
+  isDefault: z.boolean().optional(),
+  rank: z.string().optional(),
 });
 
-type formSchemaType = z.infer<typeof formSchema>;
+export type categoryFormSchemaType = z.infer<typeof formSchema>;
 
 const CategoryInputOverlay = () => {
   const pathname = usePathname();
 
-  const { data: groups, isPending, isError } = useAtomValue(groupsAtom);
-  const { data: categories, refetch: refetchCategories } = useAtomValue(categoriesAtom);
+  const { data: groups, isPending, isError } = useAtomValue(groupAtom);
+  const { data: categories } = useAtomValue(categoryAtom);
+  const { mutate, isPending: isSubmitting } = useAtomValue(categoryMutation);
   const [emoji, setEmoji] = useAtom(emojiAtom);
   const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
-  const [type, setType] = useState('task');
-  const [group, setGroup] = useState('');
+  const [defaultLogType, setType] = useState('task');
+  const [group, setGroup] = useState(groups?.find((item) => item.isDefault)?.id || '');
   const [fields, setFields] = useState<FieldType[]>([]);
   const [error, setError] = useState('');
 
@@ -49,19 +55,12 @@ const CategoryInputOverlay = () => {
   const categoryId = params.get('categoryId') || '';
   const showOverlay = params.get('category-input') || '';
 
-  const form = useForm<formSchemaType>({
+  const form = useForm<categoryFormSchemaType>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      icon: '',
-      title: '',
-      groupId: group,
-      type,
-    },
   });
 
-  const submitHandler = async (values: formSchemaType) => {
+  const submitHandler = async (values: categoryFormSchemaType) => {
     setError('');
-    const url = process.env.NEXT_PUBLIC_BASE_URL + '/api/profile';
 
     try {
       fields.forEach(({ label }) => {
@@ -70,25 +69,21 @@ const CategoryInputOverlay = () => {
         }
       });
 
-      const body = JSON.stringify({ ...values, fields });
+      const sortedCategories = categories?.sort((a, b) => a.rank?.compareTo(b.rank));
+      const lastCategory = sortedCategories && sortedCategories[sortedCategories.length - 1];
 
-      alert(body);
-
-      if (categoryId) {
-        //   await fetch(`${url}/${categoryId}`, { method: 'PATCH', body });
-      } else {
-        //   await fetch(url, { method: 'POST', body });
-      }
+      mutate({ 
+        ...values,
+        groupId: group,
+        fields,
+        rank: lastCategory?.rank.genNext().toString() || LexoRank.middle().toString(),
+        defaultLogType,
+        isDefault: false,
+      });
     } catch (error: any) {
-      setError(
-        typeof error === 'string'
-          ? error
-          : error?.message || 'An Error occured.'
-      );
+      setError(typeof error === 'string' ? error : error?.message || 'An Error occured.');
       throw error;
     }
-
-    refetchCategories();
   };
 
   const addFieldHandler = () => {
@@ -109,9 +104,10 @@ const CategoryInputOverlay = () => {
       if (categoryId) {
         const category = categories?.find((category) => category.id === categoryId);
         setEmoji(EMOJI_ID, category?.icon || '');
-        setGroup(category?.groupId || '');
+        setGroup(category?.groupId || groups?.find((item) => item.isDefault)?.id || '');
         form.setValue('title', category?.title || '');
       } else {
+        setGroup(groups?.find((item) => item.isDefault)?.id || '');
         setEmoji(EMOJI_ID, '');
         form.reset();
       }
@@ -124,7 +120,7 @@ const CategoryInputOverlay = () => {
 
   useEffect(() => {
     if (!showOverlay) {
-      setGroup('');
+      setGroup(groups?.find((item) => item.isDefault)?.id || '');
       setFields([]);
     }
   }, [showOverlay]);
@@ -135,22 +131,17 @@ const CategoryInputOverlay = () => {
     }
   }, [emoji.get(EMOJI_ID)]);
 
-  useEffect(() => {
-    form.setValue('groupId', group);
-  }, [group]);
-
-  useEffect(() => {
-    form.setValue('type', type);
-  }, [type]);
-
   return (
     <OverlayForm
       id="category-input"
-      className="[&>form]:flex [&>form]:flex-col [&>form]:px-8 [&>form]:items-center [&>form]:gap-4"
+      className={`[&>form]:flex [&>form]:flex-col [&>form]:px-8 [&>form]:items-center [&>form]:gap-4 ${
+        isSubmitting ? 'pointer-events-none' : ''
+      }`}
       title={categoryId ? 'Edit category' : 'Add category'}
       form={form}
       onSubmit={submitHandler}
       isRight={true}
+      isPending={isSubmitting}
     >
       <div className="my-6 flex flex-col gap-4 items-center">
         {/* Emoji */}
@@ -171,7 +162,7 @@ const CategoryInputOverlay = () => {
         {/* Type */}
         <Tab
           id="category-input-type"
-          value={type}
+          value={defaultLogType}
           setValue={setType}
           className="text-sm [&_label]:font-semibold w-full [&>li]:p-1"
           tabs={[
@@ -212,14 +203,10 @@ const CategoryInputOverlay = () => {
           className="text-sm w-full [&_label]:font-semibold [&>li]:p-1"
           tabs={[
             isPending ? <Loader key="loader" className="w-4 h-4" /> : undefined,
-            ...(groups?.map((group) => ({
+            ...(groups?.sort((a, b) => a.rank?.compareTo(b.rank)).map((group) => ({
               label: group.title,
-              value: group.id.toString(),
+              value: group.id?.toString(),
             })) || []),
-            {
-              label: 'etc.',
-              value: '',
-            },
           ]}
         />
       </div>
@@ -228,17 +215,20 @@ const CategoryInputOverlay = () => {
         <div className="w-full pb-1 mb-2 flex justify-between items-center border-b-2 border-black">
           <h6 className="font-extrabold">Fields</h6>
         </div>
-        <DraggableList className="max-h-36 overflow-y-scroll" items={fields} onChange={setFields}
+        <DraggableList
+          className="max-h-36 overflow-y-scroll"
+          items={fields}
+          onChange={setFields}
           renderItem={(field, i) => (
             <FieldItem
               key={field.id}
               {...field}
               idx={i}
               setFields={setFields}
-              base={`${pathname}?${params.toString()}`} />
+              base={`${pathname}?${params.toString()}`}
+            />
           )}
-        >
-        </DraggableList>
+        ></DraggableList>
         <button
           type="button"
           onClick={addFieldHandler}
@@ -262,7 +252,7 @@ const CategoryInputOverlay = () => {
             key={key}
             className="w-full p-2 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg"
           >
-            {form.formState.errors[key as keyof formSchemaType]?.message
+            {form.formState.errors[key as keyof categoryFormSchemaType]?.message
               ?.split('\n')
               .map((line, i) => (
                 <p key={i}>
@@ -315,7 +305,10 @@ const FieldItem = ({
   };
 
   return (
-    <DraggableItem id={id} className="w-full flex justify-between gap-2 items-center text-sm mb-2">
+    <DraggableItem
+      id={id}
+      className="w-full flex justify-between gap-2 items-center text-sm mb-2"
+    >
       <DragHandle />
       <select onChange={typeChangeHandler} value={type}>
         {FIELD_TYPES.map(

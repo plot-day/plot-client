@@ -12,6 +12,7 @@ interface EmojiInputProps<T extends FieldValues> extends ClassNameProps {
   params?: string;
   isCircle?: boolean;
   register?: UseFormRegisterReturn<Path<T>>;
+  disabled?: boolean;
 }
 
 const EmojiInput = <T extends FieldValues>({
@@ -19,6 +20,7 @@ const EmojiInput = <T extends FieldValues>({
   params,
   isCircle,
   register,
+  disabled,
   className,
   children,
 }: PropsWithChildren<EmojiInputProps<T>>) => {
@@ -31,6 +33,7 @@ const EmojiInput = <T extends FieldValues>({
       className={cn(
         'w-24 h-24 bg-gray-100 rounded-xl flex justify-center items-center text-5xl shrink-0',
         isCircle ? 'rounded-full' : '',
+        disabled ? 'pointer-events-none' : '',
         className
       )}
       href={`${pathname}?${params ? params + '&' : ''}emoji-select=show&emoji-id=${id}`}

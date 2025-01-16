@@ -1,4 +1,4 @@
-import Nav from '@/components/layout/Nav';
+import Nav from '@/app/_layout/Nav';
 import LogInputOverlay from './home/_overlays/LogInputOverlay';
 import EmojiOverlay from '@/components/emoji/EmojiOverlay';
 import CategorySelectOverlay from './home/_overlays/CategorySelectOverlay';

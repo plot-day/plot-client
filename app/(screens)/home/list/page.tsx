@@ -41,20 +41,20 @@ const page = () => {
   );
 };
 
-const LogItem = ({ title, category, icon, customFields, type, isDone }: LogType) => {
+const LogItem = ({ title, category, icon, fieldValues, type, isDone }: LogType) => {
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
         <PlayButton />
         <IconHolder>{icon}</IconHolder>
         <div>
-          <p className="text-xs font-extrabold">{category}</p>
+          <p className="text-xs font-extrabold">{category.title}</p>
           <p>{title}</p>
           <ul className="flex gap-2 text-xs font-light mt-2">
-            {customFields.map(({ icon, value }, i) => (
+            {category.fields.map(({ icon,label }, i) => (
               <li key={i} className="flex gap-1 items-center">
                 <IconPickerItem value={icon} />
-                <span>{value}</span>
+                <span>{fieldValues[label]}</span>
               </li>
             ))}
           </ul>
