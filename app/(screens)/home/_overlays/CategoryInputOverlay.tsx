@@ -53,6 +53,7 @@ const CategoryInputOverlay = () => {
 
   const params = useSearchParams();
   const categoryId = params.get('categoryId') || '';
+  const rank = params.get('rank') || '';
   const showOverlay = params.get('category-input') || '';
 
   const form = useForm<categoryFormSchemaType>({
@@ -74,9 +75,10 @@ const CategoryInputOverlay = () => {
 
       mutate({ 
         ...values,
+        id: categoryId || undefined,
         groupId: group,
         fields,
-        rank: lastCategory?.rank.genNext().toString() || LexoRank.middle().toString(),
+        rank: rank || lastCategory?.rank.genNext().toString() || LexoRank.middle().toString(),
         defaultLogType,
         isDefault: false,
       });
@@ -104,6 +106,7 @@ const CategoryInputOverlay = () => {
       if (categoryId) {
         const category = categories?.find((category) => category.id === categoryId);
         setEmoji(EMOJI_ID, category?.icon || '');
+        form.setValue('icon', category?.icon || '');
         setGroup(category?.groupId || groups?.find((item) => item.isDefault)?.id || '');
         form.setValue('title', category?.title || '');
       } else {

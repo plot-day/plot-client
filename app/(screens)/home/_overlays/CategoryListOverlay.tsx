@@ -6,6 +6,7 @@ import IconHolder from '@/components/icon/IconHolder';
 import Overlay from '@/components/overlay/Overlay';
 import SaveCancelButton from '@/components/overlay/SaveCancelButton';
 import { categoryAtom, categoriesMutation } from '@/store/category';
+import { removeAtom } from '@/util/query';
 import { useAtomValue } from 'jotai';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -21,27 +22,57 @@ const CategoryListOverlay = () => {
   const { data } = useAtomValue(categoryAtom);
   const { mutate, isPending } = useAtomValue(categoriesMutation);
   const [categories, setCategories] = useState(data || []);
+  const [removeIds, setRemoveIds] = useState<string[]>([]);
+
+  const showOverlay = params.get('category-list');
 
   const submitHandler = async () => {
-      await mutate(categories.map((item) => ({
+    // put
+    await mutate(
+      categories.map((item) => ({
         id: item.id,
-        rank: item.rank.toString()
-      })));
+        rank: item.rank.toString(),
+      }))
+    );
+
+    // delete
+    for (let i = 0; i < removeIds.length; i++) {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/category/${removeIds[i]}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      const data = await res.json();
+      removeAtom(data.id, 'category');
+    }
+
+    // reset
+    setRemoveIds([]);
     router.back();
   };
 
+  const removeHandler = (id: string) => {
+    const idx = categories.findIndex((item) => item.id === id);
+    setRemoveIds((prev) => [...prev, id]);
+    setCategories((prev) => [...prev.slice(0, idx), ...prev.slice(idx + 1, prev.length)]);
+  };
+
   useEffect(() => {
-    setCategories(data || []);
-  }, [data]);
+    if (showOverlay) {
+      setCategories(data?.sort((a, b) => a?.rank?.compareTo(b?.rank)) || []);
+      setRemoveIds([]);
+    }
+  }, [data, showOverlay]);
 
   return (
     <Overlay title="Edit category list" id="category-list" isRight={true} hideX={true}>
       <DraggableList
         className="space-y-2"
-        items={categories.sort((a, b) => a?.rank?.compareTo(b?.rank))}
+        items={categories}
         onChange={setCategories}
         rankKey="rank"
-        renderItem={({ id, title, icon, group }) => (
+        renderItem={({ id, title, icon, group, rank }) => (
           <DraggableItem key={id} id={id} className="flex gap-2">
             <DragHandle />
             <div className="w-full flex gap-2 items-center">
@@ -55,7 +86,7 @@ const CategoryListOverlay = () => {
               <Link
                 href={`${pathname}?${
                   params.toString() + '&'
-                }category-input=show&categoryId=${id}`}
+                }category-input=show&categoryId=${id}&rank=${rank}`}
                 className="p-2"
               >
                 <FaPencil />
@@ -63,7 +94,7 @@ const CategoryListOverlay = () => {
               <div
                 className="p-2"
                 onClick={() => {
-                  // removeHandler(i);
+                  removeHandler(id);
                 }}
               >
                 <FaTrashCan />

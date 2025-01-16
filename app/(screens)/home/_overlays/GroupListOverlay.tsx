@@ -26,7 +26,7 @@ const GroupListOverlay = () => {
   const showOverlay = params.get('group-list');
 
   const submitHandler = async () => {
-    // update
+    // put
     await mutate(
       groups
         .filter((group) => group.title)
@@ -38,7 +38,7 @@ const GroupListOverlay = () => {
         }))
     );
 
-    // remove
+    // delete
     for (let i = 0; i < removeIds.length; i++) {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/group/${removeIds[i]}`,
@@ -93,6 +93,7 @@ const GroupListOverlay = () => {
   useEffect(() => {
     if (showOverlay) {
       setGroups(data || []);
+      setRemoveIds([]);
     }
   }, [data, showOverlay]);
 
