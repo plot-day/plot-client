@@ -6,7 +6,7 @@ import IconHolder from '@/components/icon/IconHolder';
 import { IconPickerItem } from 'react-icons-picker-more';
 import { logsTodayAtom, LogType } from '@/store/log';
 import { useAtomValue } from 'jotai';
-import React from 'react';
+import React, { Suspense } from 'react';
 
 const page = () => {
   const { data: logs } = useAtomValue(logsTodayAtom);
@@ -18,7 +18,9 @@ const page = () => {
     <div className="p-8">
       {/* Header */}
       <div className="my-12 flex justify-between">
-        <YearMonthNav />
+        <Suspense>
+          <YearMonthNav />
+        </Suspense>
         <DayNav />
       </div>
       <ul className="space-y-6">
