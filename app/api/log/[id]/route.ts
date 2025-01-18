@@ -31,7 +31,7 @@ export async function PATCH(
     const res = await prisma.log.update({
       where: { id },
       data,
-      include: { goal: true },
+      include: { category: true },
     });
 
     return NextResponse.json(res, { status: 200 });

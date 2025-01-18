@@ -30,3 +30,21 @@ export const stringifyRank = (values: any) => ({
   listRank: values.listRank?.toString(),
   timelineRank: values.timelineRank?.toString(),
 });
+
+export const toCamelCase = (str: string) => {
+  const words = str.toLowerCase().split(' ');
+  const camelCases = [words[0], ...words.slice(1, words.length).map(
+    (word) => word[0].toUpperCase() + word.slice(1, word.length)
+  )];
+  return camelCases.join('');
+};
+
+export const getTimestampStr = (time: number) => {
+  const timeValue = new Date(time);
+
+  const hour = timeValue.getHours();
+  const min = timeValue.getMinutes();
+  const sec = timeValue.getSeconds();
+
+  return `${hour ? hour + (min || sec ? 'h ' : 'h') : ''}${min ? min + (sec ? 'm ' : 'm') : ''}${sec ? sec + 's' : ''}`
+}

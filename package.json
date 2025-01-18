@@ -36,6 +36,7 @@
     "react-icons-picker-more": "^1.0.2",
     "react-responsive": "^10.0.0",
     "tailwind-merge": "^2.5.2",
+    "tailwind-scrollbar-hide": "^2.0.0",
     "uuid": "^11.0.5",
     "zod": "^3.23.8"
   },

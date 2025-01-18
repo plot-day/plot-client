@@ -9,6 +9,7 @@ import SaveCancelButton from './SaveCancelButton';
 interface OverlayFormProps<T extends FieldValues> extends OverlayProps {
   form: UseFormReturn<T, any, undefined>;
   onSubmit: (values: T) => Promise<void>;
+  hideButtons?: boolean;
   disableReset?: boolean;
   disalbeBackOnSubmit?: boolean;
   isPending?: boolean;
@@ -18,6 +19,7 @@ const OverlayForm = <T extends FieldValues>({
   children,
   form,
   onSubmit,
+  hideButtons,
   disableReset,
   disalbeBackOnSubmit,
   onClose,
@@ -52,14 +54,14 @@ const OverlayForm = <T extends FieldValues>({
       hideX={true}
       {...props}
       onClose={closeHandler}
-      disableBackdrop={form.formState.isSubmitting}
+      disableBackdrop={form.formState.isSubmitting || isPending}
     >
       <form onSubmit={form.handleSubmit(submitHandler)} className="w-full">
         <div className={className}>{children}</div>
-        <SaveCancelButton
+        {!hideButtons && <SaveCancelButton
           onCancel={cancleHandler}
           isPending={form.formState.isSubmitting || isPending}
-        />
+        />}
       </form>
     </Overlay>
   );
