@@ -1,6 +1,6 @@
 import { logFormSchemaType } from '@/app/(screens)/home/_overlays/LogInputOverlay';
 import { parseRank } from '@/util/convert';
-import { getDashDate } from '@/util/date';
+import { getDashDate, getDateTimeStr } from '@/util/date';
 import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
 import { CategoryType } from './category';
 import { todayAtom } from './ui';
@@ -16,7 +16,7 @@ export interface LogType {
   categoryId: string;
   category: CategoryType;
   type: string;
-  isDone?: boolean;
+  status?: 'todo' | 'done' | 'dismiss';
   date?: Date;
   dueDate?: Date;
   fieldValues: any;
@@ -63,4 +63,19 @@ export const logMutation = atomWithMutation<LogType, Partial<logFormSchemaType>>
   },
 }));
 
-export const logFormDataAtom = atom<Partial<logFormSchemaType> | null>(null);
+
+export const currentLogAtom = atom<Partial<LogType> | null>(null);
+export const logFormDataAtom = atom(
+  (get) => {
+    const log = get(currentLogAtom);
+    return log && {
+      ...log,
+      categoryId: log?.category?.id,
+      date: getDateTimeStr(log?.date),
+      category: undefined,
+    };
+  },
+  (get, set, update: Partial<LogType> | null) => {
+    set(currentLogAtom, update);
+  }
+);

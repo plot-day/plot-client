@@ -72,10 +72,10 @@ model Log {
   categoryId   String
   category     Category  @relation(fields: [categoryId], references: [id])
   type         String
-  isDone       Boolean
+  status       String?
   date         DateTime?
   dueDate      DateTime?
-  fieldValues  Json
+  fieldValues  Json?
   todayRank    String?
   inboxRank    String?
   categoryRank String?
