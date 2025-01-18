@@ -18,15 +18,18 @@ import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import { logFormDataAtom, logMutation } from '@/store/log';
 import { todayAtom } from '@/store/ui';
 import { toCamelCase } from '@/util/convert';
-import { getDateTimeStr } from '@/util/date';
+import { getDashDate, getDateTimeStr } from '@/util/date';
 import { zodResolver } from '@hookform/resolvers/zod';
+import dayjs from 'dayjs';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { IconPickerItem } from 'react-icons-picker-more';
+import { FaArrowRight, FaCheck, FaCopy, FaTrash, FaXmark } from 'react-icons/fa6';
 import * as z from 'zod';
+import { FaCheckSquare } from 'react-icons/fa';
 
 const EMOJI_ID = 'log-emoji';
 
@@ -39,7 +42,7 @@ const formSchema = z.object({
   categoryId: z.string().optional(),
   fieldValues: z.any().optional(),
   content: z.string().optional(),
-  isDone: z.boolean().optional(),
+  status: z.string().optional(),
 });
 
 export type logFormSchemaType = z.infer<typeof formSchema>;
@@ -51,7 +54,7 @@ const LogInputOverlay = () => {
   const [emoji, setEmoji] = useAtom(emojiAtom);
   const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
-  const { data: categories } = useAtomValue(categoryAtom);
+  const { data: categories, isFetching: isCategoryFetching } = useAtomValue(categoryAtom);
   const [category, setCategory] = useAtom(selectedCategoryAtom);
   const defaultCategory = useAtomValue(defaultCategoryAtom);
 
@@ -60,9 +63,7 @@ const LogInputOverlay = () => {
   const { mutate, isPending } = useAtomValue(logMutation);
   const today = useAtomValue(todayAtom);
 
-  const [type, setType] = useState('');
   const [error, setError] = useState('');
-  const [field, setField] = useState<any>({});
 
   const params = useSearchParams();
   const showLogInput = params.get('log-input');
@@ -73,13 +74,16 @@ const LogInputOverlay = () => {
 
   const fieldInputHandler = (key: string) => {
     const setFieldFunc = (v: string | number) => {
-      setField((prev: any) => ({ ...prev, [key]: v }));
+      form.setValue('fieldValues', (prev: any) => ({ ...prev, [key]: v }));
     };
     return setFieldFunc;
   };
 
   const submitHandler = async (values: logFormSchemaType) => {
     setError('');
+    if (isCategoryFetching) {
+      return;
+    }
 
     try {
       await mutate({
@@ -87,9 +91,7 @@ const LogInputOverlay = () => {
         id: defaultValue?.id || undefined,
         icon: emoji.get(EMOJI_ID) || '',
         categoryId: category?.id || defaultCategory?.id,
-        fieldValues: field,
-        type,
-        isDone: false,
+        status: 'todo',
       });
 
       if (defaultValue) {
@@ -111,9 +113,11 @@ const LogInputOverlay = () => {
       form.reset();
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (!defaultValue) {
-        setEmoji(EMOJI_ID, defaultCategory?.icon || '');
-        setField([]);
         setCategory(null);
+        setEmoji(EMOJI_ID, defaultCategory?.icon || '');
+        form.setValue('fieldValues', []);
+        form.setValue('type', 'task');
+        form.setValue('status', 'todo');
       } else {
         const defaultCategory = categories?.find(
           (item) => item.id === defaultValue?.categoryId
@@ -121,8 +125,6 @@ const LogInputOverlay = () => {
 
         setCategory(defaultCategory || null);
         setEmoji(EMOJI_ID, defaultValue?.icon || '');
-        setField(defaultValue?.fieldValues);
-        setType(defaultValue?.type || '');
 
         for (const keyStr in defaultValue) {
           const key = keyStr as keyof logFormSchemaType;
@@ -138,9 +140,13 @@ const LogInputOverlay = () => {
     }
   }, [showLogInput]);
 
+  const updateStatus = (status: string) => {
+    form.setValue('status', status);
+  };
+
   useEffect(() => {
     setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
-    setType(category?.defaultLogType || defaultCategory?.defaultLogType || 'task');
+    form.setValue('type', category?.defaultLogType || defaultCategory?.defaultLogType || 'task');
   }, [category, defaultCategory]);
 
   return (
@@ -183,7 +189,7 @@ const LogInputOverlay = () => {
         <Button
           type="submit"
           className={`px-2 py-1 w-[3.75rem] flex justify-center items-center text-xs ${isPending ? 'opacity-25' : ''}`}
-          disabled={isPending}
+          disabled={isPending || isCategoryFetching}
         >
           {isPending ? (
             <Loader isDark={true} className="w-4 h-4" />
@@ -204,9 +210,9 @@ const LogInputOverlay = () => {
         <div className="flex gap-3 items-center">
           <div
             className={`w-[1rem] h-[1rem] border-black ${
-              type === 'note'
+              form.watch('type') === 'note'
                 ? 'border-t border-black mt-[1rem]'
-                : type === 'event'
+                : form.watch('type') === 'event'
                 ? 'border rounded-full'
                 : 'border rounded-[0.25rem]'
             }`}
@@ -230,16 +236,18 @@ const LogInputOverlay = () => {
               return (
               <li key={i} className="flex gap-1 items-center">
                 <IconPickerItem value={icon} />
+                {form.watch('fieldValues') && 
+                <>
                 {(type === 'text' || type === 'url') && (
                   <TextFieldInput
                     label={label}
-                    value={field[key] as string}
+                    value={form.watch('fieldValues')[key] as string}
                     setValue={fieldInputHandler(key)}
                   />
                 )}
                 {type === 'number' && (
                   <NumberFieldInput
-                    value={field[key] as string}
+                    value={form.watch('fieldValues')[key] as string}
                     setValue={fieldInputHandler(key)}
                     label={label}
                     {...option}
@@ -247,18 +255,19 @@ const LogInputOverlay = () => {
                 )}
                 {type === 'date' && (
                   <DateFieldInput
-                    value={field[key] as string}
+                    value={form.watch('fieldValues')[key] as string}
                     setValue={fieldInputHandler(key)}
                     {...option}
                   />
                 )}
                 {type === 'timestamp' && (
                   <TimestampFieldInput
-                    value={field[key] as number || 0}
+                    value={form.watch('fieldValues')[key] as number || 0}
                     setValue={fieldInputHandler(key)}
                     {...option}
                   />
                 )}
+                </>}
               </li>
             )})}
           </ul>
@@ -288,6 +297,105 @@ const LogInputOverlay = () => {
                 ))}
             </div>
           ))}
+        </div>
+      )}
+      {/* type & status */}
+      {form.watch('type') === 'task' && (
+        <div className="flex justify-center gap-1 bg-gray-100 rounded-md items-center p-[0.2rem] font-extrabold text-xs">
+          <button
+            type="button"
+            className={`w-full py-[0.375rem] flex justify-center items-center gap-2 rounded-md ${
+              form.watch('status') === 'todo' ? 'text-primary bg-white' : 'text-gray-400'
+            }`}
+            disabled={form.watch('status') === 'todo' || isPending}
+            onClick={updateStatus.bind(null, 'todo')}
+          >
+            <FaCheckSquare />
+            <span>Todo</span>
+          </button>
+          <button
+            type="button"
+            className={`w-full py-[0.375rem] flex justify-center items-center gap-2 rounded-md ${
+              form.watch('status') === 'dismissed'
+                ? 'text-primary bg-white'
+                : 'text-gray-400'
+            }`}
+            disabled={form.watch('status') === 'dismissed' || isPending}
+            onClick={updateStatus.bind(null, 'dismissed')}
+          >
+            <FaXmark />
+            <span>Dismiss</span>
+          </button>
+          <button
+            type="button"
+            className={`w-full py-[0.375rem] flex justify-center items-center gap-2 rounded-md ${
+              form.watch('status') === 'done' ? 'text-primary bg-white' : 'text-gray-400'
+            }`}
+            disabled={form.watch('status') === 'done' || isPending}
+            onClick={updateStatus.bind(null, 'done')}
+          >
+            <FaCheck />
+            <span>Done</span>
+          </button>
+        </div>
+      )}
+      {/* delete, move next, duplicate */}
+      {defaultValue && !isPending && (
+        <div className="flex justify-between items-center gap-1 [&>*]:w-full [&>*]:py-2 font-extrabold text-xs text-gray-400">
+          <Link
+            href={`${pathname}?${params.toString()}&delete-confirm=show`}
+            className="flex justify-center items-center gap-2"
+          >
+            <FaTrash /> <span>Delete</span>
+          </Link>
+          {form.watch('type') === 'task' && (
+            <>
+              {defaultValue.status === 'todo' &&
+                dayjs(getDashDate(defaultValue.date)) <
+                  dayjs(getDashDate(new Date())) && (
+                  <button
+                    type="button"
+                    className="flex justify-center items-center gap-2"
+                    onClick={() => {
+                      mutate({
+                        id: defaultValue.id,
+                        date: dayjs(today).toISOString(),
+                      });
+                      router.back();
+                    }}
+                  >
+                    <FaArrowRight /> <span>Move here</span>
+                  </button>
+                )}
+              {!(
+                defaultValue.status === 'todo' &&
+                dayjs(getDashDate(defaultValue.date)) < dayjs(getDashDate(new Date()))
+              ) && (
+                <button
+                  type="button"
+                  className="flex justify-center items-center gap-2"
+                  onClick={() => {
+                    mutate({
+                      id: defaultValue.id,
+                      date: dayjs(defaultValue.date).add(1, 'day').toISOString(),
+                    });
+                    router.back();
+                  }}
+                >
+                  <FaArrowRight /> <span>Move next</span>
+                </button>
+              )}
+              <button
+                type="button"
+                className="flex justify-center items-center gap-2"
+                onClick={() => {
+                  mutate({ ...defaultValue, id: undefined });
+                }}
+              >
+                <FaCopy /> <span>Duplicate</span>
+              </button>
+            </>
+          )}
         </div>
       )}
     </OverlayForm>

@@ -28,5 +28,5 @@ export const replaceAtom = (data: any, key: string | any[]) => {
 export const removeAtom = (id: string, key: string | any[]) => {
   queryClient.setQueryData(
     typeof key === 'string' ? [key] : key,
-    (prev: any) => prev.filter((item: any) => item.id !== id));
+    (prev: any) => prev?.filter((item: any) => item.id !== id));
 }

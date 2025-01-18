@@ -9,26 +9,26 @@ import { getDateTimeStr } from '@/util/date';
 import { useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { IconPickerItem } from 'react-icons-picker-more';
 
 const page = () => {
   const { data: logs } = useAtomValue(logsTodayAtom);
 
-  const logsNotDone = logs?.filter((item) => !item.isDone);
-  const dones = logs?.filter((item) => item.isDone);
+  const todos = useMemo(() => logs?.filter((item) => item.status === 'todo'), [logs]);
+  const dones = useMemo(() => logs?.filter((item) => item.status !== 'todo'), [logs]);
 
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="my-12 flex justify-between">
+      <div className="mt-4 mb-8 flex justify-between">
         <Suspense>
           <YearMonthNav />
         </Suspense>
         <DayNav />
       </div>
       <ul className="space-y-6">
-        {logsNotDone?.map((item) => (
+        {todos?.map((item) => (
           <LogItem key={item.id} {...item} />
         ))}
       </ul>
@@ -36,9 +36,7 @@ const page = () => {
       {/* Done */}
       {!!dones?.length && (
         <ul className="space-y-6">
-          {dones
-            ?.filter((item) => item.isDone)
-            .map((item) => (
+          {dones.map((item) => (
               <LogItem key={item.id} {...item} />
             ))}
         </ul>
@@ -51,17 +49,14 @@ const LogItem = (log: LogType) => {
   const pathname = usePathname();
   const setFormData = useSetAtom(logFormDataAtom);
 
-  const { id, title, category, icon, fieldValues, type, isDone } = log;
+  const { title, category, icon, fieldValues, type, status } = log;
 
   return (
     <Link
       className="flex justify-between items-center"
       href={`${pathname}?log-input=show`}
       onClick={() => {
-        setFormData({
-          ...log,
-          date: getDateTimeStr(log.date),
-        });
+        setFormData(log);
       }}
     >
       <div className="flex items-center gap-4">

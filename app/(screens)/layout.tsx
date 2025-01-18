@@ -6,6 +6,7 @@ import CategoryInputOverlay from './home/_overlays/CategoryInputOverlay';
 import CategoryListOverlay from './home/_overlays/CategoryListOverlay';
 import GroupListOverlay from './home/_overlays/GroupListOverlay';
 import { Suspense } from 'react';
+import LogDeleteConformOverlay from './home/_overlays/LogDeleteConfirmOverlay';
 
 export default function RootLayout({
   children,
@@ -27,6 +28,7 @@ export default function RootLayout({
           <CategoryInputOverlay />
           <GroupListOverlay />
           <EmojiOverlay />
+          <LogDeleteConformOverlay />
         </Suspense>
       </div>
     </div>
