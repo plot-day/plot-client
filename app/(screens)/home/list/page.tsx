@@ -3,10 +3,14 @@ import PlayButton from '@/components/button/PlayButton';
 import DayNav from '@/components/date/DayNav';
 import YearMonthNav from '@/components/date/YearMonthNav';
 import IconHolder from '@/components/icon/IconHolder';
+import { logFormDataAtom, logsTodayAtom, LogType } from '@/store/log';
+import { getTimestampStr, toCamelCase } from '@/util/convert';
+import { getDateTimeStr } from '@/util/date';
+import { useAtomValue, useSetAtom } from 'jotai';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Suspense } from 'react';
 import { IconPickerItem } from 'react-icons-picker-more';
-import { logsTodayAtom, LogType } from '@/store/log';
-import { useAtomValue } from 'jotai';
-import React, { Suspense } from 'react';
 
 const page = () => {
   const { data: logs } = useAtomValue(logsTodayAtom);
@@ -43,9 +47,23 @@ const page = () => {
   );
 };
 
-const LogItem = ({ title, category, icon, fieldValues, type, isDone }: LogType) => {
+const LogItem = (log: LogType) => {
+  const pathname = usePathname();
+  const setFormData = useSetAtom(logFormDataAtom);
+
+  const { id, title, category, icon, fieldValues, type, isDone } = log;
+
   return (
-    <div className="flex justify-between items-center">
+    <Link
+      className="flex justify-between items-center"
+      href={`${pathname}?log-input=show`}
+      onClick={() => {
+        setFormData({
+          ...log,
+          date: getDateTimeStr(log.date),
+        });
+      }}
+    >
       <div className="flex items-center gap-4">
         <PlayButton />
         <IconHolder>{icon}</IconHolder>
@@ -53,12 +71,19 @@ const LogItem = ({ title, category, icon, fieldValues, type, isDone }: LogType) 
           <p className="text-xs font-extrabold">{category.title}</p>
           <p>{title}</p>
           <ul className="flex gap-2 text-xs font-light mt-2">
-            {category.fields.map(({ icon,label }, i) => (
-              <li key={i} className="flex gap-1 items-center">
-                <IconPickerItem value={icon} />
-                <span>{fieldValues[label]}</span>
-              </li>
-            ))}
+            {category.fields.map(
+              ({ icon, type, label }, i) =>
+                fieldValues[toCamelCase(label)] && (
+                  <li key={i} className="flex gap-1 items-center">
+                    <IconPickerItem value={icon} />
+                    <span>
+                      {type === 'timestamp'
+                        ? getTimestampStr(fieldValues[toCamelCase(label)])
+                        : fieldValues[toCamelCase(label)]}
+                    </span>
+                  </li>
+                )
+            )}
           </ul>
         </div>
       </div>
@@ -71,7 +96,7 @@ const LogItem = ({ title, category, icon, fieldValues, type, isDone }: LogType) 
             : 'border-t border-black mt-[1rem]'
         }`}
       />
-    </div>
+    </Link>
   );
 };
 

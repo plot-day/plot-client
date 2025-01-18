@@ -5,13 +5,15 @@ import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
 import { CategoryType } from './category';
 import { todayAtom } from './ui';
 import { LexoRank } from 'lexorank';
-import { updateAtom } from '@/util/query';
+import { updateTodayLogAtom } from '@/util/query';
+import { atom } from 'jotai';
 
 export interface LogType {
   id: string;
   icon: string;
   title: string;
   content?: string;
+  categoryId: string;
   category: CategoryType;
   type: string;
   isDone?: boolean;
@@ -29,7 +31,10 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
         process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(today as Date)}`
       );
       const data = await res.json();
-      return data.map((item: any) => parseRank(item));
+      return data.map((item: any) => ({ 
+        ...parseRank(item),
+        date: item.date && new Date(item.date) 
+      }));
     },
   };
 });
@@ -54,6 +59,8 @@ export const logMutation = atomWithMutation<LogType, Partial<logFormSchemaType>>
     }
   },
   onSuccess: (data) => {
-    updateAtom(data, ['log', get(todayAtom)]);
+    updateTodayLogAtom(data, ['log', get(todayAtom)]);
   },
 }));
+
+export const logFormDataAtom = atom<Partial<logFormSchemaType> | null>(null);
