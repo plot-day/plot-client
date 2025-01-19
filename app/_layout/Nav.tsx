@@ -4,19 +4,20 @@ import { ClassNameProps } from '@/types/className';
 import { cn } from '@/util/cn';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaList, FaPlus } from 'react-icons/fa6';
+import { FaClock, FaInbox, FaPlus, FaRegCalendar, FaRegClock } from 'react-icons/fa6';
+import { IoGrid } from "react-icons/io5";
 
 const NAV_DATA: { [key: string]: any }[] = [
-  { path: 'home/list', icon: <FaList />, title: 'List' },
-  // { path: 'home/calendar', icon: <FaRegClock />, title: 'Schedule' },
-  // { path: 'home/cateogries', icon: <FaRegCalendar />, title: 'Calendar' },
-  // { path: 'home/tracker', icon: <FaChartBar />, title: 'Statistics' },
+  { path: '/home/today', icon: <FaRegCalendar />, title: 'Today' },
+  // { path: '/home/now', icon: <FaClock />, title: 'Now' },
+  // { path: '/home/category', icon: <IoGrid />, title: 'Category' },
+  // { path: '/home/inbox', icon: <FaInbox />, title: 'Inbox' },
   {
     plus: (pathname: string) => (
       <Link
         href={`${pathname}?log-input=show`}
         key="add"
-        className="bg-primary w-9 h-9 mb-2 rounded-md"
+        className="shrink-0 bg-primary w-9 h-9 mb-2 rounded-md"
       >
         <FaPlus className="text-base text-white" />
       </Link>
@@ -30,7 +31,7 @@ const Nav = ({ className }: ClassNameProps) => {
   return (
     <nav
       className={cn(
-        'flex justify-center items-center gap-6 text-xl text-gray-300 bg-white',
+        'mx-12 flex gap-6 justify-center items-center text-xl text-gray-300 bg-white',
         '[&>a]:flex [&>a]:flex-col [&>a]:justify-center [&>a]:items-center',
         '[&>div]:flex [&>div]:flex-col [&>div]:justify-center [&>div]:items-center',
         '[&_span]:text-[0.625rem] [&_span]:font-bold',
@@ -42,7 +43,7 @@ const Nav = ({ className }: ClassNameProps) => {
           <Link
             href={path}
             key={path}
-            className={pathname.split('/')[1] === path ? 'text-primary' : undefined}
+            className={pathname === path ? 'text-primary w-full' : 'w-full'}
           >
             {icon}
             <span>{title}</span>

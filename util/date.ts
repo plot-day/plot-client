@@ -1,10 +1,10 @@
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
-export const getDashDate = (date: Date | string | undefined) => {
+export const getDashDate = (date: Date | Dayjs | string | undefined) => {
   return date && dayjs(date).format('YYYY-MM-DD');
 };
  
-export const getDateTimeStr = (date: Date | string | undefined) => {
+export const getDateTimeStr = (date: Date | Dayjs | string | undefined) => {
   return date && dayjs(date).format('YYYY-MM-DDTHH:mm');
 };
   
