@@ -7,6 +7,7 @@ import { todayAtom } from './ui';
 import { LexoRank } from 'lexorank';
 import { updateTodayLogAtom } from '@/util/query';
 import { atom } from 'jotai';
+import dayjs from 'dayjs';
 
 export interface LogType {
   id: string;
@@ -16,12 +17,14 @@ export interface LogType {
   categoryId: string;
   category: CategoryType;
   type: string;
-  status?: 'todo' | 'done' | 'dismiss';
+  status?: StatusType;
   date?: Date;
   dueDate?: Date;
   fieldValues: any;
-  rank: LexoRank;
+  todayRank: LexoRank;
 }
+
+export type StatusType = 'todo' | 'done' | 'dismiss';
 
 export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
   return {
@@ -35,6 +38,25 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
         ...parseRank(item),
         date: item.date && new Date(item.date) 
       }));
+    },
+  };
+});
+
+
+export const logsNextAtom = atomWithQuery<LogType[]>((get) => {
+  return {
+    queryKey: ['log', dayjs(get(todayAtom) as Date).add(1, 'day')],
+    queryFn: async ({ queryKey: [, today] }) => {
+      const next = dayjs(today as Date).add(1, 'day');
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(next)}`
+      );
+      const data = await res.json();
+      return data.map((item: any) => ({ 
+        ...parseRank(item),
+        date: item.date && new Date(item.date) 
+      }));
+      return [];
     },
   };
 });

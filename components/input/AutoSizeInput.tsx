@@ -10,7 +10,7 @@ const AutoSizeInput = ({ placeholder, value, setValue, onChange, ...props }: Aut
   return (
     <input
       {...props}
-      style={{ width: (value?.length || 0) + 'ch', minWidth: value ? undefined : placeholder?.length + 'ch' }}
+      style={{ width: (value?.length || 0) < 36 ? (value?.length || 0) + 'ch' : '35ch', minWidth: value ? undefined : placeholder?.length + 'ch', maxWidth: '100%' }}
       value={value}
       onChange={onChange ? onChange : (e) => {
         setValue && setValue(e.target.value);

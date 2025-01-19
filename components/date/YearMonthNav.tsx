@@ -9,11 +9,12 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Overlay from '../overlay/Overlay';
 import YearMonth from './YearMonth';
+import { ClassNameProps } from '@/types/className';
 
 const ID = 'year-month-nav';
 const YEARS = Array.from({ length: 2000 }, (v, i) => 2000 + i);
 
-const YearMonthNav = () => {
+const YearMonthNav = ({className}: ClassNameProps) => {
   const router = useRouter();
 
   const [today, setToday] = useAtom(todayAtom);
@@ -35,7 +36,7 @@ const YearMonthNav = () => {
 
   return (
     <div>
-      <Link href={`?${ID}=show`}>
+      <Link className={cn('inline-block', className)} href={`?${ID}=show`}>
         <YearMonth date={today} />
       </Link>
       <Overlay

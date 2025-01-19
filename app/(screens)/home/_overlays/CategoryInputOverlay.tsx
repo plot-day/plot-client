@@ -53,6 +53,7 @@ const CategoryInputOverlay = () => {
 
   const params = useSearchParams();
   const categoryId = params.get('categoryId') || '';
+  const title = params.get('title') || '';
   const rank = params.get('rank') || '';
   const showOverlay = params.get('category-input') || '';
 
@@ -113,6 +114,7 @@ const CategoryInputOverlay = () => {
         setGroup(groups?.find((item) => item.isDefault)?.id || '');
         setEmoji(EMOJI_ID, '');
         form.reset();
+        form.setValue('title', title);
       }
     } else {
       setEmojiIdMemeory(

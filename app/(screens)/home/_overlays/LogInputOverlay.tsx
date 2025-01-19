@@ -15,7 +15,7 @@ import {
   selectedCategoryAtom,
 } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
-import { logFormDataAtom, logMutation } from '@/store/log';
+import { logFormDataAtom, logMutation, logsNextAtom, logsTodayAtom, LogType } from '@/store/log';
 import { todayAtom } from '@/store/ui';
 import { toCamelCase } from '@/util/convert';
 import { getDashDate, getDateTimeStr } from '@/util/date';
@@ -30,6 +30,7 @@ import { IconPickerItem } from 'react-icons-picker-more';
 import { FaArrowRight, FaCheck, FaCopy, FaTrash, FaXmark } from 'react-icons/fa6';
 import * as z from 'zod';
 import { FaCheckSquare } from 'react-icons/fa';
+import { LexoRank } from 'lexorank';
 
 const EMOJI_ID = 'log-emoji';
 
@@ -43,6 +44,7 @@ const formSchema = z.object({
   fieldValues: z.any().optional(),
   content: z.string().optional(),
   status: z.string().optional(),
+  todayRank: z.string().optional(),
 });
 
 export type logFormSchemaType = z.infer<typeof formSchema>;
@@ -60,6 +62,8 @@ const LogInputOverlay = () => {
 
   const [defaultValue, setDefaultValue] = useAtom(logFormDataAtom);
 
+  const { data: todayLogs, isFetching: isFetchingTodayLogs } = useAtomValue(logsTodayAtom);
+  const { data: nextLogs, isFetching: isFetchingNextLogs } = useAtomValue(logsNextAtom);
   const { mutate, isPending } = useAtomValue(logMutation);
   const today = useAtomValue(todayAtom);
 
@@ -74,7 +78,7 @@ const LogInputOverlay = () => {
 
   const fieldInputHandler = (key: string) => {
     const setFieldFunc = (v: string | number) => {
-      form.setValue('fieldValues', (prev: any) => ({ ...prev, [key]: v }));
+      form.setValue('fieldValues', { ...form.watch('fieldValues'), [key]: v });
     };
     return setFieldFunc;
   };
@@ -91,12 +95,19 @@ const LogInputOverlay = () => {
         id: defaultValue?.id || undefined,
         icon: emoji.get(EMOJI_ID) || '',
         categoryId: category?.id || defaultCategory?.id,
-        status: 'todo',
+        ...getRanks(todayLogs || []),
       });
 
       if (defaultValue) {
         router.back();
       }
+
+      form.reset();
+      form.setValue('categoryId', values.categoryId);
+      setEmoji(EMOJI_ID, defaultCategory?.icon || '');
+      form.setValue('fieldValues', []);
+      form.setValue('type', 'task');
+      form.setValue('status', 'todo');
     } catch (error) {
       if (typeof error === 'string') {
         setError(error);
@@ -113,6 +124,7 @@ const LogInputOverlay = () => {
       form.reset();
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (!defaultValue) {
+        form.reset();
         setCategory(null);
         setEmoji(EMOJI_ID, defaultCategory?.icon || '');
         form.setValue('fieldValues', []);
@@ -135,7 +147,6 @@ const LogInputOverlay = () => {
       setEmojiIdMemeory(
         (prev) => (prev.length && [...prev].slice(0, prev.length - 1)) || []
       );
-      form.reset();
       setDefaultValue(null);
     }
   }, [showLogInput]);
@@ -300,7 +311,7 @@ const LogInputOverlay = () => {
         </div>
       )}
       {/* type & status */}
-      {form.watch('type') === 'task' && (
+      {(form.watch('type') === 'task' || form.watch('type') === 'event' ) && (
         <div className="flex justify-center gap-1 bg-gray-100 rounded-md items-center p-[0.2rem] font-extrabold text-xs">
           <button
             type="button"
@@ -316,12 +327,12 @@ const LogInputOverlay = () => {
           <button
             type="button"
             className={`w-full py-[0.375rem] flex justify-center items-center gap-2 rounded-md ${
-              form.watch('status') === 'dismissed'
+              form.watch('status') === 'dismiss'
                 ? 'text-primary bg-white'
                 : 'text-gray-400'
             }`}
-            disabled={form.watch('status') === 'dismissed' || isPending}
-            onClick={updateStatus.bind(null, 'dismissed')}
+            disabled={form.watch('status') === 'dismiss' || isPending}
+            onClick={updateStatus.bind(null, 'dismiss')}
           >
             <FaXmark />
             <span>Dismiss</span>
@@ -348,7 +359,7 @@ const LogInputOverlay = () => {
           >
             <FaTrash /> <span>Delete</span>
           </Link>
-          {form.watch('type') === 'task' && (
+          {form.watch('type') === 'task' && !isFetchingTodayLogs && !isFetchingNextLogs && (
             <>
               {defaultValue.status === 'todo' &&
                 dayjs(getDashDate(defaultValue.date)) <
@@ -360,6 +371,7 @@ const LogInputOverlay = () => {
                       mutate({
                         id: defaultValue.id,
                         date: dayjs(today).toISOString(),
+                        ...getRanks(todayLogs || [])
                       });
                       router.back();
                     }}
@@ -378,6 +390,7 @@ const LogInputOverlay = () => {
                     mutate({
                       id: defaultValue.id,
                       date: dayjs(defaultValue.date).add(1, 'day').toISOString(),
+                      ...getRanks(nextLogs || []),
                     });
                     router.back();
                   }}
@@ -389,7 +402,7 @@ const LogInputOverlay = () => {
                 type="button"
                 className="flex justify-center items-center gap-2"
                 onClick={() => {
-                  mutate({ ...defaultValue, id: undefined });
+                  mutate({ ...defaultValue, id: undefined, ...getRanks(todayLogs || []) });
                 }}
               >
                 <FaCopy /> <span>Duplicate</span>
@@ -401,5 +414,14 @@ const LogInputOverlay = () => {
     </OverlayForm>
   );
 };
+
+const getRanks = (todayLogs: LogType[]) => {
+  const sortedTodayLogs = todayLogs && [...todayLogs].sort((a, b) => b?.todayRank?.compareTo(a?.todayRank));
+  const todayRank = sortedTodayLogs && sortedTodayLogs[0]?.todayRank?.genNext() || LexoRank.middle();
+
+  return {
+    todayRank: todayRank.toString()
+  };
+}
 
 export default LogInputOverlay;

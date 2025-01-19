@@ -9,24 +9,76 @@ import { groupAtom } from '@/store/group';
 import { useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { FaPencil, FaPlus } from 'react-icons/fa6';
+import GroupTab from '../_components/GroupTab';
 
 const CategorySelectOverlay = () => {
+  const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
 
   const { data: categories } = useAtomValue(categoryAtom);
 
+  const [group, setGroup] = useState('all');
+  const [filter, setFilter] = useState('');
+
+  const filterHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
+
+  const enterHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      router.push(
+        `${pathname}?${params.toString() + '&'}category-input=show&title=${filter}`
+      );
+      setFilter('');
+    }
+  };
+
   return (
     <Overlay id="category-select" title="Select category" isRight={true}>
+      <GroupTab
+        id="category-select-group-tab"
+        className="mb-4"
+        group={group}
+        setGroup={setGroup}
+      />
       <Suspense fallback={<Loader />}>
-        <ul className="mb-8 space-y-2">
-          {categories?.map((category) => (
-            <CategorySelectItem key={category.id} {...category} />
-          ))}
+        <ul className="mb-8 space-y-2 max-h-[580px] overflow-scroll scrollbar-hide">
+          {categories
+            ?.filter(
+              (category) =>
+                (group === 'all' || category.group?.id === group) &&
+                (!filter || category.title.toLowerCase().includes(filter.toLowerCase()))
+            )
+            .map((category) => (
+              <CategorySelectItem key={category.id} {...category} />
+            ))}
         </ul>
       </Suspense>
+      <div className="relative my-2">
+        <input
+          className={`w-full bg-gray-100 px-3 py-2 
+            pr-[4rem] rounded-md`}
+          placeholder="Search Category"
+          onChange={filterHandler}
+          onKeyDown={enterHandler}
+          value={filter}
+        />
+        <Link
+          href={`${pathname}?${
+            params.toString() + '&'
+          }category-input=show&title=${filter}`}
+          className={`block bg-primary text-white rounded-md font-extrabold absolute top-[50%] transform translate-y-[-50%] right-[0.5rem] p-1 
+              w-[3rem] text-center text-xs `}
+          onClick={() => {
+            setFilter('');
+          }}
+        >
+          Add
+        </Link>
+      </div>
       <div className="flex gap-6 mb-4">
         <Link
           href={`${pathname}?${params.toString() + '&'}category-input=show`}

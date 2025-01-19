@@ -24,8 +24,8 @@ interface BaseItem {
 
 interface Props<T extends BaseItem> extends ClassNameProps {
   items: T[];
-  onChange: (items: T[]) => void;
-  updateChange?: (items: T) => void;
+  onChange?: (items: T[]) => void;
+  updateChange?: (item: any) => void;
   rankKey?: string;
   renderItem: (item: T, i: number) => ReactNode;
 }
@@ -58,14 +58,15 @@ const DraggableList = <T extends BaseItem>({
           const activeIndex = items.findIndex(({ id }) => id === active.id);
           const overIndex = items.findIndex(({ id }) => id === over.id);
 
+          const newRank = getRank(overIndex, items, rankKey, activeIndex < overIndex);
           const newItem = rankKey && {
             ...items[activeIndex],
-            [rankKey]: getRank(overIndex, items, rankKey, activeIndex < overIndex),
+            [rankKey]: newRank,
           };
-          updateChange && newItem && updateChange(newItem);
+          updateChange && newItem && updateChange({ id: newItem.id, [rankKey]: newRank?.toString() });
 
           const newArray = arrayMove(items, activeIndex, overIndex);
-          onChange(
+          onChange && onChange(
             newItem
               ? [
                   ...newArray.slice(0, overIndex),
@@ -96,9 +97,13 @@ const DraggableList = <T extends BaseItem>({
 const getRank = (
   to: number,
   items: any[],
-  key: string | number | symbol,
+  key: string | number | symbol | undefined,
   isNext: boolean
 ) => {
+  if (!key) {
+    return;
+  }
+  
   if (to === 0) {
     if (items.length !== 1) {
       return (items[to][key] as LexoRank)?.genPrev() || LexoRank.middle();
