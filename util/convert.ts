@@ -31,6 +31,10 @@ export const stringifyRank = (values: any) => ({
   timelineRank: values.timelineRank?.toString(),
 });
 
+export const sortRank = (arr: any[], rankKey: string, desc?: boolean) => {
+  return [...arr].sort((a, b) => desc ? b[rankKey]?.compareTo(a[rankKey]) : a[rankKey]?.compareTo(b[rankKey]));
+}
+
 export const toCamelCase = (str: string) => {
   const words = str.toLowerCase().split(' ');
   const camelCases = [words[0], ...words.slice(1, words.length).map(

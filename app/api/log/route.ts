@@ -14,14 +14,21 @@ export async function GET(req: NextRequest) {
   }
 
   const searchParams = req.nextUrl.searchParams;
+  
   const dateParam = searchParams.get('date');
-  const date = dateParam ? dayjs(dateParam) : undefined;
+  const date = dateParam ? (isNaN((new Date(dateParam)).getTime()) ? null : dayjs(dateParam)) : undefined;
   const dateStart = date ? new Date(date.startOf('day').toISOString()) : undefined;
   const dateEnd = date ? new Date(date.endOf('day').toISOString()) : undefined;
 
+  const categoryId = searchParams.get('categoryId') || undefined;
+
   try {
     const data = await prisma.log.findMany({
-      where: { userId: session.user.id, date: { gte: dateStart, lte: dateEnd } },
+      where: {
+        userId: session.user.id,
+        date: date && { gte: dateStart, lte: dateEnd },
+        categoryId,
+      },
       include: { category: true },
       orderBy: [{ createdAt: 'asc' }],
     });

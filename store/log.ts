@@ -1,13 +1,12 @@
 import { logFormSchemaType } from '@/app/(screens)/home/_overlays/LogInputOverlay';
 import { parseRank } from '@/util/convert';
 import { getDashDate, getDateTimeStr } from '@/util/date';
-import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
-import { CategoryType } from './category';
-import { todayAtom } from './ui';
-import { LexoRank } from 'lexorank';
-import { updateTodayLogAtom } from '@/util/query';
+import { updateCategoryLogAtom, updateInboxLogAtom, updateTodayLogAtom } from '@/util/query';
 import { atom } from 'jotai';
-import dayjs from 'dayjs';
+import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
+import { LexoRank } from 'lexorank';
+import { CategoryType } from './category';
+import { categoryPageAtom, todayAtom } from './ui';
 
 export interface LogType {
   id: string;
@@ -22,6 +21,8 @@ export interface LogType {
   dueDate?: Date;
   fieldValues: any;
   todayRank: LexoRank;
+  inboxRank: LexoRank;
+  categoryRank: LexoRank;
 }
 
 export type StatusType = 'todo' | 'done' | 'dismiss';
@@ -43,20 +44,18 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
 });
 
 
-export const logsNextAtom = atomWithQuery<LogType[]>((get) => {
+export const logsInboxAtom = atomWithQuery<LogType[]>((get) => {
   return {
-    queryKey: ['log', dayjs(get(todayAtom) as Date).add(1, 'day')],
-    queryFn: async ({ queryKey: [, today] }) => {
-      const next = dayjs(today as Date).add(1, 'day');
+    queryKey: ['log', null],
+    queryFn: async () => {
       const res = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(next)}`
+        process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=null`
       );
       const data = await res.json();
       return data.map((item: any) => ({ 
         ...parseRank(item),
         date: item.date && new Date(item.date) 
       }));
-      return [];
     },
   };
 });
@@ -82,6 +81,8 @@ export const logMutation = atomWithMutation<LogType, Partial<logFormSchemaType>>
   },
   onSuccess: (data) => {
     updateTodayLogAtom(data, ['log', get(todayAtom)]);
+    updateInboxLogAtom(data, ['log', null]);
+    updateCategoryLogAtom(data, ['log', get(categoryPageAtom)]);
   },
 }));
 

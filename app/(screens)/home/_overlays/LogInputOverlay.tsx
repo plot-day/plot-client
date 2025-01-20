@@ -15,22 +15,22 @@ import {
   selectedCategoryAtom,
 } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
-import { logFormDataAtom, logMutation, logsNextAtom, logsTodayAtom, LogType } from '@/store/log';
+import { logFormDataAtom, logMutation, logsInboxAtom, logsTodayAtom, LogType } from '@/store/log';
 import { todayAtom } from '@/store/ui';
-import { toCamelCase } from '@/util/convert';
+import { parseRank, sortRank, toCamelCase } from '@/util/convert';
 import { getDashDate, getDateTimeStr } from '@/util/date';
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { LexoRank } from 'lexorank';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { IconPickerItem } from 'react-icons-picker-more';
+import { FaCheckSquare } from 'react-icons/fa';
 import { FaArrowRight, FaCheck, FaCopy, FaTrash, FaXmark } from 'react-icons/fa6';
 import * as z from 'zod';
-import { FaCheckSquare } from 'react-icons/fa';
-import { LexoRank } from 'lexorank';
 
 const EMOJI_ID = 'log-emoji';
 
@@ -39,12 +39,14 @@ const formSchema = z.object({
   icon: z.string().optional(),
   title: z.string().min(1, 'Please enter the title.'),
   type: z.string().optional(),
-  date: z.string().optional(),
+  date: z.string().optional().nullable(),
   categoryId: z.string().optional(),
   fieldValues: z.any().optional(),
-  content: z.string().optional(),
+  content: z.string().optional().nullable(),
   status: z.string().optional(),
   todayRank: z.string().optional(),
+  inboxRank: z.string().optional(),
+  categoryRank: z.string().optional(),
 });
 
 export type logFormSchemaType = z.infer<typeof formSchema>;
@@ -63,7 +65,7 @@ const LogInputOverlay = () => {
   const [defaultValue, setDefaultValue] = useAtom(logFormDataAtom);
 
   const { data: todayLogs, isFetching: isFetchingTodayLogs } = useAtomValue(logsTodayAtom);
-  const { data: nextLogs, isFetching: isFetchingNextLogs } = useAtomValue(logsNextAtom);
+  const { data: inboxLogs, isFetching: isFetchingInboxLogs } = useAtomValue(logsInboxAtom);
   const { mutate, isPending } = useAtomValue(logMutation);
   const today = useAtomValue(todayAtom);
 
@@ -90,12 +92,13 @@ const LogInputOverlay = () => {
     }
 
     try {
+      const ranks = await getRanks(pathname, todayLogs || [], inboxLogs || [], category?.id || defaultCategory?.id || '', undefined, values.date);
       await mutate({
         ...values,
         id: defaultValue?.id || undefined,
         icon: emoji.get(EMOJI_ID) || '',
         categoryId: category?.id || defaultCategory?.id,
-        ...getRanks(todayLogs || []),
+        ...ranks,
       });
 
       if (defaultValue) {
@@ -108,6 +111,7 @@ const LogInputOverlay = () => {
       form.setValue('fieldValues', []);
       form.setValue('type', 'task');
       form.setValue('status', 'todo');
+      form.setValue('date', pathname.includes('inbox') ? null : getDateTimeStr(today));
     } catch (error) {
       if (typeof error === 'string') {
         setError(error);
@@ -130,6 +134,11 @@ const LogInputOverlay = () => {
         form.setValue('fieldValues', []);
         form.setValue('type', 'task');
         form.setValue('status', 'todo');
+        if (pathname.includes('inbox')) {
+          form.setValue('date', null);
+        } else {
+          form.setValue('date', getDateTimeStr(today));
+        }
       } else {
         const defaultCategory = categories?.find(
           (item) => item.id === defaultValue?.categoryId
@@ -140,7 +149,11 @@ const LogInputOverlay = () => {
 
         for (const keyStr in defaultValue) {
           const key = keyStr as keyof logFormSchemaType;
-          form.setValue(key, defaultValue[key]);
+          if (key.toLowerCase().includes('rank') && defaultValue[key]) {
+            form.setValue(key, defaultValue[key].toString())
+          } else {
+            form.setValue(key, defaultValue[key]);
+          }
         }
       }
     } else {
@@ -233,7 +246,6 @@ const LogInputOverlay = () => {
               type="datetime-local"
               className="text-sm"
               {...form.register('date')}
-              defaultValue={getDateTimeStr(today)}
               disabled={isPending}
             />
           </div>
@@ -359,19 +371,20 @@ const LogInputOverlay = () => {
           >
             <FaTrash /> <span>Delete</span>
           </Link>
-          {form.watch('type') === 'task' && !isFetchingTodayLogs && !isFetchingNextLogs && (
+          {form.watch('type') === 'task' && !isFetchingTodayLogs && !isFetchingInboxLogs && (
             <>
               {defaultValue.status === 'todo' &&
                 dayjs(getDashDate(defaultValue.date)) <
-                  dayjs(getDashDate(new Date())) && (
+                  dayjs(getDashDate(new Date())) && pathname.includes('today') && (
                   <button
                     type="button"
                     className="flex justify-center items-center gap-2"
-                    onClick={() => {
+                    onClick={async () => {
+                      const ranks =  await getRanks(pathname, todayLogs || [], inboxLogs || [], category?.id || defaultCategory?.id || '');
                       mutate({
                         id: defaultValue.id,
                         date: dayjs(today).toISOString(),
-                        ...getRanks(todayLogs || [])
+                        ...ranks
                       });
                       router.back();
                     }}
@@ -386,11 +399,12 @@ const LogInputOverlay = () => {
                 <button
                   type="button"
                   className="flex justify-center items-center gap-2"
-                  onClick={() => {
+                  onClick={async () => {
+                    const ranks =  await getRanks(pathname, [], inboxLogs || [], category?.id || defaultCategory?.id || '', today);
                     mutate({
                       id: defaultValue.id,
                       date: dayjs(defaultValue.date).add(1, 'day').toISOString(),
-                      ...getRanks(nextLogs || []),
+                      ...ranks,
                     });
                     router.back();
                   }}
@@ -401,8 +415,9 @@ const LogInputOverlay = () => {
               <button
                 type="button"
                 className="flex justify-center items-center gap-2"
-                onClick={() => {
-                  mutate({ ...defaultValue, id: undefined, ...getRanks(todayLogs || []) });
+                onClick={async () => {
+                  const ranks =  await getRanks(pathname, todayLogs || [], inboxLogs || [], category?.id || defaultCategory?.id || '');
+                  mutate({ ...defaultValue, id: undefined, ...ranks });
                 }}
               >
                 <FaCopy /> <span>Duplicate</span>
@@ -415,12 +430,43 @@ const LogInputOverlay = () => {
   );
 };
 
-const getRanks = (todayLogs: LogType[]) => {
-  const sortedTodayLogs = todayLogs && [...todayLogs].sort((a, b) => b?.todayRank?.compareTo(a?.todayRank));
-  const todayRank = sortedTodayLogs && sortedTodayLogs[0]?.todayRank?.genNext() || LexoRank.middle();
+const getRanks = async (pathname: string, todayLogs: LogType[], inboxLogs: LogType[], categoryId: string, today?: Date, date?: string | null) => {
+  let todayRank;
+  if (today) {
+    const next = dayjs(today).add(1, 'day');
+    const nextRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log`, {
+      method: 'GET',
+      body: JSON.stringify({date: getDashDate(next)})
+    });
+    const nextLogs = await nextRes.json();
+    const sortedNextLogs = sortRank(nextLogs.map((item: any) => parseRank(item)) || [], 'todayRank', true);
+    todayRank = sortedNextLogs.length ? sortedNextLogs[0]?.todayRank?.genNext() : LexoRank.middle();
+  } else {
+    const sortedTodayLogs = sortRank(todayLogs, 'todayRank', true);
+    todayRank = sortedTodayLogs.length ? sortedTodayLogs[0]?.todayRank?.genNext() : LexoRank.middle();
+  }
+
+
+  let inboxRank = null;
+  if (pathname.includes('inbox') || date === null) {
+    const sortedInboxLogs = sortRank(inboxLogs, 'inboxRank', true);
+    inboxRank = sortedInboxLogs.length ? sortedInboxLogs[0]?.inboxRank?.genNext() : LexoRank.middle();
+  }
+
+  let categoryRank;
+  if (categoryId) {
+    const categoryRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${categoryId}`);
+    const categoryLogs = await categoryRes.json();
+    const sortedCategoryLogs = sortRank(categoryLogs.map((item: any) => parseRank(item)) || [], 'categoryRank', true);
+    categoryRank = sortedCategoryLogs.length ? sortedCategoryLogs[0]?.categoryRank?.genNext() : LexoRank.middle();
+  } else {
+    categoryRank = LexoRank.middle();
+  }
 
   return {
-    todayRank: todayRank.toString()
+    todayRank: todayRank.toString(),
+    inboxRank: inboxRank && inboxRank.toString(),
+    categoryRank: categoryRank.toString()
   };
 }
 

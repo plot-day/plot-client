@@ -11,7 +11,7 @@ const NAV_DATA: { [key: string]: any }[] = [
   { path: '/home/today', icon: <FaRegCalendar />, title: 'Today' },
   // { path: '/home/now', icon: <FaClock />, title: 'Now' },
   // { path: '/home/category', icon: <IoGrid />, title: 'Category' },
-  // { path: '/home/inbox', icon: <FaInbox />, title: 'Inbox' },
+  { path: '/home/inbox', icon: <FaInbox />, title: 'Inbox' },
   {
     plus: (pathname: string) => (
       <Link

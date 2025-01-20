@@ -30,7 +30,10 @@ export async function PATCH(
 
     const res = await prisma.log.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        date: data.date || data.date === undefined ? data.date : null,
+      },
       include: { category: true },
     });
 
