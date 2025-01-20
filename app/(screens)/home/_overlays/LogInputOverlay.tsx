@@ -92,7 +92,7 @@ const LogInputOverlay = () => {
     }
 
     try {
-      const ranks = await getRanks(pathname, todayLogs || [], inboxLogs || [], category?.id || defaultCategory?.id || '', undefined, values.date);
+      const ranks = await getRanks(pathname, values.date, inboxLogs || [], category?.id || defaultCategory?.id || '', undefined);
       await mutate({
         ...values,
         id: defaultValue?.id || undefined,
@@ -380,7 +380,7 @@ const LogInputOverlay = () => {
                     type="button"
                     className="flex justify-center items-center gap-2"
                     onClick={async () => {
-                      const ranks =  await getRanks(pathname, todayLogs || [], inboxLogs || [], category?.id || defaultCategory?.id || '');
+                      const ranks =  await getRanks(pathname, defaultValue.date, inboxLogs || [], category?.id || defaultCategory?.id || '');
                       mutate({
                         id: defaultValue.id,
                         date: dayjs(today).toISOString(),
@@ -400,7 +400,7 @@ const LogInputOverlay = () => {
                   type="button"
                   className="flex justify-center items-center gap-2"
                   onClick={async () => {
-                    const ranks =  await getRanks(pathname, [], inboxLogs || [], category?.id || defaultCategory?.id || '', today);
+                    const ranks =  await getRanks(pathname, getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')), inboxLogs || [], category?.id || defaultCategory?.id || '', today);
                     mutate({
                       id: defaultValue.id,
                       date: dayjs(defaultValue.date).add(1, 'day').toISOString(),
@@ -416,7 +416,7 @@ const LogInputOverlay = () => {
                 type="button"
                 className="flex justify-center items-center gap-2"
                 onClick={async () => {
-                  const ranks =  await getRanks(pathname, todayLogs || [], inboxLogs || [], category?.id || defaultCategory?.id || '');
+                  const ranks =  await getRanks(pathname, defaultValue.date, inboxLogs || [], category?.id || defaultCategory?.id || '');
                   mutate({ ...defaultValue, id: undefined, ...ranks });
                 }}
               >
@@ -430,20 +430,13 @@ const LogInputOverlay = () => {
   );
 };
 
-const getRanks = async (pathname: string, todayLogs: LogType[], inboxLogs: LogType[], categoryId: string, today?: Date, date?: string | null) => {
-  let todayRank;
-  if (today) {
-    const next = dayjs(today).add(1, 'day');
-    const nextRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log`, {
-      method: 'GET',
-      body: JSON.stringify({date: getDashDate(next)})
-    });
-    const nextLogs = await nextRes.json();
-    const sortedNextLogs = sortRank(nextLogs.map((item: any) => parseRank(item)) || [], 'todayRank', true);
-    todayRank = sortedNextLogs.length ? sortedNextLogs[0]?.todayRank?.genNext() : LexoRank.middle();
-  } else {
-    const sortedTodayLogs = sortRank(todayLogs, 'todayRank', true);
-    todayRank = sortedTodayLogs.length ? sortedTodayLogs[0]?.todayRank?.genNext() : LexoRank.middle();
+const getRanks = async (pathname: string, date: string | null | undefined, inboxLogs: LogType[], categoryId: string, today?: Date) => {
+  let todayRank = null;
+  if (date) {
+    const todayRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(date)}`);
+    const todayLogs = await todayRes.json();
+    const sortedTodayLogs = sortRank(todayLogs.map((item: any) => parseRank(item)) || [], 'todayRank', true);
+    todayRank = sortedTodayLogs.length ? sortedTodayLogs[0]?.todayyRank?.genNext() : LexoRank.middle();
   }
 
 
@@ -453,20 +446,18 @@ const getRanks = async (pathname: string, todayLogs: LogType[], inboxLogs: LogTy
     inboxRank = sortedInboxLogs.length ? sortedInboxLogs[0]?.inboxRank?.genNext() : LexoRank.middle();
   }
 
-  let categoryRank;
+  let categoryRank = null;
   if (categoryId) {
     const categoryRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${categoryId}`);
     const categoryLogs = await categoryRes.json();
     const sortedCategoryLogs = sortRank(categoryLogs.map((item: any) => parseRank(item)) || [], 'categoryRank', true);
     categoryRank = sortedCategoryLogs.length ? sortedCategoryLogs[0]?.categoryRank?.genNext() : LexoRank.middle();
-  } else {
-    categoryRank = LexoRank.middle();
   }
 
   return {
-    todayRank: todayRank.toString(),
+    todayRank: todayRank && todayRank.toString(),
     inboxRank: inboxRank && inboxRank.toString(),
-    categoryRank: categoryRank.toString()
+    categoryRank: categoryRank && categoryRank.toString()
   };
 }
 

@@ -60,6 +60,22 @@ export const logsInboxAtom = atomWithQuery<LogType[]>((get) => {
   };
 });
 
+export const logsCategoryAtom = atomWithQuery<LogType[]>((get) => {
+  return {
+    queryKey: ['log', get(categoryPageAtom)],
+    queryFn: async ({ queryKey: [, category] }) => {
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${(category as CategoryType)?.id || ''}`
+      );
+      const data = await res.json();
+      return data.map((item: any) => ({ 
+        ...parseRank(item),
+        date: item.date && new Date(item.date) 
+      }));
+    },
+  };
+});
+
 export const logMutation = atomWithMutation<LogType, Partial<logFormSchemaType>>((get) => ({
   mutationKey: ['log'],
   mutationFn: async (log) => {
