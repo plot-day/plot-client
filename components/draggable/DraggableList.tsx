@@ -17,6 +17,7 @@ import React, { useMemo, useState } from 'react';
 import { ClassNameProps } from '@/types/className';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { LexoRank } from 'lexorank';
+import { sortRank } from '@/util/convert';
 
 interface BaseItem {
   id: string;
@@ -53,28 +54,50 @@ const DraggableList = <T extends BaseItem>({
       onDragStart={({ active }) => {
         setActive(active);
       }}
-      onDragEnd={({ active, over }) => {
+      onDragEnd={async ({ active, over }) => {
         if (over && active.id !== over?.id) {
           const activeIndex = items.findIndex(({ id }) => id === active.id);
           const overIndex = items.findIndex(({ id }) => id === over.id);
 
-          const newRank = getRank(overIndex, items, rankKey, activeIndex < overIndex);
-          const newItem = rankKey && {
-            ...items[activeIndex],
-            [rankKey]: newRank,
-          };
-          updateChange && newItem && updateChange({ id: newItem.id, [rankKey]: newRank?.toString() });
+          try {
+            const newRank = getRank(overIndex, items, rankKey, activeIndex < overIndex);
+            const newItem = rankKey && {
+              ...items[activeIndex],
+              [rankKey]: newRank,
+            };
+            updateChange && newItem && updateChange({ id: newItem.id, [rankKey]: newRank?.toString() });
 
-          const newArray = arrayMove(items, activeIndex, overIndex);
-          onChange && onChange(
-            newItem
-              ? [
-                  ...newArray.slice(0, overIndex),
-                  newItem,
-                  ...newArray.slice(overIndex + 1, newArray.length),
-                ]
-              : newArray
-          );
+            const newArray = arrayMove(items, activeIndex, overIndex);
+            onChange && onChange(
+              newItem
+                ? [
+                    ...newArray.slice(0, overIndex),
+                    newItem,
+                    ...newArray.slice(overIndex + 1, newArray.length),
+                  ]
+                : newArray
+            );
+          } catch (error) {
+            if ((error as Error).message.includes('same rank')) {
+              // Reassign rank
+              if (rankKey) {
+                let rank = LexoRank.middle();
+                const sortedItems = sortRank(items, rankKey);
+                for (let i = 0; i < sortedItems.length; i++) {
+                  if (updateChange) {
+                    await updateChange({ id: sortedItems[i].id, [rankKey]: rank.toString() });
+                    rank = rank.genNext();
+                  } else {
+                    throw error;
+                  }
+                }
+              } else {
+                throw error;
+              }
+            } else {
+              throw error;
+            }
+          }
         }
         setActive(null);
       }}
@@ -103,7 +126,7 @@ const getRank = (
   if (!key) {
     return;
   }
-  
+
   if (to === 0) {
     if (items.length !== 1) {
       return (items[to][key] as LexoRank)?.genPrev() || LexoRank.middle();

@@ -21,7 +21,7 @@ const LogItem = (log: LogType) => {
     }
   };
 
-  const { title, category, icon, fieldValues, type, status } = log;
+  const { title, category, icon, fieldValues, type, status, todayRank, categoryRank, inboxRank } = log;
 
   return (
     <div className="w-full flex justify-between items-center">
