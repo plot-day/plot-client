@@ -111,7 +111,7 @@ const LogInputOverlay = () => {
       form.setValue('fieldValues', []);
       form.setValue('type', 'task');
       form.setValue('status', 'todo');
-      form.setValue('date', pathname.includes('inbox') ? null : getDateTimeStr(today));
+      form.setValue('date', pathname.includes('inbox') || pathname.includes('category') ? null : getDateTimeStr(today));
     } catch (error) {
       if (typeof error === 'string') {
         setError(error);
@@ -134,7 +134,7 @@ const LogInputOverlay = () => {
         form.setValue('fieldValues', []);
         form.setValue('type', 'task');
         form.setValue('status', 'todo');
-        if (pathname.includes('inbox')) {
+        if (pathname.includes('inbox') || pathname.includes('category')) {
           form.setValue('date', null);
         } else {
           form.setValue('date', getDateTimeStr(today));

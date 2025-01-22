@@ -7,6 +7,7 @@ import CategoryListOverlay from './home/_overlays/CategoryListOverlay';
 import GroupListOverlay from './home/_overlays/GroupListOverlay';
 import { Suspense } from 'react';
 import LogDeleteConformOverlay from './home/_overlays/LogDeleteConfirmOverlay';
+import YearMonthNavOverlay from '@/components/date/YearMonthNavOverlay';
 
 export default function RootLayout({
   children,
@@ -20,8 +21,9 @@ export default function RootLayout({
       {/* nav */}
       <Nav className="h-[6rem]" />
       {/* overlays */}
-      <div id="overlay-container" className="absolute w-full sm:bottom-0">
+      <div id="overlay-container" className="absolute top-0 w-full sm:bottom-0">
         <Suspense>
+          <YearMonthNavOverlay />
           <LogInputOverlay />
           <CategorySelectOverlay />
           <CategoryListOverlay />

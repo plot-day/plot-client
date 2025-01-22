@@ -3,7 +3,7 @@
 import OverlayForm from '@/components/overlay/OverlayForm';
 import { logsTodayAtom } from '@/store/log';
 import { logFormDataAtom } from '@/store/log';
-import { todayAtom } from '@/store/ui';
+import { categoryPageAtom, todayAtom } from '@/store/ui';
 import { removeAtom } from '@/util/query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtomValue } from 'jotai';
@@ -22,6 +22,7 @@ const LogDeleteConformOverlay = () => {
 
   const defaultValues = useAtomValue(logFormDataAtom);
   const today = useAtomValue(todayAtom);
+  const categoryPage = useAtomValue(categoryPageAtom);
 
   const [isPending, setIsPending] = useState(false);
 
@@ -41,15 +42,13 @@ const LogDeleteConformOverlay = () => {
 
       router.back();
 
-      if (pathname.includes('goal') && defaultValues?.type === 'goal') {  
-        router.back();
-      }
-
       if (!response.ok) {
         throw new Error(response.status + ' ' + response.statusText);
       }
 
       defaultValues?.id && removeAtom(defaultValues?.id, ['log', today]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['log', null]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['log', categoryPage]);
       setIsPending(false);
     } catch (error) {
       setIsPending(false);

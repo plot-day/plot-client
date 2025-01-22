@@ -4,13 +4,13 @@ import { ClassNameProps } from '@/types/className';
 import { cn } from '@/util/cn';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaClock, FaInbox, FaPlus, FaRegCalendar, FaRegClock } from 'react-icons/fa6';
+import { FaClock, FaInbox, FaPlus, FaRegCalendar } from 'react-icons/fa6';
 import { IoGrid } from "react-icons/io5";
 
 const NAV_DATA: { [key: string]: any }[] = [
   { path: '/home/today', icon: <FaRegCalendar />, title: 'Today' },
   // { path: '/home/now', icon: <FaClock />, title: 'Now' },
-  // { path: '/home/category', icon: <IoGrid />, title: 'Category' },
+  { path: '/home/category', icon: <IoGrid />, title: 'Category' },
   { path: '/home/inbox', icon: <FaInbox />, title: 'Inbox' },
   {
     plus: (pathname: string) => (

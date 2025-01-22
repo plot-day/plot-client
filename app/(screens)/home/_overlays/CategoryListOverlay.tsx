@@ -68,7 +68,7 @@ const CategoryListOverlay = () => {
   return (
     <Overlay title="Edit category list" id="category-list" isRight={true} hideX={true}>
       <DraggableList
-        className="space-y-2"
+        className="space-y-2 max-h-[500px] overflow-y-scroll scrollbar-hide"
         items={categories}
         onChange={setCategories}
         rankKey="rank"

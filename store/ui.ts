@@ -1,5 +1,6 @@
-import { atom } from "jotai";
-import { categoryAtom } from "./category";
+import { atom } from 'jotai';
+import { categoryAtom, CategoryType } from './category';
 
 export const todayAtom = atom(new Date());
-export const categoryPageAtom = atom((get) => get(categoryAtom).data?.find((item) => item.isDefault));
+export const categoryPageAtom = atom<CategoryType | null>(null);
+export const groupTabAtom = atom('all');

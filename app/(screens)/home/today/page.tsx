@@ -7,7 +7,7 @@ import Loader from '@/components/loader/Loader';
 import { logMutation, logsTodayAtom } from '@/store/log';
 import { cn } from '@/util/cn';
 import { useAtomValue } from 'jotai';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { IoCheckmarkSharp } from 'react-icons/io5';
 import LogItem from '../_components/LogItem';
 
@@ -25,9 +25,9 @@ const Page = () => {
 
   return (
     <>
-      <YearMonthNav className="p-8 pt-12" />
-      <div className="p-8 pt-0">
+      <div className="p-8">
         {/* Header */}
+        <YearMonthNav className="py-4" disabled={isFetching} />
         <div className="flex justify-between">
           <DayNav />
           <button
