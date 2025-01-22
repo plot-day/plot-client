@@ -18,7 +18,7 @@ const CategorySelectOverlay = () => {
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const { data: categories } = useAtomValue(categoryAtom);
+  const { data: categories, isFetching } = useAtomValue(categoryAtom);
 
   const [group, setGroup] = useState('all');
   const [filter, setFilter] = useState('');
@@ -45,16 +45,18 @@ const CategorySelectOverlay = () => {
         setGroup={setGroup}
       />
       <Suspense fallback={<Loader />}>
-        <ul className="mb-8 space-y-2 max-h-[580px] overflow-scroll scrollbar-hide">
-          {categories
-            ?.filter(
-              (category) =>
-                (group === 'all' || category.group?.id === group) &&
-                (!filter || category.title.toLowerCase().includes(filter.toLowerCase()))
-            )
-            .map((category) => (
-              <CategorySelectItem key={category.id} {...category} />
-            ))}
+        <ul className="mb-8 space-y-2 max-h-[500px] overflow-y-scroll scrollbar-hide">
+          {isFetching ? (
+            <Loader />
+          ) : (
+            categories
+              ?.filter(
+                (category) =>
+                  (group === 'all' || category.group?.id === group) &&
+                  (!filter || category.title.toLowerCase().includes(filter.toLowerCase()))
+              )
+              .map((category) => <CategorySelectItem key={category.id} {...category} />)
+          )}
         </ul>
       </Suspense>
       <div className="relative my-2">
@@ -79,7 +81,7 @@ const CategorySelectOverlay = () => {
           Add
         </Link>
       </div>
-      <div className="flex gap-6 mb-4">
+      <div className="flex items-center gap-6 mb-4">
         <Link
           href={`${pathname}?${params.toString() + '&'}category-input=show`}
           className="w-full p-4 flex gap-1 justify-center items-center text-xs text-center font-extrabold"
@@ -91,7 +93,7 @@ const CategorySelectOverlay = () => {
           href={`${pathname}?${params.toString() + '&'}category-list=show`}
           className="w-full p-4 flex gap-1 justify-center items-center text-xs text-center font-extrabold"
         >
-          <FaPencil />
+          <FaPencil className="mt-[0.05rem]" />
           Edit categories
         </Link>
       </div>

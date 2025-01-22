@@ -7,6 +7,7 @@ import { ClassNameProps } from '@/types/className';
 import { cn } from '@/util/cn';
 import { useAtom } from 'jotai';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 interface GroupTabProps extends ClassNameProps {
@@ -16,11 +17,12 @@ interface GroupTabProps extends ClassNameProps {
 }
 
 const GroupTab = ({ id, group, setGroup, className }: GroupTabProps) => {
+    const pathname = usePathname();
   const [{ data, isPending, isError }] = useAtom(groupAtom);
 
   return (
     <div className={cn('flex justify-center gap-4 text-xs', className)}>
-      <Link href="/home/list?group-edit=show" className="font-extrabold">
+      <Link href={`${pathname}?group-edit=show`} className="font-extrabold">
         =
       </Link>
       <Tab
