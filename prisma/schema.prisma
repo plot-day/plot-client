@@ -73,7 +73,7 @@ model Log {
   category     Category  @relation(fields: [categoryId], references: [id])
   type         String
   status       String?
-  date         DateTime?
+  date         String?
   dueDate      DateTime?
   fieldValues  Json?
   todayRank    String?

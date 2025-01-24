@@ -97,6 +97,7 @@ const LogInputOverlay = () => {
         ...values,
         id: defaultValue?.id || undefined,
         icon: emoji.get(EMOJI_ID) || '',
+        date: values.date && getDashDate(values.date),
         categoryId: category?.id || defaultCategory?.id,
         ...ranks
       });
@@ -390,7 +391,7 @@ const LogInputOverlay = () => {
                       const ranks =  await getRanks(pathname, defaultValue.date, inboxLogs || [], category?.id || defaultCategory?.id || '');
                       mutate({
                         id: defaultValue.id,
-                        date: dayjs(today).toISOString(),
+                        date: getDashDate(today),
                         ...ranks
                       });
                       router.back();
@@ -410,7 +411,7 @@ const LogInputOverlay = () => {
                     const ranks =  await getRanks(pathname, getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')), inboxLogs || [], category?.id || defaultCategory?.id || '', today);
                     mutate({
                       id: defaultValue.id,
-                      date: dayjs(defaultValue.date).add(1, 'day').toISOString(),
+                      date: dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD'),
                       ...ranks,
                     });
                     router.back();
