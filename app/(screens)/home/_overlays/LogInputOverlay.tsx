@@ -15,7 +15,13 @@ import {
   selectedCategoryAtom,
 } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
-import { logFormDataAtom, logMutation, logsInboxAtom, logsTodayAtom, LogType } from '@/store/log';
+import {
+  logFormDataAtom,
+  logMutation,
+  logsInboxAtom,
+  logsTodayAtom,
+  LogType,
+} from '@/store/log';
 import { todayAtom } from '@/store/ui';
 import { parseRank, sortRank, toCamelCase } from '@/util/convert';
 import { getDashDate, getDateTimeStr } from '@/util/date';
@@ -64,8 +70,10 @@ const LogInputOverlay = () => {
 
   const [defaultValue, setDefaultValue] = useAtom(logFormDataAtom);
 
-  const { data: todayLogs, isFetching: isFetchingTodayLogs } = useAtomValue(logsTodayAtom);
-  const { data: inboxLogs, isFetching: isFetchingInboxLogs } = useAtomValue(logsInboxAtom);
+  const { data: todayLogs, isFetching: isFetchingTodayLogs } =
+    useAtomValue(logsTodayAtom);
+  const { data: inboxLogs, isFetching: isFetchingInboxLogs } =
+    useAtomValue(logsInboxAtom);
   const { mutate, isPending } = useAtomValue(logMutation);
   const today = useAtomValue(todayAtom);
 
@@ -92,14 +100,22 @@ const LogInputOverlay = () => {
     }
 
     try {
-      const ranks = defaultValue?.id ? {} : await getRanks(pathname, values.date, inboxLogs || [], category?.id || defaultCategory?.id || '', undefined);
+      const ranks = defaultValue?.id
+        ? {}
+        : await getRanks(
+            pathname,
+            values.date,
+            inboxLogs || [],
+            category?.id || defaultCategory?.id || '',
+            undefined
+          );
       await mutate({
         ...values,
         id: defaultValue?.id || undefined,
         icon: emoji.get(EMOJI_ID) || '',
         date: values.date && getDashDate(values.date),
         categoryId: category?.id || defaultCategory?.id,
-        ...ranks
+        ...ranks,
       });
 
       if (defaultValue) {
@@ -110,7 +126,12 @@ const LogInputOverlay = () => {
       form.setValue('content', '');
       form.setValue('fieldValues', null);
       form.setValue('status', 'todo');
-      form.setValue('date', pathname.includes('inbox') || pathname.includes('category') ? null : getDateTimeStr(today));
+      form.setValue(
+        'date',
+        pathname.includes('inbox') || pathname.includes('category')
+          ? null
+          : getDateTimeStr(today)
+      );
       setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
       form.setValue('type', category?.defaultLogType || 'task');
     } catch (error) {
@@ -152,7 +173,7 @@ const LogInputOverlay = () => {
         for (const keyStr in defaultValue) {
           const key = keyStr as keyof logFormSchemaType;
           if (key.toLowerCase().includes('rank') && defaultValue[key]) {
-            form.setValue(key, defaultValue[key].toString())
+            form.setValue(key, defaultValue[key].toString());
           } else {
             form.setValue(key, defaultValue[key]);
           }
@@ -172,17 +193,23 @@ const LogInputOverlay = () => {
 
   useEffect(() => {
     setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
-    form.setValue('type', category?.defaultLogType || defaultCategory?.defaultLogType || 'task');
+    form.setValue(
+      'type',
+      category?.defaultLogType || defaultCategory?.defaultLogType || 'task'
+    );
   }, [category, defaultCategory]);
-
 
   useEffect(() => {
     const updatedCategory = categories?.find((item) => item.id === category?.id);
     setCategory(updatedCategory || defaultCategory || null);
     setEmoji(EMOJI_ID, updatedCategory?.icon || defaultCategory?.icon || '');
-    form.setValue('type', updatedCategory?.defaultLogType || defaultCategory?.defaultLogType || 'task');
+    form.setValue(
+      'type',
+      updatedCategory?.defaultLogType || defaultCategory?.defaultLogType || 'task'
+    );
   }, [categories]);
 
+  console.log(defaultValue?.date);
 
   return (
     <OverlayForm<logFormSchemaType>
@@ -223,7 +250,9 @@ const LogInputOverlay = () => {
         </div>
         <Button
           type="submit"
-          className={`px-2 py-1 w-[3.75rem] flex justify-center items-center text-xs ${isPending ? 'opacity-25' : ''}`}
+          className={`px-2 py-1 w-[3.75rem] flex justify-center items-center text-xs ${
+            isPending ? 'opacity-25' : ''
+          }`}
           disabled={isPending || isCategoryFetching}
         >
           {isPending ? (
@@ -268,39 +297,56 @@ const LogInputOverlay = () => {
             {category?.fields?.map(({ icon, type, label, option }, i) => {
               const key = toCamelCase(label);
               return (
-              <li key={i} className="flex gap-1 items-center">
-                <IconPickerItem value={icon} />
-                {(type === 'text' || type === 'url') && (
-                  <TextFieldInput
-                    label={label}
-                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as string : ''}
-                    setValue={fieldInputHandler(key)}
-                  />
-                )}
-                {type === 'number' && (
-                  <NumberFieldInput
-                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as string : ''}
-                    setValue={fieldInputHandler(key)}
-                    label={label}
-                    {...option}
-                  />
-                )}
-                {type === 'date' && (
-                  <DateFieldInput
-                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as string : ''}
-                    setValue={fieldInputHandler(key)}
-                    {...option}
-                  />
-                )}
-                {type === 'timestamp' && (
-                  <TimestampFieldInput
-                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as number : 0}
-                    setValue={fieldInputHandler(key)}
-                    {...option}
-                  />
-                )}
-              </li>
-            )})}
+                <li key={i} className="flex gap-1 items-center">
+                  <IconPickerItem value={icon} />
+                  {(type === 'text' || type === 'url') && (
+                    <TextFieldInput
+                      label={label}
+                      value={
+                        form.watch('fieldValues')
+                          ? (form.watch('fieldValues')[key] as string)
+                          : ''
+                      }
+                      setValue={fieldInputHandler(key)}
+                    />
+                  )}
+                  {type === 'number' && (
+                    <NumberFieldInput
+                      value={
+                        form.watch('fieldValues')
+                          ? (form.watch('fieldValues')[key] as string)
+                          : ''
+                      }
+                      setValue={fieldInputHandler(key)}
+                      label={label}
+                      {...option}
+                    />
+                  )}
+                  {type === 'date' && (
+                    <DateFieldInput
+                      value={
+                        form.watch('fieldValues')
+                          ? (form.watch('fieldValues')[key] as string)
+                          : ''
+                      }
+                      setValue={fieldInputHandler(key)}
+                      {...option}
+                    />
+                  )}
+                  {type === 'timestamp' && (
+                    <TimestampFieldInput
+                      value={
+                        form.watch('fieldValues')
+                          ? (form.watch('fieldValues')[key] as number)
+                          : 0
+                      }
+                      setValue={fieldInputHandler(key)}
+                      {...option}
+                    />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
@@ -331,7 +377,7 @@ const LogInputOverlay = () => {
         </div>
       )}
       {/* type & status */}
-      {(form.watch('type') === 'task' || form.watch('type') === 'event' ) && (
+      {(form.watch('type') === 'task' || form.watch('type') === 'event') && (
         <div className="flex justify-center gap-1 bg-gray-100 rounded-md items-center p-[0.2rem] font-extrabold text-xs">
           <button
             type="button"
@@ -379,94 +425,138 @@ const LogInputOverlay = () => {
           >
             <FaTrash /> <span>Delete</span>
           </Link>
-          {form.watch('type') === 'task' && !isFetchingTodayLogs && !isFetchingInboxLogs && (
-            <>
-              {defaultValue.status === 'todo' &&
-                dayjs(getDashDate(defaultValue.date)) <
-                  dayjs(getDashDate(new Date())) && pathname.includes('today') && (
+          {form.watch('type') === 'task' &&
+            !isFetchingTodayLogs &&
+            !isFetchingInboxLogs && (
+              <>
+                {defaultValue.status === 'todo' &&
+                  (pathname.includes('inbox') ||
+                    (dayjs(getDashDate(defaultValue.date)) <
+                      dayjs(getDashDate(new Date())) &&
+                      pathname.includes('today'))) && (
+                    <button
+                      type="button"
+                      className="flex justify-center items-center gap-2"
+                      onClick={async () => {
+                        const ranks = await getRanks(
+                          pathname,
+                          defaultValue.date,
+                          inboxLogs || [],
+                          category?.id || defaultCategory?.id || ''
+                        );
+                        mutate({
+                          id: defaultValue.id,
+                          date: defaultValue.date ? getDashDate(today) : getDashDate(new Date()),
+                          ...ranks,
+                        });
+                        router.back();
+                      }}
+                    >
+                      <FaArrowRight /> <span>Move {defaultValue.date}{defaultValue.date ? 'here' : 'today'}</span>
+                    </button>
+                  )}
+                {!(
+                  defaultValue.status === 'todo' &&
+                  pathname.includes('inbox') || (
+                  dayjs(getDashDate(defaultValue.date)) < dayjs(getDashDate(new Date())))
+                ) && (
                   <button
                     type="button"
                     className="flex justify-center items-center gap-2"
                     onClick={async () => {
-                      const ranks =  await getRanks(pathname, defaultValue.date, inboxLogs || [], category?.id || defaultCategory?.id || '');
+                      const ranks = await getRanks(
+                        pathname,
+                        getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')),
+                        inboxLogs || [],
+                        category?.id || defaultCategory?.id || '',
+                        today
+                      );
                       mutate({
                         id: defaultValue.id,
-                        date: getDashDate(today),
-                        ...ranks
+                        date: dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD'),
+                        ...ranks,
                       });
                       router.back();
                     }}
                   >
-                    <FaArrowRight /> <span>Move here</span>
+                    <FaArrowRight /> <span>Move next</span>
                   </button>
                 )}
-              {!(
-                defaultValue.status === 'todo' &&
-                dayjs(getDashDate(defaultValue.date)) < dayjs(getDashDate(new Date()))
-              ) && (
                 <button
                   type="button"
                   className="flex justify-center items-center gap-2"
                   onClick={async () => {
-                    const ranks =  await getRanks(pathname, getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')), inboxLogs || [], category?.id || defaultCategory?.id || '', today);
-                    mutate({
-                      id: defaultValue.id,
-                      date: dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD'),
-                      ...ranks,
-                    });
-                    router.back();
+                    const ranks = await getRanks(
+                      pathname,
+                      defaultValue.date,
+                      inboxLogs || [],
+                      category?.id || defaultCategory?.id || ''
+                    );
+                    mutate({ ...defaultValue, id: undefined, ...ranks });
                   }}
                 >
-                  <FaArrowRight /> <span>Move next</span>
+                  <FaCopy /> <span>Duplicate</span>
                 </button>
-              )}
-              <button
-                type="button"
-                className="flex justify-center items-center gap-2"
-                onClick={async () => {
-                  const ranks =  await getRanks(pathname, defaultValue.date, inboxLogs || [], category?.id || defaultCategory?.id || '');
-                  mutate({ ...defaultValue, id: undefined, ...ranks });
-                }}
-              >
-                <FaCopy /> <span>Duplicate</span>
-              </button>
-            </>
-          )}
+              </>
+            )}
         </div>
       )}
     </OverlayForm>
   );
 };
 
-const getRanks = async (pathname: string, date: string | null | undefined, inboxLogs: LogType[], categoryId: string, today?: Date) => {
+const getRanks = async (
+  pathname: string,
+  date: string | null | undefined,
+  inboxLogs: LogType[],
+  categoryId: string,
+  today?: Date
+) => {
   let todayRank = null;
   if (date) {
-    const todayRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(date)}`);
+    const todayRes = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(date)}`
+    );
     const todayLogs = await todayRes.json();
-    const sortedTodayLogs = sortRank(todayLogs.map((item: any) => parseRank(item)) || [], 'todayRank', true);
-    todayRank = sortedTodayLogs.length ? sortedTodayLogs[0].todayRank?.genNext() : LexoRank.middle();
+    const sortedTodayLogs = sortRank(
+      todayLogs.map((item: any) => parseRank(item)) || [],
+      'todayRank',
+      true
+    );
+    todayRank = sortedTodayLogs.length
+      ? sortedTodayLogs[0].todayRank?.genNext()
+      : LexoRank.middle();
   }
-  
 
   let inboxRank = null;
   if (pathname.includes('inbox') || date === null) {
     const sortedInboxLogs = sortRank(inboxLogs, 'inboxRank', true);
-    inboxRank = sortedInboxLogs.length ? sortedInboxLogs[0]?.inboxRank?.genNext() : LexoRank.middle();
+    inboxRank = sortedInboxLogs.length
+      ? sortedInboxLogs[0]?.inboxRank?.genNext()
+      : LexoRank.middle();
   }
 
   let categoryRank = null;
   if (categoryId) {
-    const categoryRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${categoryId}`);
+    const categoryRes = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${categoryId}`
+    );
     const categoryLogs = await categoryRes.json();
-    const sortedCategoryLogs = sortRank(categoryLogs.map((item: any) => parseRank(item)) || [], 'categoryRank', true);
-    categoryRank = sortedCategoryLogs.length ? sortedCategoryLogs[0]?.categoryRank?.genNext() : LexoRank.middle();
+    const sortedCategoryLogs = sortRank(
+      categoryLogs.map((item: any) => parseRank(item)) || [],
+      'categoryRank',
+      true
+    );
+    categoryRank = sortedCategoryLogs.length
+      ? sortedCategoryLogs[0]?.categoryRank?.genNext()
+      : LexoRank.middle();
   }
 
   return {
     todayRank: todayRank && todayRank.toString(),
     inboxRank: inboxRank && inboxRank.toString(),
-    categoryRank: categoryRank && categoryRank.toString()
+    categoryRank: categoryRank && categoryRank.toString(),
   };
-}
+};
 
 export default LogInputOverlay;
