@@ -1,5 +1,4 @@
 'use client';
-import Button from '@/components/button/Button';
 import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
 import DraggableList from '@/components/draggable/DraggableList';
 import IconHolder from '@/components/icon/IconHolder';
@@ -10,6 +9,8 @@ import { categoryPageAtom } from '@/store/ui';
 import { cn } from '@/util/cn';
 import { sortRank } from '@/util/convert';
 import { useAtom, useAtomValue } from 'jotai';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { IoCheckmarkSharp } from 'react-icons/io5';
 import GroupTab from '../_components/GroupTab';
@@ -17,15 +18,20 @@ import LogItem from '../_components/LogItem';
 import CategoryItem from './_components/CategoryItem';
 
 const Page = () => {
+  const pathname = usePathname();
+
   const [currentCategory, setCurrentCategory] = useAtom(categoryPageAtom);
-  const { data: logs, isFetching: isFetchingLogs } = useAtomValue(logsCategoryAtom);
+  const { data: logs, isFetching: isFetchingLogs, refetch } = useAtomValue(logsCategoryAtom);
   const { data: allCategories, isFetching: isFetchingCategories } =
     useAtomValue(categoryAtom);
   const { mutate } = useAtomValue(logMutation);
 
   const [group, setGroup] = useState('all');
 
-  const todos = useMemo(() => sortRank(logs || [], 'categoryRank').filter((item) => item.status === 'todo'), [logs]);
+  const todos = useMemo(
+    () => (logs || []).filter((item) => item.status === 'todo'),
+    [logs]
+  );
 
   const [showDone, setShowDone] = useState(false);
 
@@ -34,7 +40,10 @@ const Page = () => {
   };
 
   const categories = useMemo(
-    () => allCategories?.filter((item) => group === 'all' || item.groupId === group),
+    () =>
+      (allCategories || []).filter(
+        (item) => group === 'all' || item.groupId === group
+      ),
     [allCategories, group]
   );
 
@@ -50,7 +59,7 @@ const Page = () => {
   return (
     <div className="p-8">
       <GroupTab id="category-page-group-tab" group={group} setGroup={setGroup} />
-      <ul className="flex gap-2 overflow-x-scroll scrollbar-hide mb-6">
+      <ul className="flex gap-2 overflow-x-scroll scrollbar-hide mt-4 mb-6">
         {categories?.map((category) => (
           <div
             key={category.id}
@@ -86,7 +95,14 @@ const Page = () => {
                 </h2>
               </div>
             </div>
-            <Button className="text-xs px-2 py-1">Edit Category</Button>
+            <Link
+              className="text-xs px-2 py-1 bg-primary text-white rounded-md font-extrabold"
+              href={`${pathname}?category-input=show&categoryId=${
+                currentCategory?.id || ''
+              }&rank=${currentCategory?.rank}`}
+            >
+              Edit Category
+            </Link>
           </div>
           <div className="w-full flex justify-end">
             <button

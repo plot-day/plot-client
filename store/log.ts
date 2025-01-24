@@ -1,11 +1,11 @@
 import { logFormSchemaType } from '@/app/(screens)/home/_overlays/LogInputOverlay';
-import { parseRank } from '@/util/convert';
+import { parseRank, sortRank } from '@/util/convert';
 import { getDashDate, getDateTimeStr } from '@/util/date';
 import { updateCategoryLogAtom, updateInboxLogAtom, updateTodayLogAtom } from '@/util/query';
 import { atom } from 'jotai';
 import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
 import { LexoRank } from 'lexorank';
-import { CategoryType } from './category';
+import { categoryAtom, CategoryType } from './category';
 import { categoryPageAtom, todayAtom } from './ui';
 
 export interface LogType {
@@ -35,10 +35,10 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
         process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(today as Date)}`
       );
       const data = await res.json();
-      return data.map((item: any) => ({ 
+      return sortRank(data.map((item: any) => ({ 
         ...parseRank(item),
         date: item.date && new Date(item.date) 
-      }));
+      })), 'todayRank');
     },
   };
 });
@@ -52,26 +52,26 @@ export const logsInboxAtom = atomWithQuery<LogType[]>((get) => {
         process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=null`
       );
       const data = await res.json();
-      return data.map((item: any) => ({ 
+      return sortRank(data.map((item: any) => ({ 
         ...parseRank(item),
         date: item.date && new Date(item.date) 
-      }));
+      })), 'inboxRank');
     },
   };
 });
 
 export const logsCategoryAtom = atomWithQuery<LogType[]>((get) => {
   return {
-    queryKey: ['log', get(categoryPageAtom)],
-    queryFn: async ({ queryKey: [, category] }) => {
+    queryKey: ['log', get(categoryPageAtom)?.id],
+    queryFn: async ({ queryKey: [, categoryId] }) => {
       const res = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${(category as CategoryType)?.id || ''}`
+        process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${categoryId || ''}`
       );
       const data = await res.json();
-      return data.map((item: any) => ({ 
+      return sortRank(data.map((item: any) => ({ 
         ...parseRank(item),
         date: item.date && new Date(item.date) 
-      }));
+      })), 'categoryRank');
     },
   };
 });
@@ -97,8 +97,8 @@ export const logMutation = atomWithMutation<LogType, Partial<logFormSchemaType>>
   },
   onSuccess: (data) => {
     updateTodayLogAtom(data, ['log', get(todayAtom)]);
+    updateCategoryLogAtom(data, ['log', get(categoryPageAtom)?.id]);
     updateInboxLogAtom(data, ['log', null]);
-    updateCategoryLogAtom(data, ['log', get(categoryPageAtom)]);
   },
 }));
 

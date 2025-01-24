@@ -11,6 +11,7 @@ import { FIELD_TYPES } from '@/constants/field';
 import { categoryAtom, categoryMutation, FieldType } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import { groupAtom } from '@/store/group';
+import { logsCategoryAtom, logsInboxAtom, logsTodayAtom } from '@/store/log';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { LexoRank } from 'lexorank';
@@ -74,14 +75,14 @@ const CategoryInputOverlay = () => {
       const sortedCategories = categories?.sort((a, b) => a.rank?.compareTo(b.rank));
       const lastCategory = sortedCategories && sortedCategories[sortedCategories.length - 1];
 
-      mutate({ 
+      await mutate({ 
         ...values,
         id: categoryId || undefined,
         groupId: group,
         fields,
-        rank: rank || lastCategory?.rank.genNext().toString() || LexoRank.middle().toString(),
+        rank: categoryId ? undefined : lastCategory?.rank.genNext().toString() || LexoRank.middle().toString(),
         defaultLogType,
-        isDefault: false,
+        isDefault: categoryId ? undefined : false,
       });
     } catch (error: any) {
       setError(typeof error === 'string' ? error : error?.message || 'An Error occured.');
@@ -110,6 +111,9 @@ const CategoryInputOverlay = () => {
         form.setValue('icon', category?.icon || '');
         setGroup(category?.groupId || groups?.find((item) => item.isDefault)?.id || '');
         form.setValue('title', category?.title || '');
+        form.setValue('fields', category?.fields);
+        setFields(category?.fields || []);
+        setType(category?.defaultLogType || 'task');
       } else {
         setGroup(groups?.find((item) => item.isDefault)?.id || '');
         setEmoji(EMOJI_ID, '');
