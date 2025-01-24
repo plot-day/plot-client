@@ -31,6 +31,7 @@ export const logsTodayAtom = atomWithQuery<LogType[]>((get) => {
   return {
     queryKey: ['log', get(todayAtom)],
     queryFn: async ({ queryKey: [, today] }) => {
+      console.log(today);
       const res = await fetch(
         process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(today as Date)}`
       );
