@@ -21,9 +21,13 @@ export default function RootLayout({
       {/* nav */}
       <Nav className="h-[6rem]" />
       {/* overlays */}
-      <div id="overlay-container" className="absolute top-0 w-full sm:bottom-0">
+      <div id="overlay-container" className="absolute top-0 w-full">
         <Suspense>
           <YearMonthNavOverlay />
+        </Suspense>
+      </div>
+      <div id="overlay-container" className="absolute bottom-0 w-full">
+        <Suspense>
           <LogInputOverlay />
           <CategorySelectOverlay />
           <CategoryListOverlay />

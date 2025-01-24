@@ -19,8 +19,8 @@ const Page = () => {
 
   const todos = useMemo(() => logs?.filter((item) => item.status === 'todo'), [logs]);
 
-  const updateChangeHandler = (item: any) => {
-    mutate(item);
+  const updateChangeHandler = ({ id, todayRank, inboxRank, categoryRank }: any) => {
+    mutate({ id, todayRank, inboxRank, categoryRank });
   };
 
   return (

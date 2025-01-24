@@ -92,26 +92,26 @@ const LogInputOverlay = () => {
     }
 
     try {
-      const ranks = await getRanks(pathname, values.date, inboxLogs || [], category?.id || defaultCategory?.id || '', undefined);
+      const ranks = defaultValue?.id ? {} : await getRanks(pathname, values.date, inboxLogs || [], category?.id || defaultCategory?.id || '', undefined);
       await mutate({
         ...values,
         id: defaultValue?.id || undefined,
         icon: emoji.get(EMOJI_ID) || '',
         categoryId: category?.id || defaultCategory?.id,
-        ...ranks,
+        ...ranks
       });
 
       if (defaultValue) {
         router.back();
       }
 
-      form.reset();
-      form.setValue('categoryId', values.categoryId);
-      setEmoji(EMOJI_ID, defaultCategory?.icon || '');
-      form.setValue('fieldValues', []);
-      form.setValue('type', 'task');
+      form.setValue('title', '');
+      form.setValue('content', '');
+      form.setValue('fieldValues', null);
       form.setValue('status', 'todo');
       form.setValue('date', pathname.includes('inbox') || pathname.includes('category') ? null : getDateTimeStr(today));
+      setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
+      form.setValue('type', category?.defaultLogType || 'task');
     } catch (error) {
       if (typeof error === 'string') {
         setError(error);
@@ -125,13 +125,14 @@ const LogInputOverlay = () => {
 
   useEffect(() => {
     if (showLogInput) {
+      setError('');
       form.reset();
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (!defaultValue) {
         form.reset();
         setCategory(null);
         setEmoji(EMOJI_ID, defaultCategory?.icon || '');
-        form.setValue('fieldValues', []);
+        form.setValue('fieldValues', null);
         form.setValue('type', 'task');
         form.setValue('status', 'todo');
         if (pathname.includes('inbox') || pathname.includes('category')) {
@@ -172,6 +173,15 @@ const LogInputOverlay = () => {
     setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
     form.setValue('type', category?.defaultLogType || defaultCategory?.defaultLogType || 'task');
   }, [category, defaultCategory]);
+
+
+  useEffect(() => {
+    const updatedCategory = categories?.find((item) => item.id === category?.id);
+    setCategory(updatedCategory || defaultCategory || null);
+    setEmoji(EMOJI_ID, updatedCategory?.icon || defaultCategory?.icon || '');
+    form.setValue('type', updatedCategory?.defaultLogType || defaultCategory?.defaultLogType || 'task');
+  }, [categories]);
+
 
   return (
     <OverlayForm<logFormSchemaType>
@@ -259,18 +269,16 @@ const LogInputOverlay = () => {
               return (
               <li key={i} className="flex gap-1 items-center">
                 <IconPickerItem value={icon} />
-                {form.watch('fieldValues') && 
-                <>
                 {(type === 'text' || type === 'url') && (
                   <TextFieldInput
                     label={label}
-                    value={form.watch('fieldValues')[key] as string}
+                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as string : ''}
                     setValue={fieldInputHandler(key)}
                   />
                 )}
                 {type === 'number' && (
                   <NumberFieldInput
-                    value={form.watch('fieldValues')[key] as string}
+                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as string : ''}
                     setValue={fieldInputHandler(key)}
                     label={label}
                     {...option}
@@ -278,19 +286,18 @@ const LogInputOverlay = () => {
                 )}
                 {type === 'date' && (
                   <DateFieldInput
-                    value={form.watch('fieldValues')[key] as string}
+                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as string : ''}
                     setValue={fieldInputHandler(key)}
                     {...option}
                   />
                 )}
                 {type === 'timestamp' && (
                   <TimestampFieldInput
-                    value={form.watch('fieldValues')[key] as number || 0}
+                    value={form.watch('fieldValues') ? form.watch('fieldValues')[key] as number : 0}
                     setValue={fieldInputHandler(key)}
                     {...option}
                   />
                 )}
-                </>}
               </li>
             )})}
           </ul>
@@ -436,9 +443,9 @@ const getRanks = async (pathname: string, date: string | null | undefined, inbox
     const todayRes = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(date)}`);
     const todayLogs = await todayRes.json();
     const sortedTodayLogs = sortRank(todayLogs.map((item: any) => parseRank(item)) || [], 'todayRank', true);
-    todayRank = sortedTodayLogs.length ? sortedTodayLogs[0]?.todayyRank?.genNext() : LexoRank.middle();
+    todayRank = sortedTodayLogs.length ? sortedTodayLogs[0].todayRank?.genNext() : LexoRank.middle();
   }
-
+  
 
   let inboxRank = null;
   if (pathname.includes('inbox') || date === null) {

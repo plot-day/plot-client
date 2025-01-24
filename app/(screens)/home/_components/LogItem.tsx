@@ -21,7 +21,17 @@ const LogItem = (log: LogType) => {
     }
   };
 
-  const { title, category, icon, fieldValues, type, status, todayRank, categoryRank, inboxRank } = log;
+  const {
+    title,
+    category,
+    icon,
+    fieldValues,
+    type,
+    status,
+    todayRank,
+    categoryRank,
+    inboxRank,
+  } = log;
 
   return (
     <div className="w-full flex justify-between items-center">
@@ -40,6 +50,7 @@ const LogItem = (log: LogType) => {
           <ul className="flex gap-2 text-xs font-light mt-2">
             {category.fields.map(
               ({ icon, type, label }, i) =>
+                fieldValues &&
                 fieldValues[toCamelCase(label)] && (
                   <li key={i} className="flex gap-1 items-center">
                     <IconPickerItem value={icon} />

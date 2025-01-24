@@ -1,10 +1,11 @@
 import { atom } from 'jotai';
 import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
 import { GroupType } from './group';
-import { parseRank } from '@/util/convert';
+import { parseRank, sortRank } from '@/util/convert';
 import { categoryFormSchemaType } from '@/app/(screens)/home/_overlays/CategoryInputOverlay';
 import { LexoRank } from 'lexorank';
 import { replaceAtom, updateAtom } from '@/util/query';
+import { logsCategoryAtom, logsInboxAtom, logsTodayAtom } from './log';
 
 export interface CategoryType {
   id: string;
@@ -33,7 +34,7 @@ export const categoryAtom = atomWithQuery<CategoryType[]>(() => {
     queryFn: async () => {
       const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/api/category');
       const data = await res.json();
-      return data.map((item: any) => parseRank(item));
+      return sortRank(data.map((item: any) => parseRank(item)), 'rank');
     },
   };
 });
@@ -41,7 +42,7 @@ export const categoryAtom = atomWithQuery<CategoryType[]>(() => {
 export const categoryMutation = atomWithMutation<
   CategoryType,
   Partial<categoryFormSchemaType>
->(() => ({
+>((get) => ({
   mutationKey: ['category'],
   mutationFn: async (category) => {
     try {
@@ -61,6 +62,12 @@ export const categoryMutation = atomWithMutation<
   },
   onSuccess: (data) => {
     updateAtom(data, 'category');
+    const {refetch: refetchTodayLogs} = get(logsTodayAtom);
+    const {refetch: refetchInboxLogs} = get(logsInboxAtom);
+    const {refetch: refetchCategoryLogs} = get(logsCategoryAtom);
+    refetchTodayLogs();
+    refetchInboxLogs();
+    refetchCategoryLogs();
   },
 }));
 
