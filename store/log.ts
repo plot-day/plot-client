@@ -64,6 +64,7 @@ export const logsCategoryAtom = atomWithQuery<LogType[]>((get) => {
   return {
     queryKey: ['log', get(categoryPageAtom)?.id],
     queryFn: async ({ queryKey: [, categoryId] }) => {
+      if (categoryId) {
       const res = await fetch(
         process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${categoryId || ''}`
       );
@@ -72,6 +73,9 @@ export const logsCategoryAtom = atomWithQuery<LogType[]>((get) => {
         ...parseRank(item),
         date: item.date && new Date(item.date) 
       })), 'categoryRank');
+      } else {
+        return [];
+      }
     },
   };
 });
@@ -86,7 +90,7 @@ export const logMutation = atomWithMutation<LogType, Partial<logFormSchemaType>>
           method: log.id ? 'PATCH' : 'POST',
           body: JSON.stringify({
             ...log,
-            date: log.date && new Date(log.date),
+            date: log.date && getDashDate(log.date),
           }),
         }
       );

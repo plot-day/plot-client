@@ -22,7 +22,7 @@ import {
   logsTodayAtom,
   LogType,
 } from '@/store/log';
-import { todayAtom } from '@/store/ui';
+import { categoryPageAtom, todayAtom } from '@/store/ui';
 import { parseRank, sortRank, toCamelCase } from '@/util/convert';
 import { getDashDate, getDateTimeStr } from '@/util/date';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -76,6 +76,7 @@ const LogInputOverlay = () => {
     useAtomValue(logsInboxAtom);
   const { mutate, isPending } = useAtomValue(logMutation);
   const today = useAtomValue(todayAtom);
+  const categoryPage = useAtomValue(categoryPageAtom);
 
   const [error, setError] = useState('');
 
@@ -152,11 +153,19 @@ const LogInputOverlay = () => {
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (!defaultValue) {
         form.reset();
-        setCategory(null);
-        setEmoji(EMOJI_ID, defaultCategory?.icon || '');
+
+        if (pathname.includes('category')) {
+          setCategory(categoryPage);
+        } else {
+          setCategory(null);
+        }
+
+        setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
+        
         form.setValue('fieldValues', null);
         form.setValue('type', 'task');
         form.setValue('status', 'todo');
+
         if (pathname.includes('inbox') || pathname.includes('category')) {
           form.setValue('date', null);
         } else {
@@ -208,8 +217,6 @@ const LogInputOverlay = () => {
       updatedCategory?.defaultLogType || defaultCategory?.defaultLogType || 'task'
     );
   }, [categories]);
-
-  console.log(defaultValue?.date);
 
   return (
     <OverlayForm<logFormSchemaType>
@@ -430,10 +437,7 @@ const LogInputOverlay = () => {
             !isFetchingInboxLogs && (
               <>
                 {defaultValue.status === 'todo' &&
-                  (pathname.includes('inbox') ||
-                    (dayjs(getDashDate(defaultValue.date)) <
-                      dayjs(getDashDate(new Date())) &&
-                      pathname.includes('today'))) && (
+                  (!defaultValue.date ? (
                     <button
                       type="button"
                       className="flex justify-center items-center gap-2"
@@ -446,42 +450,48 @@ const LogInputOverlay = () => {
                         );
                         mutate({
                           id: defaultValue.id,
-                          date: defaultValue.date ? getDashDate(today) : getDashDate(new Date()),
+                          date: getDashDate(new Date()),
                           ...ranks,
                         });
                         router.back();
                       }}
                     >
-                      <FaArrowRight /> <span>Move {defaultValue.date}{defaultValue.date ? 'here' : 'today'}</span>
+                      <FaArrowRight /> <span>Move today</span>
                     </button>
-                  )}
-                {!(
-                  defaultValue.status === 'todo' &&
-                  pathname.includes('inbox') || (
-                  dayjs(getDashDate(defaultValue.date)) < dayjs(getDashDate(new Date())))
-                ) && (
-                  <button
-                    type="button"
-                    className="flex justify-center items-center gap-2"
-                    onClick={async () => {
-                      const ranks = await getRanks(
-                        pathname,
-                        getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')),
-                        inboxLogs || [],
-                        category?.id || defaultCategory?.id || '',
-                        today
-                      );
-                      mutate({
-                        id: defaultValue.id,
-                        date: dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD'),
-                        ...ranks,
-                      });
-                      router.back();
-                    }}
-                  >
-                    <FaArrowRight /> <span>Move next</span>
-                  </button>
-                )}
+                  ) : (
+                    <button
+                      type="button"
+                      className="flex justify-center items-center gap-2"
+                      onClick={async () => {
+                        const ranks = await getRanks(
+                          pathname,
+                          getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')),
+                          inboxLogs || [],
+                          category?.id || defaultCategory?.id || '',
+                          today
+                        );
+                        const date =
+                          dayjs(getDashDate(defaultValue.date)) <
+                          dayjs(getDashDate(new Date()))
+                            ? getDashDate(today)
+                            : dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD');
+                        mutate({
+                          id: defaultValue.id,
+                          date,
+                          ...ranks,
+                        });
+                        router.back();
+                      }}
+                    >
+                      <FaArrowRight />{' '}
+                      <span>
+                        {dayjs(getDashDate(defaultValue.date)) <
+                        dayjs(getDashDate(new Date()))
+                          ? 'Move here'
+                          : 'Move next'}
+                      </span>
+                    </button>
+                  ))}
                 <button
                   type="button"
                   className="flex justify-center items-center gap-2"

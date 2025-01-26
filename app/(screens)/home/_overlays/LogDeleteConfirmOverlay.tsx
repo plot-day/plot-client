@@ -48,7 +48,7 @@ const LogDeleteConformOverlay = () => {
 
       defaultValues?.id && removeAtom(defaultValues?.id, ['log', today]);
       defaultValues?.id && removeAtom(defaultValues?.id, ['log', null]);
-      defaultValues?.id && removeAtom(defaultValues?.id, ['log', categoryPage]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['log', categoryPage?.id]);
       setIsPending(false);
     } catch (error) {
       setIsPending(false);

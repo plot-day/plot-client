@@ -28,9 +28,6 @@ const LogItem = (log: LogType) => {
     fieldValues,
     type,
     status,
-    todayRank,
-    categoryRank,
-    inboxRank,
   } = log;
 
   return (

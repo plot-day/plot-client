@@ -8,7 +8,7 @@ import { logMutation, logsCategoryAtom } from '@/store/log';
 import { categoryPageAtom } from '@/store/ui';
 import { cn } from '@/util/cn';
 import { sortRank } from '@/util/convert';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -21,9 +21,14 @@ const Page = () => {
   const pathname = usePathname();
 
   const [currentCategory, setCurrentCategory] = useAtom(categoryPageAtom);
-  const { data: logs, isFetching: isFetchingLogs, refetch } = useAtomValue(logsCategoryAtom);
+  const {
+    data: logs,
+    isFetching: isFetchingLogs,
+    refetch,
+  } = useAtomValue(logsCategoryAtom);
   const { data: allCategories, isFetching: isFetchingCategories } =
     useAtomValue(categoryAtom);
+  const setCategoryPageAtom = useSetAtom(categoryPageAtom);
   const { mutate } = useAtomValue(logMutation);
 
   const [group, setGroup] = useState('all');
@@ -39,13 +44,13 @@ const Page = () => {
     mutate(item);
   };
 
-  const categories = useMemo(
-    () =>
-      (allCategories || []).filter(
-        (item) => group === 'all' || item.groupId === group
-      ),
-    [allCategories, group]
-  );
+  const categories = useMemo(() => {
+    const filtered = (allCategories || []).filter(
+      (item) => group === 'all' || item.groupId === group
+    );
+    setCategoryPageAtom(filtered.length ? filtered[0] : null);
+    return filtered;
+  }, [allCategories, group]);
 
   useEffect(() => {
     if (!currentCategory) {
