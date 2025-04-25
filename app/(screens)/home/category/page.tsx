@@ -4,17 +4,16 @@ import DraggableList from '@/components/draggable/DraggableList';
 import IconHolder from '@/components/icon/IconHolder';
 import Loader from '@/components/loader/Loader';
 import { categoryAtom } from '@/store/category';
-import { logMutation, logsCategoryAtom } from '@/store/log';
+import { plotMutation, plotsCategoryAtom } from '@/store/plot';
 import { categoryPageAtom } from '@/store/ui';
 import { cn } from '@/util/cn';
-import { sortRank } from '@/util/convert';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { IoCheckmarkSharp } from 'react-icons/io5';
 import GroupTab from '../_components/GroupTab';
-import LogItem from '../_components/LogItem';
+import PlotItem from '../_components/PlotItem';
 import CategoryItem from './_components/CategoryItem';
 
 const Page = () => {
@@ -22,21 +21,22 @@ const Page = () => {
 
   const [currentCategory, setCurrentCategory] = useAtom(categoryPageAtom);
   const {
-    data: logs,
-    isFetching: isFetchingLogs,
+    data: plots,
+    isFetching: isFetchingPlots,
     refetch,
-  } = useAtomValue(logsCategoryAtom);
+  } = useAtomValue(plotsCategoryAtom);
   const { data: allCategories, isFetching: isFetchingCategories } =
     useAtomValue(categoryAtom);
   const setCategoryPageAtom = useSetAtom(categoryPageAtom);
-  const { mutate } = useAtomValue(logMutation);
+  const { mutate } = useAtomValue(plotMutation);
 
   const [group, setGroup] = useState('all');
 
   const todos = useMemo(
-    () => (logs || []).filter((item) => item.status === 'todo'),
-    [logs]
+    () => (plots || []).filter((item) => item.status === 'todo'),
+    [plots]
   );
+  console.log(plots);
 
   const [showDone, setShowDone] = useState(false);
 
@@ -62,30 +62,9 @@ const Page = () => {
   }, [currentCategory, categories]);
 
   return (
-    <div className="p-8">
-      <GroupTab id="category-page-group-tab" group={group} setGroup={setGroup} />
-      <ul className="flex gap-2 overflow-x-scroll scrollbar-hide mt-4 mb-6">
-        {categories?.map((category) => (
-          <div
-            key={category.id}
-            className={cn(
-              'flex flex-col items-center',
-              category.id !== currentCategory?.id ? 'opacity-30' : ''
-            )}
-          >
-            <CategoryItem
-              {...category}
-              onClick={() => {
-                setCurrentCategory(category);
-              }}
-            />
-            {currentCategory?.id === category.id && (
-              <span className="text-3xl leading-none">﹒</span>
-            )}
-          </div>
-        ))}
-      </ul>
-      {/* Header */}
+    <div className="p-8 flex flex-col justify-between h-full">
+      {/* Nav */}
+      <div>
       {currentCategory && (
         <>
           <div className="my-2 flex justify-between items-center">
@@ -120,26 +99,26 @@ const Page = () => {
                 setShowDone((prev) => !prev);
               }}
             >
-              <IoCheckmarkSharp /> Done {logs && todos ? logs?.length - todos?.length : 0}
+              <IoCheckmarkSharp /> Done {plots && todos ? plots?.length - todos?.length : 0}
             </button>
           </div>
         </>
       )}
-      {isFetchingLogs && isFetchingCategories ? (
+      {isFetchingPlots && isFetchingCategories ? (
         <div
           className={cn(
             'w-full h-full flex justify-center items-center',
-            logs?.length ? 'py-10' : 'py-72'
+            plots?.length ? 'py-10' : 'py-72'
           )}
         >
           <Loader />
         </div>
       ) : (
         <DraggableList
-          className="space-y-6 mt-8"
+          className="space-y-6 mt-4 h-[50dvh] overflow-y-scroll scrollbar-hide"
           items={
             showDone
-              ? (logs && [...logs].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
+              ? (plots && [...plots].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
                 []
               : (todos &&
                   [...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
@@ -150,11 +129,35 @@ const Page = () => {
           renderItem={(item) => (
             <DraggableItem id={item.id} className="flex items-center gap-2">
               <DragHandle />
-              <LogItem key={item.id} {...item} />
+              <PlotItem key={item.id} {...item} />
             </DraggableItem>
           )}
         />
       )}
+      </div>
+
+      {/* Categories */}
+      <div>
+      <GroupTab id="category-page-group-tab" group={group} setGroup={setGroup} />
+      <ul className="flex gap-2 overflow-x-scroll scrollbar-hide mt-4">
+        {categories?.map((category) => (
+          <div
+            key={category.id}
+            className={cn(
+              'flex flex-col items-center',
+              category.id !== currentCategory?.id ? 'opacity-30' : ''
+            )}
+          >
+            <CategoryItem
+              {...category}
+              onClick={() => {
+                setCurrentCategory(category);
+              }}
+            />
+          </div>
+        ))}
+      </ul>
+      </div>
     </div>
   );
 };

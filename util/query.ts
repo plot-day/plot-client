@@ -8,7 +8,7 @@ export const updateAtom = (data: any, key: string | any[]) => {
   });
 };
 
-export const updateTodayLogAtom = (data: any, key: string | any[]) => {
+export const updateTodayPlotAtom = (data: any, key: string | any[]) => {
   if (getDashDate(key[1]) === getDashDate(data.date)) {
     queryClient.setQueryData(typeof key === 'string' ? [key] : key, (prev: any) => {
       return sortRank([...prev.filter((item: any) => item.id !== data.id), parseRank(data)], 'todayRank');
@@ -18,7 +18,7 @@ export const updateTodayLogAtom = (data: any, key: string | any[]) => {
   }
 };
 
-export const updateInboxLogAtom = (data: any, key: string | any[]) => {
+export const updateInboxPlotAtom = (data: any, key: string | any[]) => {
   if (!data.date) {
     queryClient.setQueryData(typeof key === 'string' ? [key] : key, (prev: any) => {
       return sortRank([...prev.filter((item: any) => item.id !== data.id), parseRank(data)], 'inboxRank');
@@ -28,7 +28,7 @@ export const updateInboxLogAtom = (data: any, key: string | any[]) => {
   }
 };
 
-export const updateCategoryLogAtom = (data: any, key: string | any[]) => {
+export const updateCategoryPlotAtom = (data: any, key: string | any[]) => {
   if (data.categoryId === key[1]) {
     queryClient.setQueryData(typeof key === 'string' ? [key] : key, (prev: any) => {
       return sortRank([...prev.filter((item: any) => item.id !== data.id), parseRank(data)], 'categoryRank');

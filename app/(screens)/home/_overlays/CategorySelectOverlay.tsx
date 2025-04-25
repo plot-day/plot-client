@@ -5,7 +5,6 @@ import IconHolder from '@/components/icon/IconHolder';
 import Loader from '@/components/loader/Loader';
 import Overlay from '@/components/overlay/Overlay';
 import { categoryAtom, CategoryType, selectedCategoryAtom } from '@/store/category';
-import { groupAtom } from '@/store/group';
 import { useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -136,7 +135,7 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
         className="px-2 py-1 text-xs rounded-md shrink-0"
         onClick={selectCategoryHandler}
       >
-        Add Log
+        Add Plot
       </Button>
     </li>
   );

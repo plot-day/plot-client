@@ -16,12 +16,12 @@ import {
 } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import {
-  logFormDataAtom,
-  logMutation,
-  logsInboxAtom,
-  logsTodayAtom,
-  LogType,
-} from '@/store/log';
+  plotFormDataAtom,
+  plotMutation,
+  plotsInboxAtom,
+  plotsTodayAtom,
+  PlotType,
+} from '@/store/plot';
 import { categoryPageAtom, todayAtom } from '@/store/ui';
 import { parseRank, sortRank, toCamelCase } from '@/util/convert';
 import { getDashDate, getDateTimeStr } from '@/util/date';
@@ -38,7 +38,7 @@ import { FaCheckSquare } from 'react-icons/fa';
 import { FaArrowRight, FaCheck, FaCopy, FaTrash, FaXmark } from 'react-icons/fa6';
 import * as z from 'zod';
 
-const EMOJI_ID = 'log-emoji';
+const EMOJI_ID = 'plot-emoji';
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -48,16 +48,16 @@ const formSchema = z.object({
   date: z.string().optional().nullable(),
   categoryId: z.string().optional(),
   fieldValues: z.any().optional(),
-  content: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
   status: z.string().optional(),
   todayRank: z.string().optional(),
   inboxRank: z.string().optional(),
   categoryRank: z.string().optional(),
 });
 
-export type logFormSchemaType = z.infer<typeof formSchema>;
+export type plotFormSchemaType = z.infer<typeof formSchema>;
 
-const LogInputOverlay = () => {
+const PlotInputOverlay = () => {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -68,22 +68,22 @@ const LogInputOverlay = () => {
   const [category, setCategory] = useAtom(selectedCategoryAtom);
   const defaultCategory = useAtomValue(defaultCategoryAtom);
 
-  const [defaultValue, setDefaultValue] = useAtom(logFormDataAtom);
+  const [defaultValue, setDefaultValue] = useAtom(plotFormDataAtom);
 
-  const { data: todayLogs, isFetching: isFetchingTodayLogs } =
-    useAtomValue(logsTodayAtom);
-  const { data: inboxLogs, isFetching: isFetchingInboxLogs } =
-    useAtomValue(logsInboxAtom);
-  const { mutate, isPending } = useAtomValue(logMutation);
+  const { data: todayPlots, isFetching: isFetchingTodayPlots } =
+    useAtomValue(plotsTodayAtom);
+  const { data: inboxPlots, isFetching: isFetchingInboxPlots } =
+    useAtomValue(plotsInboxAtom);
+  const { mutate, isPending } = useAtomValue(plotMutation);
   const today = useAtomValue(todayAtom);
   const categoryPage = useAtomValue(categoryPageAtom);
 
   const [error, setError] = useState('');
 
   const params = useSearchParams();
-  const showLogInput = params.get('log-input');
+  const showPlotInput = params.get('plot-input');
 
-  const form = useForm<logFormSchemaType>({
+  const form = useForm<plotFormSchemaType>({
     resolver: zodResolver(formSchema),
   });
 
@@ -94,7 +94,7 @@ const LogInputOverlay = () => {
     return setFieldFunc;
   };
 
-  const submitHandler = async (values: logFormSchemaType) => {
+  const submitHandler = async (values: plotFormSchemaType) => {
     setError('');
     if (isCategoryFetching) {
       return;
@@ -106,7 +106,7 @@ const LogInputOverlay = () => {
         : await getRanks(
             pathname,
             values.date,
-            inboxLogs || [],
+            inboxPlots || [],
             category?.id || defaultCategory?.id || '',
             undefined
           );
@@ -124,7 +124,7 @@ const LogInputOverlay = () => {
       }
 
       form.setValue('title', '');
-      form.setValue('content', '');
+      form.setValue('description', '');
       form.setValue('fieldValues', null);
       form.setValue('status', 'todo');
       form.setValue(
@@ -134,7 +134,7 @@ const LogInputOverlay = () => {
           : getDateTimeStr(today)
       );
       setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
-      form.setValue('type', category?.defaultLogType || 'task');
+      form.setValue('type', category?.defaultPlotType || 'task');
     } catch (error) {
       if (typeof error === 'string') {
         setError(error);
@@ -147,7 +147,7 @@ const LogInputOverlay = () => {
   };
 
   useEffect(() => {
-    if (showLogInput) {
+    if (showPlotInput) {
       setError('');
       form.reset();
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
@@ -180,7 +180,7 @@ const LogInputOverlay = () => {
         setEmoji(EMOJI_ID, defaultValue?.icon || '');
 
         for (const keyStr in defaultValue) {
-          const key = keyStr as keyof logFormSchemaType;
+          const key = keyStr as keyof plotFormSchemaType;
           if (key.toLowerCase().includes('rank') && defaultValue[key]) {
             form.setValue(key, defaultValue[key].toString());
           } else {
@@ -194,7 +194,7 @@ const LogInputOverlay = () => {
       );
       setDefaultValue(null);
     }
-  }, [showLogInput]);
+  }, [showPlotInput]);
 
   const updateStatus = (status: string) => {
     form.setValue('status', status);
@@ -204,7 +204,7 @@ const LogInputOverlay = () => {
     setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
     form.setValue(
       'type',
-      category?.defaultLogType || defaultCategory?.defaultLogType || 'task'
+      category?.defaultPlotType || defaultCategory?.defaultPlotType || 'task'
     );
   }, [category, defaultCategory]);
 
@@ -214,13 +214,13 @@ const LogInputOverlay = () => {
     setEmoji(EMOJI_ID, updatedCategory?.icon || defaultCategory?.icon || '');
     form.setValue(
       'type',
-      updatedCategory?.defaultLogType || defaultCategory?.defaultLogType || 'task'
+      updatedCategory?.defaultPlotType || defaultCategory?.defaultPlotType || 'task'
     );
   }, [categories]);
 
   return (
-    <OverlayForm<logFormSchemaType>
-      id="log-input"
+    <OverlayForm<plotFormSchemaType>
+      id="plot-input"
       form={form}
       onSubmit={submitHandler}
       isRight={true}
@@ -231,7 +231,7 @@ const LogInputOverlay = () => {
       isPending={isPending}
     >
       <div className="flex gap-2 items-center">
-        <EmojiInput<logFormSchemaType>
+        <EmojiInput<plotFormSchemaType>
           id={EMOJI_ID}
           className="w-12 h-12 text-2xl rounded-lg"
           params={params.toString()}
@@ -273,8 +273,8 @@ const LogInputOverlay = () => {
       </div>
       <AutoHeightTextarea
         className="font-extralight"
-        placeholder="Enter the content"
-        {...form.register('content')}
+        placeholder="Enter the description"
+        {...form.register('description')}
         disabled={isPending}
       />
       <div className="flex flex-col gap-2">
@@ -371,7 +371,7 @@ const LogInputOverlay = () => {
               key={key}
               className="w-full p-2 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg"
             >
-              {(form.formState.errors[key as keyof logFormSchemaType]?.message as string)
+              {(form.formState.errors[key as keyof plotFormSchemaType]?.message as string)
                 ?.split('\n')
                 .map((line, i) => (
                   <p key={i}>
@@ -433,8 +433,8 @@ const LogInputOverlay = () => {
             <FaTrash /> <span>Delete</span>
           </Link>
           {form.watch('type') === 'task' &&
-            !isFetchingTodayLogs &&
-            !isFetchingInboxLogs && (
+            !isFetchingTodayPlots &&
+            !isFetchingInboxPlots && (
               <>
                 {defaultValue.status === 'todo' &&
                   (!defaultValue.date ? (
@@ -445,7 +445,7 @@ const LogInputOverlay = () => {
                         const ranks = await getRanks(
                           pathname,
                           defaultValue.date,
-                          inboxLogs || [],
+                          inboxPlots || [],
                           category?.id || defaultCategory?.id || ''
                         );
                         mutate({
@@ -466,7 +466,7 @@ const LogInputOverlay = () => {
                         const ranks = await getRanks(
                           pathname,
                           getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')),
-                          inboxLogs || [],
+                          inboxPlots || [],
                           category?.id || defaultCategory?.id || '',
                           today
                         );
@@ -499,7 +499,7 @@ const LogInputOverlay = () => {
                     const ranks = await getRanks(
                       pathname,
                       defaultValue.date,
-                      inboxLogs || [],
+                      inboxPlots || [],
                       category?.id || defaultCategory?.id || ''
                     );
                     mutate({ ...defaultValue, id: undefined, ...ranks });
@@ -518,47 +518,44 @@ const LogInputOverlay = () => {
 const getRanks = async (
   pathname: string,
   date: string | null | undefined,
-  inboxLogs: LogType[],
+  inboxPlots: PlotType[],
   categoryId: string,
   today?: Date
 ) => {
   let todayRank = null;
   if (date) {
-    const todayRes = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + `/api/log?date=${getDashDate(date)}`
-    );
-    const todayLogs = await todayRes.json();
-    const sortedTodayLogs = sortRank(
-      todayLogs.map((item: any) => parseRank(item)) || [],
+    const todayRes = await fetch(`/api/plot?date=${getDashDate(date)}`);
+    const todayPlots = await todayRes.json();
+    const sortedTodayPlots = sortRank(
+      todayPlots.map((item: any) => parseRank(item)) || [],
       'todayRank',
       true
     );
-    todayRank = sortedTodayLogs.length
-      ? sortedTodayLogs[0].todayRank?.genNext()
+    todayRank = sortedTodayPlots.length
+      ? sortedTodayPlots[0].todayRank?.genNext()
       : LexoRank.middle();
   }
 
   let inboxRank = null;
   if (pathname.includes('inbox') || date === null) {
-    const sortedInboxLogs = sortRank(inboxLogs, 'inboxRank', true);
-    inboxRank = sortedInboxLogs.length
-      ? sortedInboxLogs[0]?.inboxRank?.genNext()
+    const sortedInboxPlots = sortRank(inboxPlots, 'inboxRank', true);
+    inboxRank = sortedInboxPlots.length
+      ? sortedInboxPlots[0]?.inboxRank?.genNext()
       : LexoRank.middle();
   }
 
   let categoryRank = null;
   if (categoryId) {
-    const categoryRes = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + `/api/log?categoryId=${categoryId}`
+    const categoryRes = await fetch(`/api/plot?categoryId=${categoryId}`
     );
-    const categoryLogs = await categoryRes.json();
-    const sortedCategoryLogs = sortRank(
-      categoryLogs.map((item: any) => parseRank(item)) || [],
+    const categoryPlots = await categoryRes.json();
+    const sortedCategoryPlots = sortRank(
+      categoryPlots.map((item: any) => parseRank(item)) || [],
       'categoryRank',
       true
     );
-    categoryRank = sortedCategoryLogs.length
-      ? sortedCategoryLogs[0]?.categoryRank?.genNext()
+    categoryRank = sortedCategoryPlots.length
+      ? sortedCategoryPlots[0]?.categoryRank?.genNext()
       : LexoRank.middle();
   }
 
@@ -569,4 +566,4 @@ const getRanks = async (
   };
 };
 
-export default LogInputOverlay;
+export default PlotInputOverlay;

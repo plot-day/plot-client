@@ -16,7 +16,7 @@ export const groupAtom = atomWithQuery<GroupType[]>(() => {
   return {
     queryKey: ['group'],
     queryFn: async () => {
-      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/api/group');
+      const res = await fetch('/api/group');
       const data = await res.json();
       return data.map((item: any) => parseRank(item));
     },
@@ -28,7 +28,7 @@ export const groupMutation = atomWithMutation<GroupType, any>(() => ({
   mutationFn: async (groups) => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/group`,
+        `/api/group`,
         {
           method: 'PUT',
           body: JSON.stringify(groups),

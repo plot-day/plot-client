@@ -1,6 +1,6 @@
 import PlayButton from '@/components/button/PlayButton';
 import IconHolder from '@/components/icon/IconHolder';
-import { logFormDataAtom, logMutation, LogType, StatusType } from '@/store/log';
+import { plotFormDataAtom, plotMutation, PlotType, StatusType } from '@/store/plot';
 import { getTimestampStr, toCamelCase } from '@/util/convert';
 import { useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
@@ -8,14 +8,14 @@ import { usePathname } from 'next/navigation';
 import { IconPickerItem } from 'react-icons-picker-more';
 import { FaCheck, FaXmark } from 'react-icons/fa6';
 
-const LogItem = (log: LogType) => {
+const PlotItem = (plot: PlotType) => {
   const pathname = usePathname();
-  const setFormData = useSetAtom(logFormDataAtom);
-  const { mutate } = useAtomValue(logMutation);
+  const setFormData = useSetAtom(plotFormDataAtom);
+  const { mutate } = useAtomValue(plotMutation);
 
   const updateStatus = async (statusStr: StatusType) => {
     try {
-      mutate({ id: log.id, status: statusStr });
+      mutate({ id: plot.id, status: statusStr });
     } catch (error) {
       console.error(error);
     }
@@ -28,15 +28,15 @@ const LogItem = (log: LogType) => {
     fieldValues,
     type,
     status,
-  } = log;
+  } = plot;
 
   return (
     <div className="w-full flex justify-between items-center">
       <Link
-        href={`${pathname}?log-input=show`}
+        href={`${pathname}?plot-input=show`}
         className="flex items-center gap-4"
         onClick={() => {
-          setFormData(log);
+          setFormData(plot);
         }}
       >
         {/* <PlayButton /> */}
@@ -83,4 +83,4 @@ const LogItem = (log: LogType) => {
   );
 };
 
-export default LogItem;
+export default PlotItem;

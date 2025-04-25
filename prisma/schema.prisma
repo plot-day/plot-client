@@ -22,9 +22,10 @@ model User {
   updatedAt     DateTime   @updatedAt
   Account       Account[]
   Session       Session[]
-  Log           Log[]
+  Plot          Plot[]
   Category      Category[]
   Group         Group[]
+  Log           Log[]
 }
 
 model Account {
@@ -64,11 +65,11 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Log {
+model Plot {
   id           String    @id @default(cuid())
   icon         String?
   title        String
-  content      String?
+  description  String?
   categoryId   String
   category     Category  @relation(fields: [categoryId], references: [id])
   type         String
@@ -84,20 +85,33 @@ model Log {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  logs      Log[]
+}
+
+model Log {
+  id      String @id @default(cuid())
+  content String
+  plotId  String
+  plot    Plot   @relation(fields: [plotId], references: [id])
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Category {
-  id             String  @id @default(cuid())
-  icon           String
-  title          String
-  group          Group   @relation(fields: [groupId], references: [id])
-  groupId        String
-  defaultLogType String
-  fields         Json[]
-  isDefault      Boolean
-  rank           String
+  id              String  @id @default(cuid())
+  icon            String
+  title           String
+  group           Group   @relation(fields: [groupId], references: [id])
+  groupId         String
+  defaultPlotType String
+  fields          Json[]
+  isDefault       Boolean
+  rank            String
 
-  Log Log[]
+  Plot Plot[]
 
   userId    String
   user      User     @relation(fields: [userId], references: [id])

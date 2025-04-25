@@ -5,7 +5,7 @@ import { parseRank, sortRank } from '@/util/convert';
 import { categoryFormSchemaType } from '@/app/(screens)/home/_overlays/CategoryInputOverlay';
 import { LexoRank } from 'lexorank';
 import { replaceAtom, updateAtom } from '@/util/query';
-import { logsCategoryAtom, logsInboxAtom, logsTodayAtom } from './log';
+import { plotsCategoryAtom, plotsInboxAtom, plotsTodayAtom } from './plot';
 
 export interface CategoryType {
   id: string;
@@ -14,7 +14,7 @@ export interface CategoryType {
   group: GroupType;
   groupId: string;
   userId?: string;
-  defaultLogType: string;
+  defaultPlotType: string;
   fields: FieldType[];
   isDefault: boolean;
   rank: LexoRank;
@@ -32,7 +32,7 @@ export const categoryAtom = atomWithQuery<CategoryType[]>(() => {
   return {
     queryKey: ['category'],
     queryFn: async () => {
-      const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/api/category');
+      const res = await fetch('/api/category');
       const data = await res.json();
       return sortRank(data.map((item: any) => parseRank(item)), 'rank');
     },
@@ -47,7 +47,7 @@ export const categoryMutation = atomWithMutation<
   mutationFn: async (category) => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/category${
+        `/api/category${
           category.id ? '/' + category.id : ''
         }`,
         {
@@ -62,12 +62,12 @@ export const categoryMutation = atomWithMutation<
   },
   onSuccess: (data) => {
     updateAtom(data, 'category');
-    const {refetch: refetchTodayLogs} = get(logsTodayAtom);
-    const {refetch: refetchInboxLogs} = get(logsInboxAtom);
-    const {refetch: refetchCategoryLogs} = get(logsCategoryAtom);
-    refetchTodayLogs();
-    refetchInboxLogs();
-    refetchCategoryLogs();
+    const {refetch: refetchTodayPlots} = get(plotsTodayAtom);
+    const {refetch: refetchInboxPlots} = get(plotsInboxAtom);
+    const {refetch: refetchCategoryPlots} = get(plotsCategoryAtom);
+    refetchTodayPlots();
+    refetchInboxPlots();
+    refetchCategoryPlots();
   },
 }));
 
@@ -77,7 +77,7 @@ export const categoriesMutation = atomWithMutation<CategoryType, any>(() => ({
   mutationFn: async (categories) => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/category`,
+        `/api/category`,
         {
           method: 'PUT',
           body: JSON.stringify(categories),

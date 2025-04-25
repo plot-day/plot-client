@@ -1,8 +1,8 @@
 'use client';
 
 import OverlayForm from '@/components/overlay/OverlayForm';
-import { logsTodayAtom } from '@/store/log';
-import { logFormDataAtom } from '@/store/log';
+import { plotsTodayAtom } from '@/store/plot';
+import { plotFormDataAtom } from '@/store/plot';
 import { categoryPageAtom, todayAtom } from '@/store/ui';
 import { removeAtom } from '@/util/query';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,11 +16,11 @@ const formSchema = z.object({});
 
 type schemaType = z.infer<typeof formSchema>;
 
-const LogDeleteConformOverlay = () => {
+const PlotDeleteConformOverlay = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const defaultValues = useAtomValue(logFormDataAtom);
+  const defaultValues = useAtomValue(plotFormDataAtom);
   const today = useAtomValue(todayAtom);
   const categoryPage = useAtomValue(categoryPageAtom);
 
@@ -34,7 +34,7 @@ const LogDeleteConformOverlay = () => {
     try {
       setIsPending(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/log/${defaultValues?.id}`,
+        `/api/plot/${defaultValues?.id}`,
         {
           method: 'DELETE',
         }
@@ -46,9 +46,9 @@ const LogDeleteConformOverlay = () => {
         throw new Error(response.status + ' ' + response.statusText);
       }
 
-      defaultValues?.id && removeAtom(defaultValues?.id, ['log', today]);
-      defaultValues?.id && removeAtom(defaultValues?.id, ['log', null]);
-      defaultValues?.id && removeAtom(defaultValues?.id, ['log', categoryPage?.id]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['plot', today]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['plot', null]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['plot', categoryPage?.id]);
       setIsPending(false);
     } catch (error) {
       setIsPending(false);
@@ -78,4 +78,4 @@ const LogDeleteConformOverlay = () => {
   );
 };
 
-export default LogDeleteConformOverlay;
+export default PlotDeleteConformOverlay;

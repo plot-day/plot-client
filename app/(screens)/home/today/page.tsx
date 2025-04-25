@@ -4,20 +4,20 @@ import YearMonthNav from '@/components/date/YearMonthNav';
 import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
 import DraggableList from '@/components/draggable/DraggableList';
 import Loader from '@/components/loader/Loader';
-import { logMutation, logsTodayAtom } from '@/store/log';
+import { plotMutation, plotsTodayAtom } from '@/store/plot';
 import { cn } from '@/util/cn';
 import { useAtomValue } from 'jotai';
 import { Suspense, useMemo, useState } from 'react';
 import { IoCheckmarkSharp } from 'react-icons/io5';
-import LogItem from '../_components/LogItem';
+import PlotItem from '../_components/PlotItem';
 
 const Page = () => {
-  const { data: logs, isFetching } = useAtomValue(logsTodayAtom);
-  const { mutate } = useAtomValue(logMutation);
+  const { data: plots, isFetching } = useAtomValue(plotsTodayAtom);
+  const { mutate } = useAtomValue(plotMutation);
 
   const [showDone, setShowDone] = useState(false);
 
-  const todos = useMemo(() => logs?.filter((item) => item.status === 'todo'), [logs]);
+  const todos = useMemo(() => plots?.filter((item) => item.status === 'todo'), [plots]);
 
   const updateChangeHandler = ({ id, todayRank, inboxRank, categoryRank }: any) => {
     mutate({ id, todayRank, inboxRank, categoryRank });
@@ -40,14 +40,14 @@ const Page = () => {
               setShowDone((prev) => !prev);
             }}
           >
-            <IoCheckmarkSharp /> Done {logs && todos ? logs?.length - todos?.length : 0}
+            <IoCheckmarkSharp /> Done {plots && todos ? plots?.length - todos?.length : 0}
           </button>
         </div>
         {isFetching ? (
           <div
             className={cn(
               'w-full h-full flex justify-center items-center',
-              logs?.length ? 'py-10' : 'py-60'
+              plots?.length ? 'py-10' : 'py-60'
             )}
           >
             <Loader />
@@ -57,8 +57,8 @@ const Page = () => {
             className="space-y-6 mt-8"
             items={
               showDone
-                ? (logs &&
-                    [...logs].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
+                ? (plots &&
+                    [...plots].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
                   []
                 : (todos &&
                     [...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
@@ -69,7 +69,7 @@ const Page = () => {
             renderItem={(item) => (
               <DraggableItem id={item.id} className="flex items-center gap-2">
                 <DragHandle />
-                <LogItem key={item.id} {...item} />
+                <PlotItem key={item.id} {...item} />
               </DraggableItem>
             )}
           />

@@ -1,70 +1,91 @@
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { NextRequest } from 'next/server';
 
-export const GET = async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const id = params.id;
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new Response('Session not found', {
+      status: 401,
+    });
+  }
 
   try {
-    const log = await prisma.log.findUnique({
-      where: {
-        id,
-      },
+    const data = await prisma.log.findMany({
+      where: { userId: session.user.id },
+      orderBy: [{ createdAt: 'desc' }],
     });
 
-    return NextResponse.json({ log });
+    return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to get log', { status: 500 });
-  }
-};
-
-export async function PATCH(
-  req: NextRequest,
-  { params: { id } }: { params: { id: string } }
-) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
-
-  try {
-    const data = await req.json();
-
-    const res = await prisma.log.update({
-      where: { id },
-      data: {
-        ...data,
-        date: data.date || data.date === undefined ? data.date : null,
-      },
-      include: { category: true },
-    });
-
-    return NextResponse.json(res, { status: 200 });
-  } catch (error) {
-    const err = error as Error;
-
-    if (err.name === 'AbortError') {
-      return new Response('Request timeout: ' + id, { status: 408 });
-    }
-
-    console.error('PATCH error:', err);
-    return new Response('Failed to update log: ' + id, { status: 500 });
-  } finally {
-    clearTimeout(timeout);
+    return new Response('Failed to fetch logs', { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function PUT(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new Response('Session not found', {
+      status: 401,
+    });
+  }
+
+  const reqData = await req.json();
+  const resData: any[] = [];
 
   try {
-    const res = await prisma.log.delete({
-      where: {
-        id: id,
+    for (let i = 0; i < reqData.length; i++) {
+      if (reqData[i].id) {
+        const data = await prisma.log.update({
+          where: {
+            id: reqData[i].id,
+          },
+          data: reqData[i],
+        });
+        resData.push(data);
+      } else {
+        const data = await prisma.log.create({
+          data: {
+            ...reqData[i],
+            userId: session.user.id,
+          },
+        });
+        resData.push(data);
+      }
+    }
+
+    return new Response(JSON.stringify(resData), { status: 201 });
+  } catch (error) {
+    console.error(error);
+    return new Response('Failed to put logs', { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new Response('Session not found', {
+      status: 401,
+    });
+  }
+
+  const reqData = await req.json();
+  try {
+    const data = await prisma.log.create({
+      data: {
+        ...reqData,
+        userId: session.user.id,
       },
     });
 
-    return NextResponse.json(res, { status: 200 });
+    return new Response(JSON.stringify(data), { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to delete log:' + id, { status: 500 });
+    return new Response('Failed to create log', { status: 500 });
   }
 }

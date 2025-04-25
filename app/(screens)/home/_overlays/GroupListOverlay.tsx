@@ -41,7 +41,7 @@ const GroupListOverlay = () => {
     // delete
     for (let i = 0; i < removeIds.length; i++) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/group/${removeIds[i]}`,
+        `/api/group/${removeIds[i]}`,
         {
           method: 'DELETE',
         }

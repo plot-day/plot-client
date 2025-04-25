@@ -20,18 +20,20 @@ export async function GET(req: NextRequest) {
   const categoryId = searchParams.get('categoryId') || undefined;
 
   try {
-    const data = await prisma.log.findMany({
+    const data = await prisma.plot.findMany({
       where: {
         userId: session.user.id,
+        date,
+        categoryId,
       },
-      include: { plot: true },
+      include: { category: true },
       orderBy: [{ createdAt: 'asc' }],
     });
 
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to fetch logs', { status: 500 });
+    return new Response('Failed to fetch plots', { status: 500 });
   }
 }
 
@@ -46,17 +48,17 @@ export async function POST(req: Request) {
 
   const reqData = await req.json();
   try {
-    const data = await prisma.log.create({
+    const data = await prisma.plot.create({
       data: {
         ...reqData,
         userId: session.user.id,
       },
-      include: { plot: true },
+      include: { category: true },
     });
 
     return new Response(JSON.stringify(data), { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to create log', { status: 500 });
+    return new Response('Failed to create plot', { status: 500 });
   }
 }

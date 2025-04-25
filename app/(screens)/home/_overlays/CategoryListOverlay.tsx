@@ -38,7 +38,7 @@ const CategoryListOverlay = () => {
     // delete
     for (let i = 0; i < removeIds.length; i++) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/category/${removeIds[i]}`,
+        `/api/category/${removeIds[i]}`,
         {
           method: 'DELETE',
         }

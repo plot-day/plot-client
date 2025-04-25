@@ -1,12 +1,12 @@
 import Nav from '@/app/_layout/Nav';
-import LogInputOverlay from './home/_overlays/LogInputOverlay';
+import PlotInputOverlay from './home/_overlays/PlotInputOverlay';
 import EmojiOverlay from '@/components/emoji/EmojiOverlay';
 import CategorySelectOverlay from './home/_overlays/CategorySelectOverlay';
 import CategoryInputOverlay from './home/_overlays/CategoryInputOverlay';
 import CategoryListOverlay from './home/_overlays/CategoryListOverlay';
 import GroupListOverlay from './home/_overlays/GroupListOverlay';
 import { Suspense } from 'react';
-import LogDeleteConformOverlay from './home/_overlays/LogDeleteConfirmOverlay';
+import PlotDeleteConformOverlay from './home/_overlays/PlotDeleteConfirmOverlay';
 import YearMonthNavOverlay from '@/components/date/YearMonthNavOverlay';
 
 export default function RootLayout({
@@ -28,13 +28,13 @@ export default function RootLayout({
       </div>
       <div id="overlay-container" className="absolute bottom-0 w-full">
         <Suspense>
-          <LogInputOverlay />
+          <PlotInputOverlay />
           <CategorySelectOverlay />
           <CategoryListOverlay />
           <CategoryInputOverlay />
           <GroupListOverlay />
           <EmojiOverlay />
-          <LogDeleteConformOverlay />
+          <PlotDeleteConformOverlay />
         </Suspense>
       </div>
     </div>

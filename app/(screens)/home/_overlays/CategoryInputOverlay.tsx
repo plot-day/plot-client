@@ -11,7 +11,6 @@ import { FIELD_TYPES } from '@/constants/field';
 import { categoryAtom, categoryMutation, FieldType } from '@/store/category';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import { groupAtom } from '@/store/group';
-import { logsCategoryAtom, logsInboxAtom, logsTodayAtom } from '@/store/log';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { LexoRank } from 'lexorank';
@@ -30,7 +29,7 @@ const formSchema = z.object({
   icon: z.string().min(1, 'Please select icon.'),
   title: z.string().min(1, 'Please enter the title.'),
   groupId: z.string().optional(),
-  defaultLogType: z.string().optional(),
+  defaultPlotType: z.string().optional(),
   fields: z.array(z.any()).optional(),
   isDefault: z.boolean().optional(),
   rank: z.string().optional(),
@@ -47,7 +46,7 @@ const CategoryInputOverlay = () => {
   const [emoji, setEmoji] = useAtom(emojiAtom);
   const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
-  const [defaultLogType, setType] = useState('task');
+  const [defaultPlotType, setType] = useState('task');
   const [group, setGroup] = useState(groups?.find((item) => item.isDefault)?.id || '');
   const [fields, setFields] = useState<FieldType[]>([]);
   const [error, setError] = useState('');
@@ -81,7 +80,7 @@ const CategoryInputOverlay = () => {
         groupId: group,
         fields,
         rank: categoryId ? undefined : lastCategory?.rank.genNext().toString() || LexoRank.middle().toString(),
-        defaultLogType,
+        defaultPlotType,
         isDefault: categoryId ? undefined : false,
       });
     } catch (error: any) {
@@ -113,7 +112,7 @@ const CategoryInputOverlay = () => {
         form.setValue('title', category?.title || '');
         form.setValue('fields', category?.fields);
         setFields(category?.fields || []);
-        setType(category?.defaultLogType || 'task');
+        setType(category?.defaultPlotType || 'task');
       } else {
         setGroup(groups?.find((item) => item.isDefault)?.id || '');
         setEmoji(EMOJI_ID, '');
@@ -171,7 +170,7 @@ const CategoryInputOverlay = () => {
         {/* Type */}
         <Tab
           id="category-input-type"
-          value={defaultLogType}
+          value={defaultPlotType}
           setValue={setType}
           className="text-sm [&_label]:font-semibold w-full [&>li]:p-1"
           tabs={[

@@ -1,15 +1,16 @@
-# PLOT - Plan, Log, Organize, Track your day
+# PLOT - Plan, Plot, Organize, Track your day
 
 The PLOT service is a productivity tool for planning, logging, organizing, and tracking your daily activities.<br/>
 It enables you to add task logs for planning and note logs for tracking.<br/>
-Logs can be organised by date or fields of category, providing a convenient overview of daily activities.
+Plots can be organised by date or fields of category, providing a convenient overview of daily activities.
 
 <br/>
 <br/>
-
 
 ## Features
+
 ### 👀 View log
+
 View log by date on list, calender, timeline, and tracker.
 | List | Calender | Timeline | Tracker |
 | ---- | -------- | -------- | ------- |
@@ -18,6 +19,7 @@ View log by date on list, calender, timeline, and tracker.
 <br/>
 
 ### 📐 Organize view
+
 Organize view based on fields of category.<br />
 You can list up logs categorized by tag field, sum up the number field value by tag field.<br />
 You can use it as follows:
@@ -26,19 +28,19 @@ You can use it as follows:
 |<img width="431" alt="image" src="https://github.com/user-attachments/assets/3a1c69c1-70f6-4548-b7a9-e338e3e27ea5">|<img width="456" alt="image" src="https://github.com/user-attachments/assets/bf56db07-60cc-4330-84c9-eef5b54a3b1f">|<img width="447" alt="image" src="https://github.com/user-attachments/assets/2c90237c-831f-4e59-b82a-217e133e0ee5">|<img width="470" alt="image" src="https://github.com/user-attachments/assets/a5b0eb51-1dfd-4ace-8448-2ac66f5741f9">|
 <br/>
 
-
 ### 📝 Add log & Custom field
+
 Add two types of log: task & note<br />
 You can add various type of fields and custom detail.
-| Log | Category | Field |
+| Plot | Category | Field |
 | --- | -------- | ----- |
 |<img width="185" alt="image" src="https://github.com/user-attachments/assets/189842f4-fae1-49bb-a337-49297e63e1b5">|<img width="185" alt="image" src="https://github.com/user-attachments/assets/1b050661-cae1-4ccd-9e9f-1895883febce">|<img width="187" alt="image" src="https://github.com/user-attachments/assets/cdc5fb7d-b087-426e-beda-383470d68b2a"><img width="187" alt="image" src="https://github.com/user-attachments/assets/6b1d8050-fd16-45c4-b1c7-33600e82433d">
 
 <br/>
 <br/>
 
-
 ## Installation
+
 ```
 git clone https://github.com/plot-day/plot-client
 cd plot-client
@@ -50,6 +52,7 @@ pnpm dev
 <br/>
 
 ## Stack
+
 - React
 - Next.js
 - Typescript
@@ -61,9 +64,8 @@ pnpm dev
 <br/>
 
 ## Structure
-<br/>
-<br/>
 
+<br/>
+<br/>
 
 ## Issues
-
