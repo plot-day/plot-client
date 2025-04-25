@@ -18,13 +18,18 @@ export async function GET(req: NextRequest) {
   const dateParam = searchParams.get('date');
   const date = dateParam ? (isNaN((new Date(dateParam)).getTime()) ? null : dateParam) : undefined;
   const categoryId = searchParams.get('categoryId') || undefined;
+  const status = searchParams.get('status') || undefined;
+  const before = searchParams.get('before') || undefined;
 
   try {
     const data = await prisma.plot.findMany({
       where: {
-        userId: session.user.id,
-        date,
+        userId: session.user.id, 
+        date: before ? {
+          lt: before,
+        } : date,
         categoryId,
+        status,
       },
       include: { category: true },
       orderBy: [{ createdAt: 'asc' }],

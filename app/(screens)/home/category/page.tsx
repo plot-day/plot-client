@@ -33,12 +33,21 @@ const Page = () => {
   const [group, setGroup] = useState('all');
 
   const todos = useMemo(
-    () => (plots || []).filter((item) => item.status === 'todo'),
+    () => (plots || []).filter((item) => item.status === 'todo' && !item.date),
     [plots]
   );
-  console.log(plots);
 
-  const [showDone, setShowDone] = useState(false);
+  const scheduled = useMemo(
+    () => (plots || []).filter((item) => item.status === 'todo' && item.date),
+    [plots]
+  );
+
+  const done = useMemo(
+    () => (plots || []).filter((item) => item.status === 'done'),
+    [plots]
+  );
+
+  const [view, setView] = useState('default');
 
   const updateChangeHandler = (item: any) => {
     mutate(item);
@@ -88,18 +97,30 @@ const Page = () => {
               Edit Category
             </Link>
           </div>
-          <div className="w-full flex justify-end">
+          <div className="w-full flex justify-end gap-4">
             <button
               type="button"
               className={cn(
                 'flex gap-1 items-center text-sm font-semibold',
-                showDone ? '' : 'text-gray-400'
+                view === 'scheduled' ? '' : 'text-gray-400'
               )}
               onClick={() => {
-                setShowDone((prev) => !prev);
+                setView((prev) => prev === 'scheduled' ? 'default' : 'scheduled');
               }}
             >
-              <IoCheckmarkSharp /> Done {plots && todos ? plots?.length - todos?.length : 0}
+              <IoCheckmarkSharp /> Scheduled {plots && scheduled ? scheduled?.length : 0}
+            </button>
+            <button
+              type="button"
+              className={cn(
+                'flex gap-1 items-center text-sm font-semibold',
+                view === 'done' ? '' : 'text-gray-400'
+              )}
+              onClick={() => {
+                setView((prev) => prev === 'done' ? 'default' : 'done');
+              }}
+            >
+              <IoCheckmarkSharp /> Done {plots && done ? done?.length : 0}
             </button>
           </div>
         </>
@@ -117,17 +138,18 @@ const Page = () => {
         <DraggableList
           className="space-y-6 mt-4 h-[50dvh] overflow-y-scroll scrollbar-hide"
           items={
-            showDone
-              ? (plots && [...plots].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
+            view === 'done'
+              ? (done && todos && [...done, ...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
                 []
-              : (todos &&
+              : view === 'default' ? (todos &&
                   [...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
+                [] :  [...scheduled, ...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank)) ||
                 []
           }
           rankKey="categoryRank"
           updateChange={updateChangeHandler}
           renderItem={(item) => (
-            <DraggableItem id={item.id} className="flex items-center gap-2">
+            <DraggableItem id={item.id} className="flex items-center gap-2 [&_.date]:block [&_.category]:hidden">
               <DragHandle />
               <PlotItem key={item.id} {...item} />
             </DraggableItem>
