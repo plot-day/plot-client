@@ -27,14 +27,15 @@ const PlotItem = (plot: PlotType) => {
     icon,
     fieldValues,
     type,
+    date,
     status,
   } = plot;
 
   return (
-    <div className="w-full flex justify-between items-center">
+    <div className="plot-item w-full flex justify-between items-center">
       <Link
         href={`${pathname}?plot-input=show`}
-        className="flex items-center gap-4"
+        className="w-full flex items-center gap-4"
         onClick={() => {
           setFormData(plot);
         }}
@@ -42,7 +43,8 @@ const PlotItem = (plot: PlotType) => {
         {/* <PlayButton /> */}
         <IconHolder>{icon}</IconHolder>
         <div>
-          <p className="text-xs font-extrabold">{category.title}</p>
+          <p className="category text-xs font-extrabold">{category.title}</p>
+          <p className="date hidden text-xs font-extrabold">{date?.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
           <p>{title}</p>
           <ul className="flex gap-2 text-xs font-light mt-2">
             {category.fields.map(

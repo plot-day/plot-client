@@ -19,6 +19,7 @@ import {
   plotFormDataAtom,
   plotMutation,
   plotsInboxAtom,
+  plotsOverdueAtom,
   plotsTodayAtom,
   PlotType,
 } from '@/store/plot';
@@ -67,6 +68,7 @@ const PlotInputOverlay = () => {
   const { data: categories, isFetching: isCategoryFetching } = useAtomValue(categoryAtom);
   const [category, setCategory] = useAtom(selectedCategoryAtom);
   const defaultCategory = useAtomValue(defaultCategoryAtom);
+  const { refetch: refetchOverduePlots } = useAtomValue(plotsOverdueAtom);
 
   const [defaultValue, setDefaultValue] = useAtom(plotFormDataAtom);
 
@@ -459,6 +461,7 @@ const PlotInputOverlay = () => {
                       <FaArrowRight /> <span>Move today</span>
                     </button>
                   ) : (
+                    !(defaultValue.date && !pathname.includes('today')) &&
                     <button
                       type="button"
                       className="flex justify-center items-center gap-2"
@@ -471,24 +474,25 @@ const PlotInputOverlay = () => {
                           today
                         );
                         const date =
-                          dayjs(getDashDate(defaultValue.date)) <
+                        pathname.includes('today') ? dayjs(getDashDate(defaultValue.date)) <
                           dayjs(getDashDate(new Date()))
                             ? getDashDate(today)
-                            : dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD');
+                            : dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD') : getDashDate(new Date());
                         mutate({
                           id: defaultValue.id,
                           date,
                           ...ranks,
                         });
+                        refetchOverduePlots();
                         router.back();
                       }}
                     >
                       <FaArrowRight />{' '}
                       <span>
-                        {dayjs(getDashDate(defaultValue.date)) <
+                        {pathname.includes('today') ? dayjs(getDashDate(defaultValue.date)) <
                         dayjs(getDashDate(new Date()))
                           ? 'Move here'
-                          : 'Move next'}
+                          : 'Move next' : 'Move today'}
                       </span>
                     </button>
                   ))}

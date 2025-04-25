@@ -48,6 +48,7 @@ const PlotDeleteConformOverlay = () => {
 
       defaultValues?.id && removeAtom(defaultValues?.id, ['plot', today]);
       defaultValues?.id && removeAtom(defaultValues?.id, ['plot', null]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['plot-overdue']);
       defaultValues?.id && removeAtom(defaultValues?.id, ['plot', categoryPage?.id]);
       setIsPending(false);
     } catch (error) {

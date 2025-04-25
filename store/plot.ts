@@ -100,6 +100,24 @@ export const plotsCategoryAtom = atomWithQuery<PlotType[]>((get) => {
   };
 });
 
+export const plotsOverdueAtom = atomWithQuery<PlotType[]>((get) => {
+  return {
+    queryKey: ['plot-overdue'],
+    queryFn: async () => {
+      const res = await fetch(`/api/plot?status=todo&before=${getDashDate(new Date())}`
+      );
+      const data = await res.json();
+      return sortRank(data.map((item: any) => {
+        const [year, month, day] = item.date.split('-');
+        return { 
+          ...parseRank(item),
+          date: item.date && new Date(year, month - 1, day) 
+        }
+      }), 'todayRank');
+    },
+  };
+});
+
 export const plotMutation = atomWithMutation<PlotType, Partial<plotFormSchemaType>>((get) => ({
   mutationKey: ['plot'],
   mutationFn: async (plot) => {
@@ -114,6 +132,7 @@ export const plotMutation = atomWithMutation<PlotType, Partial<plotFormSchemaTyp
           }),
         }
       );
+      get(plotsOverdueAtom).refetch();
       return await res.json();
     } catch (error) {
       throw error;
@@ -142,3 +161,4 @@ export const plotFormDataAtom = atom(
     set(currentPlotAtom, update);
   }
 );
+

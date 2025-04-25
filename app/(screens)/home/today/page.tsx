@@ -4,15 +4,19 @@ import YearMonthNav from '@/components/date/YearMonthNav';
 import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
 import DraggableList from '@/components/draggable/DraggableList';
 import Loader from '@/components/loader/Loader';
-import { plotMutation, plotsTodayAtom } from '@/store/plot';
+import { plotMutation, plotsOverdueAtom, plotsTodayAtom } from '@/store/plot';
 import { cn } from '@/util/cn';
 import { useAtomValue } from 'jotai';
 import { Suspense, useMemo, useState } from 'react';
 import { IoCheckmarkSharp } from 'react-icons/io5';
 import PlotItem from '../_components/PlotItem';
+import { getDashDate } from '@/util/date';
+import dayjs from 'dayjs';
+import PlotList from '../_components/PlotList';
 
 const Page = () => {
   const { data: plots, isFetching } = useAtomValue(plotsTodayAtom);
+  const { data: overdues, isFetching: isOverdueFetching } = useAtomValue(plotsOverdueAtom);
   const { mutate } = useAtomValue(plotMutation);
 
   const [showDone, setShowDone] = useState(false);
@@ -53,6 +57,16 @@ const Page = () => {
             <Loader />
           </div>
         ) : (
+          <>
+          {!isOverdueFetching && !!overdues?.length && (
+        <PlotList
+          className="[&_.icon-holder]:bg-white [&_.plot-item]:pr-1 box-content w-full mt-4 -ml-2 [&_li]:text-base [&_svg]:text-xs p-3 bg-red-50 rounded-xl text-red-400 [&_svg]:text-red-200 [&>div>svg]:text-red-400"
+          title="Overdue Tasks"
+          items={overdues}
+          gap={2}
+          isFolded={true}
+        ></PlotList>
+      )}
           <DraggableList
             className="space-y-6 mt-8"
             items={
@@ -73,6 +87,7 @@ const Page = () => {
               </DraggableItem>
             )}
           />
+          </>
         )}
       </div>
     </>
