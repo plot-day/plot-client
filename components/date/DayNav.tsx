@@ -21,21 +21,22 @@ const DayNav = ({ isVertical, className }: DayNavProps) => {
   };
 
   const dateChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setToday(new Date(event.target.value));
+    const [year, month, day] = event.target.value.split('-');
+    setToday(new Date(+year, +month - 1, +day));
   };
 
   // NOTE: 24 hour to milliseconds - 8.64e+7
   const goPrevDay = () => {
     setToday((prevDay) => {
-      const nextTime = prevDay.getTime() - 8.64e7;
-      return new Date(nextTime);
+      const [year, month, day] = prevDay.toISOString().split('T')[0].split('-');
+      return new Date(+year, +month - 1, +day - 1);
     });
   };
 
   const goNextDay = () => {
     setToday((prevDay) => {
-      const nextTime = prevDay.getTime() + 8.64e7;
-      return new Date(nextTime);
+      const [year, month, day] = prevDay.toISOString().split('T')[0].split('-');
+      return new Date(+year, +month - 1, +day + 1);
     });
   };
 

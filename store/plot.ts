@@ -18,7 +18,7 @@ export interface PlotType {
   category: CategoryType;
   type: string;
   status?: StatusType;
-  date?: Date;
+  date?: Date | string;
   dueDate?: Date;
   fieldValues: any;
   todayRank: LexoRank;

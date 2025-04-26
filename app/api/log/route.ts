@@ -16,9 +16,7 @@ export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   
   const dateParam = searchParams.get('date');
-  const date = dateParam ? (isNaN((new Date(dateParam)).getTime()) ? null : dateParam) : undefined;
-  const categoryId = searchParams.get('categoryId') || undefined;
-
+  
   try {
     const data = await prisma.log.findMany({
       where: {
