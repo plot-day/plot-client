@@ -104,7 +104,7 @@ export const plotsOverdueAtom = atomWithQuery<PlotType[]>((get) => {
   return {
     queryKey: ['plot-overdue'],
     queryFn: async () => {
-      const res = await fetch(`/api/plot?status=todo&before=${getDashDate(new Date())}`
+      const res = await fetch(`/api/plot?type=task&status=todo&before=${getDashDate(new Date())}`
       );
       const data = await res.json();
       return sortRank(data.map((item: any) => {
