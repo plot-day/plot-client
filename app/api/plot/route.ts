@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const categoryId = searchParams.get('categoryId') || undefined;
   const status = searchParams.get('status') || undefined;
   const before = searchParams.get('before') || undefined;
-
+  const type = searchParams.get('type') || undefined;
   try {
     const data = await prisma.plot.findMany({
       where: {
@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
         } : date,
         categoryId,
         status,
+        type,
       },
       include: { category: true },
       orderBy: [{ createdAt: 'asc' }],

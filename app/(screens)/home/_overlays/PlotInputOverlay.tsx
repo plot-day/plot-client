@@ -36,7 +36,13 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { IconPickerItem } from 'react-icons-picker-more';
 import { FaCheckSquare } from 'react-icons/fa';
-import { FaArrowRight, FaCheck, FaCopy, FaTrash, FaXmark } from 'react-icons/fa6';
+import {
+  FaArrowRight,
+  FaCheck,
+  FaCopy,
+  FaTrash,
+  FaXmark,
+} from 'react-icons/fa6';
 import * as z from 'zod';
 
 const EMOJI_ID = 'plot-emoji';
@@ -65,7 +71,8 @@ const PlotInputOverlay = () => {
   const [emoji, setEmoji] = useAtom(emojiAtom);
   const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
-  const { data: categories, isFetching: isCategoryFetching } = useAtomValue(categoryAtom);
+  const { data: categories, isFetching: isCategoryFetching } =
+    useAtomValue(categoryAtom);
   const [category, setCategory] = useAtom(selectedCategoryAtom);
   const defaultCategory = useAtomValue(defaultCategoryAtom);
   const { refetch: refetchOverduePlots } = useAtomValue(plotsOverdueAtom);
@@ -80,6 +87,7 @@ const PlotInputOverlay = () => {
   const today = useAtomValue(todayAtom);
   const categoryPage = useAtomValue(categoryPageAtom);
 
+  const [showType, setShowType] = useState(false);
   const [error, setError] = useState('');
 
   const params = useSearchParams();
@@ -163,7 +171,7 @@ const PlotInputOverlay = () => {
         }
 
         setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
-        
+
         form.setValue('fieldValues', null);
         form.setValue('type', 'task');
         form.setValue('status', 'todo');
@@ -211,14 +219,27 @@ const PlotInputOverlay = () => {
   }, [category, defaultCategory]);
 
   useEffect(() => {
-    const updatedCategory = categories?.find((item) => item.id === category?.id);
+    const updatedCategory = categories?.find(
+      (item) => item.id === category?.id
+    );
     setCategory(updatedCategory || defaultCategory || null);
     setEmoji(EMOJI_ID, updatedCategory?.icon || defaultCategory?.icon || '');
     form.setValue(
       'type',
-      updatedCategory?.defaultPlotType || defaultCategory?.defaultPlotType || 'task'
+      updatedCategory?.defaultPlotType ||
+        defaultCategory?.defaultPlotType ||
+        'task'
     );
   }, [categories]);
+
+  const typeChangeHandler = (type: string) => {
+    if (type === form.getValues('type')) {
+      setShowType((prev) => !prev);
+    } else {
+      setShowType(false);
+      form.setValue('type', type);
+    }
+  };
 
   return (
     <OverlayForm<plotFormSchemaType>
@@ -281,15 +302,38 @@ const PlotInputOverlay = () => {
       />
       <div className="flex flex-col gap-2">
         <div className="flex gap-3 items-center">
-          <div
-            className={`w-[1rem] h-[1rem] border-black ${
-              form.watch('type') === 'note'
-                ? 'border-t border-black mt-[1rem]'
-                : form.watch('type') === 'event'
-                ? 'border rounded-full'
-                : 'border rounded-[0.25rem]'
-            }`}
-          />
+          <div className="flex gap-2 items-center">
+            <div
+              className={`w-[1rem] h-[1rem] ${
+                form.watch('type') === 'task'
+                  ? 'border-black border rounded-[0.25rem]'
+                  : showType
+                  ? 'border-gray-300 border rounded-[0.25rem]'
+                  : 'hidden'
+              }`}
+              onClick={typeChangeHandler.bind(null, 'task')}
+            />
+            <div
+              className={`w-[1rem] h-[1rem] ${
+                form.watch('type') === 'event'
+                  ? 'border-black border rounded-full'
+                  : showType
+                  ? 'border-gray-300 border rounded-full'
+                  : 'hidden'
+              }`}
+              onClick={typeChangeHandler.bind(null, 'event')}
+            />
+            <div
+              className={`w-[1rem] h-[1rem] ${
+                form.watch('type') === 'note'
+                  ? 'border-t border-black mt-[1rem]'
+                  : showType
+                  ? 'border-t border-gray-300 mt-[1rem]'
+                  : 'hidden'
+              }`}
+              onClick={typeChangeHandler.bind(null, 'note')}
+            />
+          </div>
           <div className="flex gap-1 items-center">
             <input
               type="datetime-local"
@@ -301,7 +345,9 @@ const PlotInputOverlay = () => {
         </div>
         {!!category?.fields.length && (
           <ul
-            className={`flex gap-3 flex-wrap ${isPending ? 'pointer-events-none' : ''}`}
+            className={`flex gap-3 flex-wrap ${
+              isPending ? 'pointer-events-none' : ''
+            }`}
           >
             {category?.fields?.map(({ icon, type, label, option }, i) => {
               const key = toCamelCase(label);
@@ -373,7 +419,10 @@ const PlotInputOverlay = () => {
               key={key}
               className="w-full p-2 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg"
             >
-              {(form.formState.errors[key as keyof plotFormSchemaType]?.message as string)
+              {(
+                form.formState.errors[key as keyof plotFormSchemaType]
+                  ?.message as string
+              )
                 ?.split('\n')
                 .map((line, i) => (
                   <p key={i}>
@@ -391,7 +440,9 @@ const PlotInputOverlay = () => {
           <button
             type="button"
             className={`w-full py-[0.375rem] flex justify-center items-center gap-2 rounded-md ${
-              form.watch('status') === 'todo' ? 'text-primary bg-white' : 'text-gray-400'
+              form.watch('status') === 'todo'
+                ? 'text-primary bg-white'
+                : 'text-gray-400'
             }`}
             disabled={form.watch('status') === 'todo' || isPending}
             onClick={updateStatus.bind(null, 'todo')}
@@ -415,7 +466,9 @@ const PlotInputOverlay = () => {
           <button
             type="button"
             className={`w-full py-[0.375rem] flex justify-center items-center gap-2 rounded-md ${
-              form.watch('status') === 'done' ? 'text-primary bg-white' : 'text-gray-400'
+              form.watch('status') === 'done'
+                ? 'text-primary bg-white'
+                : 'text-gray-400'
             }`}
             disabled={form.watch('status') === 'done' || isPending}
             onClick={updateStatus.bind(null, 'done')}
@@ -439,6 +492,7 @@ const PlotInputOverlay = () => {
             !isFetchingInboxPlots && (
               <>
                 {defaultValue.status === 'todo' &&
+                  defaultValue.type !== 'note' &&
                   (!defaultValue.date ? (
                     <button
                       type="button"
@@ -461,40 +515,51 @@ const PlotInputOverlay = () => {
                       <FaArrowRight /> <span>Move today</span>
                     </button>
                   ) : (
-                    !(defaultValue.date && !pathname.includes('today')) &&
-                    <button
-                      type="button"
-                      className="flex justify-center items-center gap-2"
-                      onClick={async () => {
-                        const ranks = await getRanks(
-                          pathname,
-                          getDateTimeStr(dayjs(defaultValue.date).add(1, 'day')),
-                          inboxPlots || [],
-                          category?.id || defaultCategory?.id || '',
-                          today
-                        );
-                        const date =
-                        pathname.includes('today') ? dayjs(getDashDate(defaultValue.date)) <
-                          dayjs(getDashDate(new Date()))
-                            ? getDashDate(today)
-                            : dayjs(defaultValue.date).add(1, 'day').format('YYYY-MM-DD') : getDashDate(new Date());
-                        mutate({
-                          id: defaultValue.id,
-                          date,
-                          ...ranks,
-                        });
-                        refetchOverduePlots();
-                        router.back();
-                      }}
-                    >
-                      <FaArrowRight />{' '}
-                      <span>
-                        {pathname.includes('today') ? dayjs(getDashDate(defaultValue.date)) <
-                        dayjs(getDashDate(new Date()))
-                          ? 'Move here'
-                          : 'Move next' : 'Move today'}
-                      </span>
-                    </button>
+                    !(defaultValue.date && !pathname.includes('today')) && (
+                      <button
+                        type="button"
+                        className="flex justify-center items-center gap-2"
+                        onClick={async () => {
+                          const ranks = await getRanks(
+                            pathname,
+                            getDateTimeStr(
+                              dayjs(defaultValue.date).add(1, 'day')
+                            ),
+                            inboxPlots || [],
+                            category?.id || defaultCategory?.id || '',
+                            today
+                          );
+                          const date = pathname.includes('today')
+                            ? dayjs(getDashDate(defaultValue.date)) <
+                              dayjs(getDashDate(new Date()))
+                              ? getDashDate(today)
+                              : dayjs(defaultValue.date)
+                                  .add(1, 'day')
+                                  .format('YYYY-MM-DD')
+                            : getDashDate(new Date());
+                          mutate({
+                            id: defaultValue.id,
+                            date,
+                            ...ranks,
+                          });
+                          refetchOverduePlots();
+                          router.back();
+                        }}
+                      >
+                        <FaArrowRight />{' '}
+                        <span>
+                          {pathname.includes('today')
+                            ? dayjs(getDashDate(defaultValue.date)) <
+                              dayjs(getDashDate(new Date()))
+                              ? getDashDate(defaultValue.date) ===
+                                getDashDate(today)
+                                ? 'Move today'
+                                : 'Move here'
+                              : 'Move next'
+                            : 'Move today'}
+                        </span>
+                      </button>
+                    )
                   ))}
                 <button
                   type="button"
@@ -526,6 +591,7 @@ const getRanks = async (
   categoryId: string,
   today?: Date
 ) => {
+  console.log('get Ranks', date);
   let todayRank = null;
   if (date) {
     const todayRes = await fetch(`/api/plot?date=${getDashDate(date)}`);
@@ -538,6 +604,7 @@ const getRanks = async (
     todayRank = sortedTodayPlots.length
       ? sortedTodayPlots[0].todayRank?.genNext()
       : LexoRank.middle();
+    console.log('todayRank', todayRank);
   }
 
   let inboxRank = null;
@@ -550,8 +617,7 @@ const getRanks = async (
 
   let categoryRank = null;
   if (categoryId) {
-    const categoryRes = await fetch(`/api/plot?categoryId=${categoryId}`
-    );
+    const categoryRes = await fetch(`/api/plot?categoryId=${categoryId}`);
     const categoryPlots = await categoryRes.json();
     const sortedCategoryPlots = sortRank(
       categoryPlots.map((item: any) => parseRank(item)) || [],
