@@ -336,10 +336,11 @@ const PlotInputOverlay = () => {
           </div>
           <div className="flex gap-1 items-center">
             <input
-              type="datetime-local"
+              type="date"
               className="text-sm"
               {...form.register('date')}
               disabled={isPending}
+              value={getDashDate(form.watch('date') || '')}
             />
           </div>
         </div>
@@ -591,7 +592,6 @@ const getRanks = async (
   categoryId: string,
   today?: Date
 ) => {
-  console.log('get Ranks', date);
   let todayRank = null;
   if (date) {
     const todayRes = await fetch(`/api/plot?date=${getDashDate(date)}`);
@@ -604,7 +604,6 @@ const getRanks = async (
     todayRank = sortedTodayPlots.length
       ? sortedTodayPlots[0].todayRank?.genNext()
       : LexoRank.middle();
-    console.log('todayRank', todayRank);
   }
 
   let inboxRank = null;

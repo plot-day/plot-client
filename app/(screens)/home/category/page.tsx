@@ -1,5 +1,8 @@
 'use client';
-import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
+import {
+  DraggableItem,
+  DragHandle,
+} from '@/components/draggable/DraggableItem';
 import DraggableList from '@/components/draggable/DraggableList';
 import IconHolder from '@/components/icon/IconHolder';
 import Loader from '@/components/loader/Loader';
@@ -15,6 +18,8 @@ import { IoCheckmarkSharp } from 'react-icons/io5';
 import GroupTab from '../_components/GroupTab';
 import PlotItem from '../_components/PlotItem';
 import CategoryItem from './_components/CategoryItem';
+import dayjs from 'dayjs';
+import { getDashDate } from '@/util/date';
 
 const Page = () => {
   const pathname = usePathname();
@@ -31,19 +36,54 @@ const Page = () => {
   const { mutate } = useAtomValue(plotMutation);
 
   const [group, setGroup] = useState('all');
+  const [type, setType] = useState(currentCategory?.defaultPlotType);
 
+  // TASK
   const todos = useMemo(
-    () => (plots || []).filter((item) => item.status === 'todo' && !item.date),
+    () =>
+      (plots || []).filter(
+        (item) => item.type === 'task' && item.status === 'todo' && !item.date
+      ),
     [plots]
   );
 
   const scheduled = useMemo(
-    () => (plots || []).filter((item) => item.status === 'todo' && item.date),
+    () =>
+      (plots || []).filter(
+        (item) => item.type === 'task' && item.status === 'todo' && item.date
+      ),
     [plots]
   );
 
   const done = useMemo(
-    () => (plots || []).filter((item) => item.status === 'done'),
+    () =>
+      (plots || []).filter(
+        (item) => item.type === 'task' && item.status === 'done'
+      ),
+    [plots]
+  );
+
+  // EVENT
+  const events = useMemo(
+    () => (plots || []).filter((item) => item.type === 'event'),
+    [plots]
+  );
+
+  const upcoming = useMemo(
+    () =>
+      (plots || []).filter(
+        (item) =>
+          item.type === 'event' &&
+          (!item.date ||
+            getDashDate(item.date) === getDashDate(dayjs()) ||
+            dayjs(getDashDate(item.date)).isAfter(getDashDate(dayjs())))
+      ),
+    [plots]
+  );
+
+  // NOTE
+  const notes = useMemo(
+    () => (plots || []).filter((item) => item.type === 'note'),
     [plots]
   );
 
@@ -68,12 +108,11 @@ const Page = () => {
         setCurrentCategory(defaultCategory);
       }
     }
+    setType(currentCategory?.defaultPlotType);
   }, [currentCategory, categories]);
 
   return (
     <div className="p-8 flex flex-col justify-between h-full">
-      {/* Nav */}
-      <div>
       {currentCategory && (
         <>
           <div className="my-2 flex justify-between items-center">
@@ -82,7 +121,9 @@ const Page = () => {
                 {currentCategory?.icon}
               </IconHolder>
               <div>
-                <p className="text-sm font-medium">{currentCategory?.group?.title}</p>
+                <p className="text-sm font-medium">
+                  {currentCategory?.group?.title}
+                </p>
                 <h2 className="block text-3xl font-extrabold">
                   {currentCategory?.title}
                 </h2>
@@ -97,88 +138,176 @@ const Page = () => {
               Edit Category
             </Link>
           </div>
-          <div className="w-full flex justify-end gap-4">
-            <button
-              type="button"
-              className={cn(
-                'flex gap-1 items-center text-sm font-semibold',
-                view === 'scheduled' ? '' : 'text-gray-400'
+          <div className="w-full flex justify-between gap-4">
+            <div className="flex gap-2 items-center pl-2">
+              <div
+                className={`w-[1rem] h-[1rem] ${
+                  type === 'task'
+                    ? 'border-black border rounded-[0.25rem]'
+                    : 'border-gray-300 border rounded-[0.25rem]'
+                }`}
+                onClick={() => {
+                  setType('task');
+                }}
+              />
+              <div
+                className={`w-[1rem] h-[1rem] ${
+                  type === 'event'
+                    ? 'border-black border rounded-full'
+                    : 'border-gray-300 border rounded-full'
+                }`}
+                onClick={() => {
+                  setType('event');
+                }}
+              />
+              <div
+                className={`w-[1rem] h-[1rem] ${
+                  type === 'note'
+                    ? 'border-t border-black mt-[1rem]'
+                    : 'border-t border-gray-300 mt-[1rem]'
+                }`}
+                onClick={() => {
+                  setType('note');
+                }}
+              />
+            </div>
+            <div className="flex gap-2 items-center">
+              {type === 'note' ? (
+                <></>
+              ) : type === 'event' ? (
+                <button
+                  type="button"
+                  className={cn(
+                    'flex gap-1 items-center text-sm font-semibold',
+                    view === 'past' ? '' : 'text-gray-400'
+                  )}
+                  onClick={() => {
+                    setView((prev) => (prev === 'past' ? 'default' : 'past'));
+                  }}
+                >
+                  <IoCheckmarkSharp /> Past{' '}
+                  {events && upcoming ? events.length - upcoming.length : 0}
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex gap-1 items-center text-sm font-semibold',
+                      view === 'scheduled' ? '' : 'text-gray-400'
+                    )}
+                    onClick={() => {
+                      setView((prev) =>
+                        prev === 'scheduled' ? 'default' : 'scheduled'
+                      );
+                    }}
+                  >
+                    <IoCheckmarkSharp /> Scheduled{' '}
+                    {scheduled ? scheduled?.length : 0}
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex gap-1 items-center text-sm font-semibold',
+                      view === 'done' ? '' : 'text-gray-400'
+                    )}
+                    onClick={() => {
+                      setView((prev) => (prev === 'done' ? 'default' : 'done'));
+                    }}
+                  >
+                    <IoCheckmarkSharp /> Done {plots && done ? done?.length : 0}
+                  </button>
+                </>
               )}
-              onClick={() => {
-                setView((prev) => prev === 'scheduled' ? 'default' : 'scheduled');
-              }}
-            >
-              <IoCheckmarkSharp /> Scheduled {plots && scheduled ? scheduled?.length : 0}
-            </button>
-            <button
-              type="button"
-              className={cn(
-                'flex gap-1 items-center text-sm font-semibold',
-                view === 'done' ? '' : 'text-gray-400'
-              )}
-              onClick={() => {
-                setView((prev) => prev === 'done' ? 'default' : 'done');
-              }}
-            >
-              <IoCheckmarkSharp /> Done {plots && done ? done?.length : 0}
-            </button>
+            </div>
           </div>
         </>
       )}
-      {isFetchingPlots && isFetchingCategories ? (
-        <div
-          className={cn(
-            'w-full h-full flex justify-center items-center',
-            plots?.length ? 'py-10' : 'py-72'
-          )}
-        >
-          <Loader />
-        </div>
-      ) : (
-        <DraggableList
-          className="space-y-6 mt-4 h-[50dvh] overflow-y-scroll scrollbar-hide"
-          items={
-            view === 'done'
-              ? (done && todos && [...done, ...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
-                []
-              : view === 'default' ? (todos &&
-                  [...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank))) ||
-                [] :  [...scheduled, ...todos].sort((a, b) => a.todayRank?.compareTo(b.todayRank)) ||
-                []
-          }
-          rankKey="categoryRank"
-          updateChange={updateChangeHandler}
-          renderItem={(item) => (
-            <DraggableItem id={item.id} className="flex items-center gap-2 [&_.date]:block [&_.category]:hidden">
-              <DragHandle />
-              <PlotItem key={item.id} {...item} />
-            </DraggableItem>
-          )}
-        />
-      )}
+
+      {/* Plots */}
+      <div>
+        {isFetchingPlots && isFetchingCategories ? (
+          <div
+            className={cn(
+              'w-full h-full flex justify-center items-center',
+              plots?.length ? 'py-10' : 'py-72'
+            )}
+          >
+            <Loader />
+          </div>
+        ) : (
+          <DraggableList
+            className="space-y-6 mt-4 h-[50dvh] pb-10 overflow-y-scroll scrollbar-hide"
+            items={
+              // Note
+              type === 'note'
+                ? notes?.sort((a, b) => a.todayRank?.compareTo(b.todayRank)) ||
+                  []
+                : // Event
+                type === 'event'
+                ? view === 'past'
+                  ? events?.sort((a, b) =>
+                      a.todayRank?.compareTo(b.todayRank)
+                    ) || []
+                  : upcoming
+                : // Todo
+                view === 'done'
+                ? (done &&
+                    todos &&
+                    [...done, ...todos].sort((a, b) =>
+                      a.todayRank?.compareTo(b.todayRank)
+                    )) ||
+                  []
+                : view === 'scheduled'
+                ? [...scheduled, ...todos].sort((a, b) =>
+                    a.todayRank?.compareTo(b.todayRank)
+                  ) || []
+                : (todos &&
+                    [...todos].sort((a, b) =>
+                      a.todayRank?.compareTo(b.todayRank)
+                    )) ||
+                  []
+            }
+            rankKey="categoryRank"
+            updateChange={updateChangeHandler}
+            renderItem={(item) => (
+              <DraggableItem
+                id={item.id}
+                className="flex items-center gap-2 [&_.date]:block [&_.category]:hidden"
+              >
+                <DragHandle />
+                <PlotItem key={item.id} {...item} />
+              </DraggableItem>
+            )}
+          />
+        )}
       </div>
 
       {/* Categories */}
       <div>
-      <GroupTab id="category-page-group-tab" group={group} setGroup={setGroup} />
-      <ul className="flex gap-2 overflow-x-scroll scrollbar-hide mt-4">
-        {categories?.map((category) => (
-          <div
-            key={category.id}
-            className={cn(
-              'flex flex-col items-center',
-              category.id !== currentCategory?.id ? 'opacity-30' : ''
-            )}
-          >
-            <CategoryItem
-              {...category}
-              onClick={() => {
-                setCurrentCategory(category);
-              }}
-            />
-          </div>
-        ))}
-      </ul>
+        <GroupTab
+          id="category-page-group-tab"
+          group={group}
+          setGroup={setGroup}
+        />
+        <ul className="flex gap-2 overflow-x-scroll scrollbar-hide mt-4">
+          {categories?.map((category) => (
+            <div
+              key={category.id}
+              className={cn(
+                'flex flex-col items-center',
+                category.id !== currentCategory?.id ? 'opacity-30' : ''
+              )}
+            >
+              <CategoryItem
+                {...category}
+                onClick={() => {
+                  setCurrentCategory(category);
+                }}
+              />
+            </div>
+          ))}
+        </ul>
       </div>
     </div>
   );

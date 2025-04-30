@@ -1,5 +1,7 @@
 import React from 'react';
-import AutoSizeInput, { AutoSizeInputProps } from '@/components/input/AutoSizeInput';
+import AutoSizeInput, {
+  AutoSizeInputProps,
+} from '@/components/input/AutoSizeInput';
 
 interface NumberFieldInputProps extends AutoSizeInputProps {
   label: string;
