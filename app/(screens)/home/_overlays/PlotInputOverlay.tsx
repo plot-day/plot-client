@@ -211,7 +211,12 @@ const PlotInputOverlay = () => {
   };
 
   useEffect(() => {
-    setEmoji(EMOJI_ID, category?.icon || defaultCategory?.icon || '');
+    setEmoji(
+      EMOJI_ID,
+      defaultValue && defaultValue?.categoryId === category?.id
+        ? defaultValue?.icon || ''
+        : category?.icon || defaultCategory?.icon || ''
+    );
     form.setValue(
       'type',
       category?.defaultPlotType || defaultCategory?.defaultPlotType || 'task'

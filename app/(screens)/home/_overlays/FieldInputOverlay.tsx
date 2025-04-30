@@ -1,3 +1,5 @@
+'use client';
+
 import OverlayForm from '@/components/overlay/OverlayForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'next/navigation';
@@ -20,12 +22,16 @@ const FieldInputOverlay = () => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log(data);
   };
 
   return (
-    <OverlayForm id="field-input" form={form} onSubmit={onSubmit}>
+    <OverlayForm<z.infer<typeof formSchema>>
+      id="field-input"
+      form={form}
+      onSubmit={onSubmit}
+    >
       {type === 'number' && <NumberFieldInput />}
       {type === 'text' && <TextFieldInput />}
       {type === 'date' && <DateFieldInput />}

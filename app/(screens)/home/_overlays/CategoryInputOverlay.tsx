@@ -380,7 +380,7 @@ const FieldItem = ({
       >
         <FaTrashCan />
       </button>
-      <a
+      {/* <Link
         href={`${base}&field-input=show&fieldId=${id}&type=${type}`}
         className="p-1 text-xs"
         onClick={() => {
@@ -388,7 +388,7 @@ const FieldItem = ({
         }}
       >
         <FaPencil />
-      </a>
+      </Link> */}
     </DraggableItem>
   );
 };

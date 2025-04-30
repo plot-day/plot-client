@@ -8,6 +8,7 @@ import GroupListOverlay from './home/_overlays/GroupListOverlay';
 import { Suspense } from 'react';
 import PlotDeleteConformOverlay from './home/_overlays/PlotDeleteConfirmOverlay';
 import YearMonthNavOverlay from '@/components/date/YearMonthNavOverlay';
+import FieldInputOverlay from './home/_overlays/FieldInputOverlay';
 
 export default function RootLayout({
   children,
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <div className="relative max-w-[1280px] mx-auto">
       {/* content */}
-      <main className="w-full h-[calc(100dvh-6rem)] overflow-scroll">{children}</main>
+      <main className="w-full h-[calc(100dvh-6rem)] overflow-scroll">
+        {children}
+      </main>
       {/* nav */}
       <Nav className="h-[6rem]" />
       {/* overlays */}
@@ -32,6 +35,7 @@ export default function RootLayout({
           <CategorySelectOverlay />
           <CategoryListOverlay />
           <CategoryInputOverlay />
+          <FieldInputOverlay />
           <GroupListOverlay />
           <EmojiOverlay />
           <PlotDeleteConformOverlay />
