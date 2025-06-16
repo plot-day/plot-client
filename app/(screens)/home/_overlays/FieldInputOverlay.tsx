@@ -1,46 +1,25 @@
 'use client';
 
-import OverlayForm from '@/components/overlay/OverlayForm';
-import { zodResolver } from '@hookform/resolvers/zod';
+import Overlay from '@/components/overlay/Overlay';
 import { useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-const formSchema = z.object({
-  title: z.string().min(1),
-});
+import TagsFieldInput from './TagsFieldInputOverlay';
 
 const FieldInputOverlay = () => {
   const params = useSearchParams();
-  const fieldId = params.get('fieldId');
+  const fieldId = params.get('fieldId') || '';
   const type = params.get('type');
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-    },
-  });
-
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-  };
-
   return (
-    <OverlayForm<z.infer<typeof formSchema>>
-      id="field-input"
-      form={form}
-      onSubmit={onSubmit}
-    >
+    <Overlay id="field-input" hideX={true}>
       {type === 'number' && <NumberFieldInput />}
       {type === 'text' && <TextFieldInput />}
       {type === 'date' && <DateFieldInput />}
       {type === 'timestamp' && <TimestampFieldInput />}
-      {type === 'tags' && <TagsFieldInput />}
+      {type === 'tags' && <TagsFieldInput fieldId={fieldId} />}
       {type === 'options' && <OptionsFieldInput />}
       {type === 'image' && <ImageFieldInput />}
       {type === 'url' && <UrlFieldInput />}
-    </OverlayForm>
+    </Overlay>
   );
 };
 
@@ -58,10 +37,6 @@ const DateFieldInput = () => {
 
 const TimestampFieldInput = () => {
   return <div>TimestampFieldInput</div>;
-};
-
-const TagsFieldInput = () => {
-  return <div>TagsFieldInput</div>;
 };
 
 const OptionsFieldInput = () => {

@@ -110,7 +110,6 @@ const CategoryInputOverlay = () => {
       icon: 'FaEllipsis',
       label: '',
       type: 'text',
-      option: [],
     };
     setFields((prev) => [...prev, newField]);
   };
@@ -380,15 +379,14 @@ const FieldItem = ({
       >
         <FaTrashCan />
       </button>
-      {/* <Link
-        href={`${base}&field-input=show&fieldId=${id}&type=${type}`}
-        className="p-1 text-xs"
-        onClick={() => {
-          console.log(id);
-        }}
-      >
-        <FaPencil />
-      </Link> */}
+      {type === 'tags' && (
+        <Link
+          href={`${base}&field-input=show&fieldId=${id}&type=${type}`}
+          className="p-1 text-xs"
+        >
+          <FaPencil />
+        </Link>
+      )}
     </DraggableItem>
   );
 };

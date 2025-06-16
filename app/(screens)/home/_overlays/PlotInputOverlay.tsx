@@ -193,6 +193,8 @@ const PlotInputOverlay = () => {
           const key = keyStr as keyof plotFormSchemaType;
           if (key.toLowerCase().includes('rank') && defaultValue[key]) {
             form.setValue(key, defaultValue[key].toString());
+          } else if (key === 'date' && defaultValue[key]) {
+            form.setValue(key, getDashDate(defaultValue[key]));
           } else {
             form.setValue(key, defaultValue[key]);
           }
@@ -535,14 +537,19 @@ const PlotInputOverlay = () => {
                             category?.id || defaultCategory?.id || '',
                             today
                           );
+
                           const date = pathname.includes('today')
                             ? dayjs(getDashDate(defaultValue.date)) <
                               dayjs(getDashDate(new Date()))
-                              ? getDashDate(today)
+                              ? getDashDate(defaultValue.date) ===
+                                getDashDate(today)
+                                ? getDashDate(new Date())
+                                : getDashDate(today)
                               : dayjs(defaultValue.date)
                                   .add(1, 'day')
                                   .format('YYYY-MM-DD')
                             : getDashDate(new Date());
+
                           mutate({
                             id: defaultValue.id,
                             date,
