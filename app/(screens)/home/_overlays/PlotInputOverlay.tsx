@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/button/Button';
+import CheckButton from '@/components/button/CheckButton';
 import EmojiInput from '@/components/emoji/EmojiInput';
 import DateFieldInput from '@/components/field/DateFieldInput';
 import NumberFieldInput from '@/components/field/NumberFieldInput';
@@ -98,7 +99,7 @@ const PlotInputOverlay = () => {
   });
 
   const fieldInputHandler = (key: string) => {
-    const setFieldFunc = (v: string | number) => {
+    const setFieldFunc = (v: string | number | boolean) => {
       form.setValue('fieldValues', { ...form.watch('fieldValues'), [key]: v });
     };
     return setFieldFunc;
@@ -384,6 +385,28 @@ const PlotInputOverlay = () => {
                       label={label}
                       {...option}
                     />
+                  )}
+                  {type === 'checkbox' && (
+                    <div
+                      className="flex items-center gap-1"
+                      onClick={() => {
+                        const prev = form.getValues('fieldValues')
+                          ? form.getValues('fieldValues')[key]
+                          : false;
+                        fieldInputHandler(key)(!prev);
+                      }}
+                    >
+                      <span className="font-extrabold">{label}</span>
+                      <CheckButton
+                        checked={
+                          form.watch('fieldValues')
+                            ? form.watch('fieldValues')[key]
+                            : false
+                        }
+                        onChecked={() => {}}
+                        {...option}
+                      />
+                    </div>
                   )}
                   {type === 'date' && (
                     <DateFieldInput

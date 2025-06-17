@@ -2,7 +2,7 @@ import { ClassNameProps } from '@/types/className';
 import { cn } from '@/util/cn';
 import { useEffect, useState } from 'react';
 
-interface CheckButtonProps extends ClassNameProps {
+export interface CheckButtonProps extends ClassNameProps {
   checked: boolean;
   onChecked: (checked: boolean) => void;
   checkedCheckClass?: string;
@@ -14,10 +14,9 @@ const CheckButton = ({
   checkedCheckClass,
   className,
 }: CheckButtonProps) => {
-
   const checkHandler = () => {
     onChecked(!checked);
-  }
+  };
 
   return (
     <button

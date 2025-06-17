@@ -1,1 +1,11 @@
-export const FIELD_TYPES = ['Text', 'Number', 'Date', 'Timestamp', 'Tags', 'Options', /*'Image'*/, 'URL'];
+export const FIELD_TYPES = [
+  'Text',
+  'Number',
+  'Checkbox',
+  'Date',
+  'Timestamp',
+  'Tags',
+  'Options' /*'Image'*/,
+  ,
+  'URL',
+];
