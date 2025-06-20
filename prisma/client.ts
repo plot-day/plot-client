@@ -1,10 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { Pool } from '@neondatabase/serverless';
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
 const neonPool = new Pool({
-  connectionString: process.env.DIRECT_URL,
+  connectionString: process.env.DATABASE_URL,
   max: 10,
   idleTimeoutMillis: 5000,
   connectionTimeoutMillis: 2000,
@@ -22,7 +24,7 @@ export const prisma =
   new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DIRECT_URL,
+        url: process.env.DATABASE_URL,
       },
     },
   });

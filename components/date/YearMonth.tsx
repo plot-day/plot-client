@@ -1,14 +1,19 @@
+import { ClassNameProps } from '@/types/className';
+import { cn } from '@/util/cn';
 import React from 'react';
 
-interface YearMonthProps {
+interface YearMonthProps extends ClassNameProps {
   date: Date;
   onClick?: React.MouseEventHandler;
 }
 
-const YearMonth = ({ date, onClick }: YearMonthProps) => {
+const YearMonth = ({ date, onClick, className }: YearMonthProps) => {
   return (
     <div
-      className="flex flex-col items-start font-extrabold leading-tight"
+      className={cn(
+        'flex flex-col items-start font-extrabold leading-tight',
+        className
+      )}
       onClick={onClick}
     >
       <div className="text-lg">{date.getFullYear()}</div>

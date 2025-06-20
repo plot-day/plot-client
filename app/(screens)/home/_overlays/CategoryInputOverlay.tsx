@@ -1,6 +1,9 @@
 'use client';
 
-import { DraggableItem, DragHandle } from '@/components/draggable/DraggableItem';
+import {
+  DraggableItem,
+  DragHandle,
+} from '@/components/draggable/DraggableItem';
 import DraggableList from '@/components/draggable/DraggableList';
 import EmojiInput from '@/components/emoji/EmojiInput';
 import IconPicker from '@/components/icon/IconPicker';
@@ -29,7 +32,7 @@ const formSchema = z.object({
   icon: z.string().min(1, 'Please select icon.'),
   title: z.string().min(1, 'Please enter the title.'),
   groupId: z.string().optional(),
-  defaultPlotType: z.string().optional(),
+  enableTodo: z.boolean().optional(),
   fields: z.array(z.any()).optional(),
   isDefault: z.boolean().optional(),
   rank: z.string().optional(),
@@ -46,8 +49,9 @@ const CategoryInputOverlay = () => {
   const [emoji, setEmoji] = useAtom(emojiAtom);
   const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
-  const [defaultPlotType, setType] = useState('task');
-  const [group, setGroup] = useState(groups?.find((item) => item.isDefault)?.id || '');
+  const [group, setGroup] = useState(
+    groups?.find((item) => item.isDefault)?.id || ''
+  );
   const [fields, setFields] = useState<FieldType[]>([]);
   const [error, setError] = useState('');
 
@@ -71,20 +75,30 @@ const CategoryInputOverlay = () => {
         }
       });
 
-      const sortedCategories = categories?.sort((a, b) => a.rank?.compareTo(b.rank));
-      const lastCategory = sortedCategories && sortedCategories[sortedCategories.length - 1];
+      const sortedCategories = categories?.sort((a, b) =>
+        a.rank?.compareTo(b.rank)
+      );
+      const lastCategory =
+        sortedCategories && sortedCategories[sortedCategories.length - 1];
 
-      await mutate({ 
+      await mutate({
         ...values,
         id: categoryId || undefined,
         groupId: group,
         fields,
-        rank: categoryId ? undefined : lastCategory?.rank.genNext().toString() || LexoRank.middle().toString(),
-        defaultPlotType,
+        rank: categoryId
+          ? undefined
+          : lastCategory?.rank.genNext().toString() ||
+            LexoRank.middle().toString(),
+        enableTodo: true,
         isDefault: categoryId ? undefined : false,
       });
     } catch (error: any) {
-      setError(typeof error === 'string' ? error : error?.message || 'An Error occured.');
+      setError(
+        typeof error === 'string'
+          ? error
+          : error?.message || 'An Error occured.'
+      );
       throw error;
     }
   };
@@ -95,7 +109,6 @@ const CategoryInputOverlay = () => {
       icon: 'FaEllipsis',
       label: '',
       type: 'text',
-      option: [],
     };
     setFields((prev) => [...prev, newField]);
   };
@@ -105,14 +118,17 @@ const CategoryInputOverlay = () => {
       setError('');
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
       if (categoryId) {
-        const category = categories?.find((category) => category.id === categoryId);
+        const category = categories?.find(
+          (category) => category.id === categoryId
+        );
         setEmoji(EMOJI_ID, category?.icon || '');
         form.setValue('icon', category?.icon || '');
-        setGroup(category?.groupId || groups?.find((item) => item.isDefault)?.id || '');
+        setGroup(
+          category?.groupId || groups?.find((item) => item.isDefault)?.id || ''
+        );
         form.setValue('title', category?.title || '');
         form.setValue('fields', category?.fields);
         setFields(category?.fields || []);
-        setType(category?.defaultPlotType || 'task');
       } else {
         setGroup(groups?.find((item) => item.isDefault)?.id || '');
         setEmoji(EMOJI_ID, '');
@@ -135,9 +151,23 @@ const CategoryInputOverlay = () => {
 
   useEffect(() => {
     if (emoji.get(EMOJI_ID)) {
-      form.setValue('icon', emoji.get(EMOJI_ID) || '', { shouldValidate: true });
+      form.setValue('icon', emoji.get(EMOJI_ID) || '', {
+        shouldValidate: true,
+      });
     }
   }, [emoji.get(EMOJI_ID)]);
+
+  useEffect(() => {
+    if (categoryId) {
+      const category = categories?.find(
+        (category) => category.id === categoryId
+      );
+      if (category?.fields) {
+        setFields(category.fields);
+      }
+    }
+    console.log(params.toString());
+  }, [params.toString()]);
 
   return (
     <OverlayForm
@@ -167,34 +197,6 @@ const CategoryInputOverlay = () => {
           {...form.register('title')}
           className="text-center font-medium bg-gray-100 px-3 py-2.5 rounded-lg"
         />
-        {/* Type */}
-        <Tab
-          id="category-input-type"
-          value={defaultPlotType}
-          setValue={setType}
-          className="text-sm [&_label]:font-semibold w-full [&>li]:p-1"
-          tabs={[
-            {
-              icon: (
-                <div className="w-[1rem] h-[1rem] border-black border rounded-[0.25rem]" />
-              ),
-              label: 'task',
-              value: 'task',
-            },
-            {
-              icon: (
-                <div className="w-[1rem] h-[1rem] border-black border rounded-full" />
-              ),
-              label: 'event',
-              value: 'event',
-            },
-            {
-              icon: <div className="w-[1rem] h-[1rem] border-black border-t mt-[1rem]" />,
-              label: 'note',
-              value: 'note',
-            },
-          ]}
-        />
       </div>
       {/* Group */}
       <div className="w-full flex flex-col items-center mb-6">
@@ -211,10 +213,12 @@ const CategoryInputOverlay = () => {
           className="text-sm w-full [&_label]:font-semibold [&>li]:p-1"
           tabs={[
             isPending ? <Loader key="loader" className="w-4 h-4" /> : undefined,
-            ...(groups?.sort((a, b) => a.rank?.compareTo(b.rank)).map((group) => ({
-              label: group.title,
-              value: group.id?.toString(),
-            })) || []),
+            ...(groups
+              ?.sort((a, b) => a.rank?.compareTo(b.rank))
+              .map((group) => ({
+                label: group.title,
+                value: group.id?.toString(),
+              })) || []),
           ]}
         />
       </div>
@@ -290,7 +294,10 @@ const FieldItem = ({
   setFields: Dispatch<SetStateAction<FieldType[]>>;
 }) => {
   const removeHandler = (i: number) => {
-    setFields((prev) => [...prev.slice(0, i), ...prev.slice(i + 1, prev.length)]);
+    setFields((prev) => [
+      ...prev.slice(0, i),
+      ...prev.slice(i + 1, prev.length),
+    ]);
   };
 
   const labelChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -308,7 +315,11 @@ const FieldItem = ({
   const changeHandler = (key: string, value: string) => {
     setFields((prev) => {
       const newItem = { ...prev[idx], [key]: value };
-      return [...prev.slice(0, idx), newItem, ...prev.slice(idx + 1, prev.length)];
+      return [
+        ...prev.slice(0, idx),
+        newItem,
+        ...prev.slice(idx + 1, prev.length),
+      ];
     });
   };
 
@@ -348,6 +359,14 @@ const FieldItem = ({
       >
         <FaTrashCan />
       </button>
+      {type === 'tag' && (
+        <Link
+          href={`${base}&field-input=show&fieldId=${id}&type=${type}`}
+          className="p-1 text-xs"
+        >
+          <FaPencil />
+        </Link>
+      )}
     </DraggableItem>
   );
 };

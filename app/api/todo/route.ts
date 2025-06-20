@@ -14,22 +14,37 @@ export async function GET(req: NextRequest) {
   }
 
   const searchParams = req.nextUrl.searchParams;
-  
+
   const dateParam = searchParams.get('date');
-  
+  const date = dateParam
+    ? isNaN(new Date(dateParam).getTime())
+      ? null
+      : dateParam
+    : undefined;
+  const categoryId = searchParams.get('categoryId') || undefined;
+  const status = searchParams.get('status') || undefined;
+  const before = searchParams.get('before') || undefined;
+
   try {
-    const data = await prisma.log.findMany({
+    const data = await prisma.todo.findMany({
       where: {
         userId: session.user.id,
+        date: before
+          ? {
+              lt: before,
+            }
+          : date,
+        categoryId,
+        status,
       },
-      include: { plot: true },
+      include: { category: true },
       orderBy: [{ createdAt: 'asc' }],
     });
 
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to fetch logs', { status: 500 });
+    return new Response('Failed to fetch todos', { status: 500 });
   }
 }
 
@@ -44,17 +59,17 @@ export async function POST(req: Request) {
 
   const reqData = await req.json();
   try {
-    const data = await prisma.log.create({
+    const data = await prisma.todo.create({
       data: {
         ...reqData,
         userId: session.user.id,
       },
-      include: { plot: true },
+      include: { category: true },
     });
 
     return new Response(JSON.stringify(data), { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to create log', { status: 500 });
+    return new Response('Failed to create todo', { status: 500 });
   }
 }
