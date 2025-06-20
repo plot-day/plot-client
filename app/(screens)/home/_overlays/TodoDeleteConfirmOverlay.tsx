@@ -1,8 +1,8 @@
 'use client';
 
 import OverlayForm from '@/components/overlay/OverlayForm';
-import { plotsTodayAtom } from '@/store/plot';
-import { plotFormDataAtom } from '@/store/plot';
+import { todosTodayAtom } from '@/store/todo';
+import { todoFormDataAtom } from '@/store/todo';
 import { categoryPageAtom, todayAtom } from '@/store/ui';
 import { removeAtom } from '@/util/query';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,11 +16,10 @@ const formSchema = z.object({});
 
 type schemaType = z.infer<typeof formSchema>;
 
-const PlotDeleteConformOverlay = () => {
+const TodoDeleteConformOverlay = () => {
   const router = useRouter();
-  const pathname = usePathname();
 
-  const defaultValues = useAtomValue(plotFormDataAtom);
+  const defaultValues = useAtomValue(todoFormDataAtom);
   const today = useAtomValue(todayAtom);
   const categoryPage = useAtomValue(categoryPageAtom);
 
@@ -33,12 +32,9 @@ const PlotDeleteConformOverlay = () => {
   const submitHandler = async () => {
     try {
       setIsPending(true);
-      const response = await fetch(
-        `/api/plot/${defaultValues?.id}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await fetch(`/api/todo/${defaultValues?.id}`, {
+        method: 'DELETE',
+      });
 
       router.back();
 
@@ -46,10 +42,11 @@ const PlotDeleteConformOverlay = () => {
         throw new Error(response.status + ' ' + response.statusText);
       }
 
-      defaultValues?.id && removeAtom(defaultValues?.id, ['plot', today]);
-      defaultValues?.id && removeAtom(defaultValues?.id, ['plot', null]);
-      defaultValues?.id && removeAtom(defaultValues?.id, ['plot-overdue']);
-      defaultValues?.id && removeAtom(defaultValues?.id, ['plot', categoryPage?.id]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['todo', today]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['todo', null]);
+      defaultValues?.id && removeAtom(defaultValues?.id, ['todo-overdue']);
+      defaultValues?.id &&
+        removeAtom(defaultValues?.id, ['todo', categoryPage?.id]);
       setIsPending(false);
     } catch (error) {
       setIsPending(false);
@@ -79,4 +76,4 @@ const PlotDeleteConformOverlay = () => {
   );
 };
 
-export default PlotDeleteConformOverlay;
+export default TodoDeleteConformOverlay;

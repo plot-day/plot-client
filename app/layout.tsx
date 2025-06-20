@@ -29,7 +29,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
-      <body>
+      <body className="bg-gray-100">
         <JotaiQueryClientProvider>
           <JotaiProvider>{children}</JotaiProvider>
         </JotaiQueryClientProvider>

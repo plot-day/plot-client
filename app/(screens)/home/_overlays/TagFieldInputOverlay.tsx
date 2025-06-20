@@ -6,15 +6,16 @@ import {
 } from '@/components/draggable/DraggableItem';
 import DraggableList from '@/components/draggable/DraggableList';
 import SaveCancelButton from '@/components/overlay/SaveCancelButton';
-import { categoryAtom, fieldMutation, TagsOptionType } from '@/store/category';
-import { parseRank } from '@/util/convert';
+import { categoryAtom, fieldMutation, TagOptionType } from '@/store/category';
+import { todosCategoryAtom, todosTodayAtom } from '@/store/todo';
 import { useAtomValue } from 'jotai';
 import { LexoRank } from 'lexorank';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FaTrashCan } from 'react-icons/fa6';
+import { v4 as uuidv4 } from 'uuid';
 
-interface TagsFieldInputProps {
+interface TagFieldInputProps {
   fieldId: string;
 }
 
@@ -24,7 +25,7 @@ interface TagItem {
   rank: LexoRank | string;
 }
 
-const TagsFieldInput = ({ fieldId }: TagsFieldInputProps) => {
+const TagFieldInput = ({ fieldId }: TagFieldInputProps) => {
   const router = useRouter();
   const params = useSearchParams();
   const categoryId = params.get('categoryId') || '';
@@ -34,6 +35,9 @@ const TagsFieldInput = ({ fieldId }: TagsFieldInputProps) => {
 
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState('');
+
+  const { refetch: refetchToday } = useAtomValue(todosTodayAtom);
+  const { refetch: refetchCategory } = useAtomValue(todosCategoryAtom);
 
   const { data: categories } = useAtomValue(categoryAtom);
   const field = categories
@@ -57,7 +61,7 @@ const TagsFieldInput = ({ fieldId }: TagsFieldInputProps) => {
     setTags((prev) => [
       ...prev,
       {
-        id: tag + rank.toString(),
+        id: uuidv4(),
         title: tag,
         rank,
       },
@@ -102,8 +106,12 @@ const TagsFieldInput = ({ fieldId }: TagsFieldInputProps) => {
           option: { tags: submitTags },
         },
       });
-      router.back();
+      await refetchToday();
+      await refetchCategory();
+
       setIsPending(false);
+
+      router.back();
     } catch (error) {
       if (typeof error === 'string') {
         setError(error);
@@ -117,7 +125,7 @@ const TagsFieldInput = ({ fieldId }: TagsFieldInputProps) => {
 
   useEffect(() => {
     console.log(field?.option);
-    setTags((field?.option as TagsOptionType)?.tags || []);
+    setTags((field?.option as TagOptionType)?.tags || []);
   }, [fieldId]);
 
   return (
@@ -139,9 +147,7 @@ const TagsFieldInput = ({ fieldId }: TagsFieldInputProps) => {
             <button
               type="button"
               className="p-4 text-xs"
-              onClick={() => {
-                removeHandler(id);
-              }}
+              onClick={removeHandler.bind(null, id)}
             >
               <FaTrashCan />
             </button>
@@ -180,9 +186,15 @@ const TagsFieldInput = ({ fieldId }: TagsFieldInputProps) => {
           ))}
         </div>
       )}
-      <SaveCancelButton onSave={submitHandler} isPending={isPending} />
+      <SaveCancelButton
+        onSave={submitHandler}
+        onCancel={() => {
+          router.back();
+        }}
+        isPending={isPending}
+      />
     </>
   );
 };
 
-export default TagsFieldInput;
+export default TagFieldInput;

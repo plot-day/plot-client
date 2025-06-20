@@ -7,7 +7,7 @@ import DraggableList from '@/components/draggable/DraggableList';
 import IconHolder from '@/components/icon/IconHolder';
 import Loader from '@/components/loader/Loader';
 import { categoryAtom } from '@/store/category';
-import { plotMutation, plotsCategoryAtom } from '@/store/plot';
+import { todoMutation, todosCategoryAtom } from '@/store/todo';
 import { categoryPageAtom } from '@/store/ui';
 import { cn } from '@/util/cn';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -16,7 +16,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { IoCheckmarkSharp } from 'react-icons/io5';
 import GroupTab from '../_components/GroupTab';
-import PlotItem from '../_components/PlotItem';
+import TodoItem from '../_components/TodoItem';
 import CategoryItem from './_components/CategoryItem';
 import dayjs from 'dayjs';
 import { getDashDate } from '@/util/date';
@@ -26,65 +26,31 @@ const Page = () => {
 
   const [currentCategory, setCurrentCategory] = useAtom(categoryPageAtom);
   const {
-    data: plots,
-    isFetching: isFetchingPlots,
+    data: todos,
+    isFetching: isFetchingTodos,
     refetch,
-  } = useAtomValue(plotsCategoryAtom);
+  } = useAtomValue(todosCategoryAtom);
   const { data: allCategories, isFetching: isFetchingCategories } =
     useAtomValue(categoryAtom);
   const setCategoryPageAtom = useSetAtom(categoryPageAtom);
-  const { mutate } = useAtomValue(plotMutation);
+  const { mutate } = useAtomValue(todoMutation);
 
   const [group, setGroup] = useState('all');
-  const [type, setType] = useState(currentCategory?.defaultPlotType);
 
   // TASK
-  const todos = useMemo(
-    () =>
-      (plots || []).filter(
-        (item) => item.type === 'task' && item.status === 'todo' && !item.date
-      ),
-    [plots]
+  const todoList = useMemo(
+    () => (todos || []).filter((item) => item.status === 'todo' && !item.date),
+    [todos]
   );
 
   const scheduled = useMemo(
-    () =>
-      (plots || []).filter(
-        (item) => item.type === 'task' && item.status === 'todo' && item.date
-      ),
-    [plots]
+    () => (todos || []).filter((item) => item.status === 'todo' && item.date),
+    [todos]
   );
 
   const done = useMemo(
-    () =>
-      (plots || []).filter(
-        (item) => item.type === 'task' && item.status === 'done'
-      ),
-    [plots]
-  );
-
-  // EVENT
-  const events = useMemo(
-    () => (plots || []).filter((item) => item.type === 'event'),
-    [plots]
-  );
-
-  const upcoming = useMemo(
-    () =>
-      (plots || []).filter(
-        (item) =>
-          item.type === 'event' &&
-          (!item.date ||
-            getDashDate(item.date) === getDashDate(dayjs()) ||
-            dayjs(getDashDate(item.date)).isAfter(getDashDate(dayjs())))
-      ),
-    [plots]
-  );
-
-  // NOTE
-  const notes = useMemo(
-    () => (plots || []).filter((item) => item.type === 'note'),
-    [plots]
+    () => (todos || []).filter((item) => item.status === 'done'),
+    [todos]
   );
 
   const [view, setView] = useState('default');
@@ -108,7 +74,6 @@ const Page = () => {
         setCurrentCategory(defaultCategory);
       }
     }
-    setType(currentCategory?.defaultPlotType);
   }, [currentCategory, categories]);
 
   return (
@@ -139,98 +104,48 @@ const Page = () => {
             </Link>
           </div>
           <div className="w-full flex justify-between gap-4">
-            <div className="flex gap-2 items-center pl-2">
-              <div
-                className={`w-[1rem] h-[1rem] ${
-                  type === 'task'
-                    ? 'border-black border rounded-[0.25rem]'
-                    : 'border-gray-300 border rounded-[0.25rem]'
-                }`}
-                onClick={() => {
-                  setType('task');
-                }}
-              />
-              <div
-                className={`w-[1rem] h-[1rem] ${
-                  type === 'event'
-                    ? 'border-black border rounded-full'
-                    : 'border-gray-300 border rounded-full'
-                }`}
-                onClick={() => {
-                  setType('event');
-                }}
-              />
-              <div
-                className={`w-[1rem] h-[1rem] ${
-                  type === 'note'
-                    ? 'border-t border-black mt-[1rem]'
-                    : 'border-t border-gray-300 mt-[1rem]'
-                }`}
-                onClick={() => {
-                  setType('note');
-                }}
-              />
-            </div>
             <div className="flex gap-2 items-center">
-              {type === 'note' ? (
-                <></>
-              ) : type === 'event' ? (
+              <>
                 <button
                   type="button"
                   className={cn(
                     'flex gap-1 items-center text-sm font-semibold',
-                    view === 'past' ? '' : 'text-gray-400'
+                    view === 'scheduled' ? '' : 'text-gray-400'
                   )}
                   onClick={() => {
-                    setView((prev) => (prev === 'past' ? 'default' : 'past'));
+                    setView((prev) =>
+                      prev === 'scheduled' ? 'default' : 'scheduled'
+                    );
                   }}
                 >
-                  <IoCheckmarkSharp /> Past{' '}
-                  {events && upcoming ? events.length - upcoming.length : 0}
+                  <IoCheckmarkSharp /> Scheduled{' '}
+                  {scheduled ? scheduled?.length : 0}
                 </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex gap-1 items-center text-sm font-semibold',
-                      view === 'scheduled' ? '' : 'text-gray-400'
-                    )}
-                    onClick={() => {
-                      setView((prev) =>
-                        prev === 'scheduled' ? 'default' : 'scheduled'
-                      );
-                    }}
-                  >
-                    <IoCheckmarkSharp /> Scheduled{' '}
-                    {scheduled ? scheduled?.length : 0}
-                  </button>
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex gap-1 items-center text-sm font-semibold',
-                      view === 'done' ? '' : 'text-gray-400'
-                    )}
-                    onClick={() => {
-                      setView((prev) => (prev === 'done' ? 'default' : 'done'));
-                    }}
-                  >
-                    <IoCheckmarkSharp /> Done {plots && done ? done?.length : 0}
-                  </button>
-                </>
-              )}
+                <button
+                  type="button"
+                  className={cn(
+                    'flex gap-1 items-center text-sm font-semibold',
+                    view === 'done' ? '' : 'text-gray-400'
+                  )}
+                  onClick={() => {
+                    setView((prev) => (prev === 'done' ? 'default' : 'done'));
+                  }}
+                >
+                  <IoCheckmarkSharp /> Done {todos && done ? done?.length : 0}
+                </button>
+              </>
             </div>
           </div>
         </>
       )}
 
-      {/* Plots */}
+      {/* Todos */}
       <div>
-        {isFetchingPlots && isFetchingCategories ? (
+        {isFetchingTodos && isFetchingCategories ? (
           <div
             className={cn(
               'w-full h-full flex justify-center items-center',
-              plots?.length ? 'py-10' : 'py-72'
+              todos?.length ? 'py-10' : 'py-72'
             )}
           >
             <Loader />
@@ -239,32 +154,21 @@ const Page = () => {
           <DraggableList
             className="space-y-6 mt-4 h-[50dvh] pb-10 overflow-y-scroll scrollbar-hide"
             items={
-              // Note
-              type === 'note'
-                ? notes?.sort((a, b) => a.todayRank?.compareTo(b.todayRank)) ||
-                  []
-                : // Event
-                type === 'event'
-                ? view === 'past'
-                  ? events?.sort((a, b) =>
-                      a.todayRank?.compareTo(b.todayRank)
-                    ) || []
-                  : upcoming
-                : // Todo
-                view === 'done'
+              // Todo
+              view === 'done'
                 ? (done &&
-                    todos &&
-                    [...done, ...todos].sort((a, b) =>
-                      a.todayRank?.compareTo(b.todayRank)
+                    todoList &&
+                    [...done, ...todoList].sort((a, b) =>
+                      a.categoryRank?.compareTo(b.categoryRank)
                     )) ||
                   []
                 : view === 'scheduled'
-                ? [...scheduled, ...todos].sort((a, b) =>
-                    a.todayRank?.compareTo(b.todayRank)
+                ? [...scheduled, ...todoList].sort((a, b) =>
+                    a.categoryRank?.compareTo(b.categoryRank)
                   ) || []
-                : (todos &&
-                    [...todos].sort((a, b) =>
-                      a.todayRank?.compareTo(b.todayRank)
+                : (todoList &&
+                    [...todoList].sort((a, b) =>
+                      a.categoryRank?.compareTo(b.categoryRank)
                     )) ||
                   []
             }
@@ -276,7 +180,7 @@ const Page = () => {
                 className="flex items-center gap-2 [&_.date]:block [&_.category]:hidden"
               >
                 <DragHandle />
-                <PlotItem key={item.id} {...item} />
+                <TodoItem key={item.id} {...item} />
               </DraggableItem>
             )}
           />

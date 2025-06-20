@@ -14,23 +14,28 @@ export async function GET(req: NextRequest) {
   }
 
   const searchParams = req.nextUrl.searchParams;
-  
+
   const dateParam = searchParams.get('date');
-  const date = dateParam ? (isNaN((new Date(dateParam)).getTime()) ? null : dateParam) : undefined;
+  const date = dateParam
+    ? isNaN(new Date(dateParam).getTime())
+      ? null
+      : dateParam
+    : undefined;
   const categoryId = searchParams.get('categoryId') || undefined;
   const status = searchParams.get('status') || undefined;
   const before = searchParams.get('before') || undefined;
-  const type = searchParams.get('type') || undefined;
+
   try {
-    const data = await prisma.plot.findMany({
+    const data = await prisma.todo.findMany({
       where: {
-        userId: session.user.id, 
-        date: before ? {
-          lt: before,
-        } : date,
+        userId: session.user.id,
+        date: before
+          ? {
+              lt: before,
+            }
+          : date,
         categoryId,
         status,
-        type,
       },
       include: { category: true },
       orderBy: [{ createdAt: 'asc' }],
@@ -39,7 +44,7 @@ export async function GET(req: NextRequest) {
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to fetch plots', { status: 500 });
+    return new Response('Failed to fetch todos', { status: 500 });
   }
 }
 
@@ -54,7 +59,7 @@ export async function POST(req: Request) {
 
   const reqData = await req.json();
   try {
-    const data = await prisma.plot.create({
+    const data = await prisma.todo.create({
       data: {
         ...reqData,
         userId: session.user.id,
@@ -65,6 +70,6 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify(data), { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to create plot', { status: 500 });
+    return new Response('Failed to create todo', { status: 500 });
   }
 }

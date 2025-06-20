@@ -6,30 +6,36 @@ export const DEFAULT_CATEGORIES = [
   {
     title: 'Todo',
     icon: '✅',
-    defaultPlotType: 'task',
+    enableTodo: true,
     fields: [],
     isDefault: true,
   },
   {
     title: 'Schedule',
-    defaultPlotType: 'event',
     icon: '📆',
+    enableTodo: true,
     fields: [],
     isDefault: false,
   },
   {
     title: 'Sleep',
-    defaultPlotType: 'note',
+    enableTodo: false,
     icon: '🌙',
     fields: [
-      { id: uuidv4(), icon: 'FaClock', label: 'Duration', type: 'timestamp', option: [] },
+      {
+        id: uuidv4(),
+        icon: 'FaClock',
+        label: 'Duration',
+        type: 'timestamp',
+        option: [],
+      },
     ],
     isDefault: false,
   },
   {
     title: 'Expense',
     icon: '💸',
-    defaultPlotType: 'note',
+    enableTodo: false,
     fields: [
       {
         id: uuidv4(),
@@ -51,7 +57,7 @@ export const DEFAULT_CATEGORIES = [
   {
     title: 'Mood',
     icon: '🙂',
-    defaultPlotType: 'note',
+    enableTodo: false,
     fields: [
       {
         id: uuidv4(),

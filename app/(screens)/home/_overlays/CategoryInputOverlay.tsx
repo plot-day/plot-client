@@ -32,7 +32,7 @@ const formSchema = z.object({
   icon: z.string().min(1, 'Please select icon.'),
   title: z.string().min(1, 'Please enter the title.'),
   groupId: z.string().optional(),
-  defaultPlotType: z.string().optional(),
+  defaultTodoType: z.string().optional(),
   fields: z.array(z.any()).optional(),
   isDefault: z.boolean().optional(),
   rank: z.string().optional(),
@@ -49,7 +49,7 @@ const CategoryInputOverlay = () => {
   const [emoji, setEmoji] = useAtom(emojiAtom);
   const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
-  const [defaultPlotType, setType] = useState('task');
+  const [defaultTodoType, setType] = useState('task');
   const [group, setGroup] = useState(
     groups?.find((item) => item.isDefault)?.id || ''
   );
@@ -91,7 +91,7 @@ const CategoryInputOverlay = () => {
           ? undefined
           : lastCategory?.rank.genNext().toString() ||
             LexoRank.middle().toString(),
-        defaultPlotType,
+        defaultTodoType,
         isDefault: categoryId ? undefined : false,
       });
     } catch (error: any) {
@@ -130,7 +130,7 @@ const CategoryInputOverlay = () => {
         form.setValue('title', category?.title || '');
         form.setValue('fields', category?.fields);
         setFields(category?.fields || []);
-        setType(category?.defaultPlotType || 'task');
+        setType(category?.defaultTodoType || 'task');
       } else {
         setGroup(groups?.find((item) => item.isDefault)?.id || '');
         setEmoji(EMOJI_ID, '');
@@ -159,6 +159,18 @@ const CategoryInputOverlay = () => {
     }
   }, [emoji.get(EMOJI_ID)]);
 
+  useEffect(() => {
+    if (categoryId) {
+      const category = categories?.find(
+        (category) => category.id === categoryId
+      );
+      if (category?.fields) {
+        setFields(category.fields);
+      }
+    }
+    console.log(params.toString());
+  }, [params.toString()]);
+
   return (
     <OverlayForm
       id="category-input"
@@ -186,36 +198,6 @@ const CategoryInputOverlay = () => {
           placeholder="Enter the title"
           {...form.register('title')}
           className="text-center font-medium bg-gray-100 px-3 py-2.5 rounded-lg"
-        />
-        {/* Type */}
-        <Tab
-          id="category-input-type"
-          value={defaultPlotType}
-          setValue={setType}
-          className="text-sm [&_label]:font-semibold w-full [&>li]:p-1"
-          tabs={[
-            {
-              icon: (
-                <div className="w-[1rem] h-[1rem] border-black border rounded-[0.25rem]" />
-              ),
-              label: 'task',
-              value: 'task',
-            },
-            {
-              icon: (
-                <div className="w-[1rem] h-[1rem] border-black border rounded-full" />
-              ),
-              label: 'event',
-              value: 'event',
-            },
-            {
-              icon: (
-                <div className="w-[1rem] h-[1rem] border-black border-t mt-[1rem]" />
-              ),
-              label: 'note',
-              value: 'note',
-            },
-          ]}
         />
       </div>
       {/* Group */}
@@ -379,7 +361,7 @@ const FieldItem = ({
       >
         <FaTrashCan />
       </button>
-      {type === 'tags' && (
+      {type === 'tag' && (
         <Link
           href={`${base}&field-input=show&fieldId=${id}&type=${type}`}
           className="p-1 text-xs"

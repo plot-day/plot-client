@@ -7,16 +7,6 @@ export const parseRank = (values: any) => ({
       ? LexoRank.parse(values.rank)
       : values.rank
     : undefined,
-  todayRank: values.todayRank
-    ? typeof values.todayRank === 'string'
-      ? LexoRank.parse(values.todayRank)
-      : values.todayRank
-    : undefined,
-  inboxRank: values.inboxRank
-    ? typeof values.inboxRank === 'string'
-      ? LexoRank.parse(values.inboxRank)
-      : values.inboxRank
-    : undefined,
   categoryRank: values.categoryRank
     ? typeof values.categoryRank === 'string'
       ? LexoRank.parse(values.categoryRank)
@@ -32,14 +22,19 @@ export const stringifyRank = (values: any) => ({
 });
 
 export const sortRank = (arr: any[], rankKey: string, desc?: boolean) => {
-  return [...arr].sort((a, b) => desc ? b[rankKey]?.compareTo(a[rankKey]) : a[rankKey]?.compareTo(b[rankKey]));
-}
+  return [...arr].sort((a, b) =>
+    desc ? b[rankKey]?.compareTo(a[rankKey]) : a[rankKey]?.compareTo(b[rankKey])
+  );
+};
 
 export const toCamelCase = (str: string) => {
   const words = str.toLowerCase().split(' ');
-  const camelCases = [words[0], ...words.slice(1, words.length).map(
-    (word) => word[0].toUpperCase() + word.slice(1, word.length)
-  )];
+  const camelCases = [
+    words[0],
+    ...words
+      .slice(1, words.length)
+      .map((word) => word[0].toUpperCase() + word.slice(1, word.length)),
+  ];
   return camelCases.join('');
 };
 
@@ -50,5 +45,7 @@ export const getTimestampStr = (time: number) => {
   const min = timeValue.getMinutes();
   const sec = timeValue.getSeconds();
 
-  return `${hour ? hour + (min || sec ? 'h ' : 'h') : ''}${min ? min + (sec ? 'm ' : 'm') : ''}${sec ? sec + 's' : ''}`
-}
+  return `${hour ? hour + (min || sec ? 'h ' : 'h') : ''}${
+    min ? min + (sec ? 'm ' : 'm') : ''
+  }${sec ? sec + 's' : ''}`;
+};

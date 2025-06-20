@@ -1,19 +1,25 @@
-
 import { ClassNameProps } from '@/types/className';
 import { useState } from 'react';
 import { FaChevronDown, FaChevronRight, FaChevronUp } from 'react-icons/fa6';
-import PlotItem from './PlotItem';
-import { PlotType } from '@/store/plot';
+import TodoItem from './TodoItem';
+import { TodoType } from '@/store/todo';
 
-interface PlotListProps extends ClassNameProps {
+interface TodoListProps extends ClassNameProps {
   title?: string;
-  items: PlotType[];
+  items: TodoType[];
   gap?: number;
   isFolded?: boolean;
   isRightSideArrow?: boolean;
 }
 
-const PlotList = ({ title, items, isFolded, gap, isRightSideArrow, className }: PlotListProps) => {
+const TodoList = ({
+  title,
+  items,
+  isFolded,
+  gap,
+  isRightSideArrow,
+  className,
+}: TodoListProps) => {
   const [hide, setHide] = useState(isFolded);
 
   return (
@@ -49,10 +55,10 @@ const PlotList = ({ title, items, isFolded, gap, isRightSideArrow, className }: 
           isFolded !== undefined && !isRightSideArrow ? 'ml-4' : ''
         }`}
       >
-        {!hide && items?.map((item) => <PlotItem key={item.id} {...item} />)}
+        {!hide && items?.map((item) => <TodoItem key={item.id} {...item} />)}
       </li>
     </ul>
   );
 };
 
-export default PlotList;
+export default TodoList;

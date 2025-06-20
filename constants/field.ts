@@ -4,8 +4,7 @@ export const FIELD_TYPES = [
   'Checkbox',
   'Date',
   'Timestamp',
-  'Tags',
-  'Options' /*'Image'*/,
+  'Tag' /*'Image'*/,
   ,
   'URL',
 ];

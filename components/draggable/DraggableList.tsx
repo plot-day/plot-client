@@ -12,7 +12,7 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import type { ReactNode } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { ClassNameProps } from '@/types/className';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -33,13 +33,26 @@ interface Props<T extends BaseItem> extends ClassNameProps {
 
 const DraggableList = <T extends BaseItem>({
   className,
-  items,
+  items: originalItems,
   rankKey,
   onChange,
   updateChange,
   renderItem,
 }: Props<T>) => {
   const [active, setActive] = useState<Active | null>(null);
+  const [items, setItems] = useState(originalItems);
+
+  useEffect(() => {
+    setItems(
+      originalItems.map((item) => {
+        if (rankKey && typeof (item as any)[rankKey] === 'string') {
+          return { ...item, [rankKey]: LexoRank.parse((item as any)[rankKey]) };
+        } else {
+          return item;
+        }
+      })
+    );
+  }, [originalItems]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -60,23 +73,31 @@ const DraggableList = <T extends BaseItem>({
           const overIndex = items.findIndex(({ id }) => id === over.id);
 
           try {
-            const newRank = getRank(overIndex, items, rankKey, activeIndex < overIndex);
+            const newRank = getRank(
+              overIndex,
+              items,
+              rankKey,
+              activeIndex < overIndex
+            );
             const newItem = rankKey && {
               ...items[activeIndex],
               [rankKey]: newRank,
             };
-            updateChange && newItem && updateChange({ id: newItem.id, [rankKey]: newRank?.toString() });
+            updateChange &&
+              newItem &&
+              updateChange({ id: newItem.id, [rankKey]: newRank?.toString() });
 
             const newArray = arrayMove(items, activeIndex, overIndex);
-            onChange && onChange(
-              newItem
-                ? [
-                    ...newArray.slice(0, overIndex),
-                    newItem,
-                    ...newArray.slice(overIndex + 1, newArray.length),
-                  ]
-                : newArray
-            );
+            onChange &&
+              onChange(
+                newItem
+                  ? [
+                      ...newArray.slice(0, overIndex),
+                      newItem,
+                      ...newArray.slice(overIndex + 1, newArray.length),
+                    ]
+                  : newArray
+              );
           } catch (error) {
             if ((error as Error).message.includes('same rank')) {
               // Reassign rank
@@ -85,7 +106,10 @@ const DraggableList = <T extends BaseItem>({
                 const sortedItems = sortRank(items, rankKey);
                 for (let i = 0; i < sortedItems.length; i++) {
                   if (updateChange) {
-                    await updateChange({ id: sortedItems[i].id, [rankKey]: rank.toString() });
+                    await updateChange({
+                      id: sortedItems[i].id,
+                      [rankKey]: rank.toString(),
+                    });
                     rank = rank.genNext();
                   } else {
                     throw error;

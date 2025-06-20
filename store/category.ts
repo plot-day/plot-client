@@ -5,7 +5,7 @@ import { parseRank, sortRank } from '@/util/convert';
 import { categoryFormSchemaType } from '@/app/(screens)/home/_overlays/CategoryInputOverlay';
 import { LexoRank } from 'lexorank';
 import { replaceAtom, updateAtom } from '@/util/query';
-import { plotsCategoryAtom, plotsInboxAtom, plotsTodayAtom } from './plot';
+import { todosCategoryAtom, todosTodayAtom } from './todo';
 
 export interface CategoryType {
   id: string;
@@ -14,7 +14,7 @@ export interface CategoryType {
   group: GroupType;
   groupId: string;
   userId?: string;
-  defaultPlotType: string;
+  enableTodo: boolean;
   fields: FieldType[];
   isDefault: boolean;
   rank: LexoRank;
@@ -25,24 +25,14 @@ export interface FieldType {
   icon: string;
   label: string;
   type: string;
-  option?:
-    | TagsOptionType
-    | OptionsOptionType
-    | NumberOptionType
-    | DateOptionType;
+  option?: TagOptionType | NumberOptionType | DateOptionType;
 }
 
-export interface TagsOptionType {
+export interface TagOptionType {
   tags: TagType[];
 }
 
 export interface TagType {
-  id: string;
-  title: string;
-  rank: LexoRank | string;
-}
-
-export interface OptionsOptionType {
   id: string;
   title: string;
   rank: LexoRank | string;
@@ -103,12 +93,10 @@ export const categoryMutation = atomWithMutation<
   },
   onSuccess: (data) => {
     updateAtom(data, 'category');
-    const { refetch: refetchTodayPlots } = get(plotsTodayAtom);
-    const { refetch: refetchInboxPlots } = get(plotsInboxAtom);
-    const { refetch: refetchCategoryPlots } = get(plotsCategoryAtom);
-    refetchTodayPlots();
-    refetchInboxPlots();
-    refetchCategoryPlots();
+    const { refetch: refetchTodayTodos } = get(todosTodayAtom);
+    const { refetch: refetchCategoryTodos } = get(todosCategoryAtom);
+    refetchTodayTodos();
+    refetchCategoryTodos();
   },
 }));
 

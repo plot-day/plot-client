@@ -4,7 +4,11 @@ import Button from '@/components/button/Button';
 import IconHolder from '@/components/icon/IconHolder';
 import Loader from '@/components/loader/Loader';
 import Overlay from '@/components/overlay/Overlay';
-import { categoryAtom, CategoryType, selectedCategoryAtom } from '@/store/category';
+import {
+  categoryAtom,
+  CategoryType,
+  selectedCategoryAtom,
+} from '@/store/category';
 import { useAtomValue, useSetAtom } from 'jotai';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -29,7 +33,9 @@ const CategorySelectOverlay = () => {
   const enterHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       router.push(
-        `${pathname}?${params.toString() + '&'}category-input=show&title=${filter}`
+        `${pathname}?${
+          params.toString() + '&'
+        }category-input=show&title=${filter}`
       );
       setFilter('');
     }
@@ -51,10 +57,17 @@ const CategorySelectOverlay = () => {
             categories
               ?.filter(
                 (category) =>
-                  (group === 'all' || (category.group?.id || category.groupId) === group) &&
-                  (!filter || category.title.toLowerCase().includes(filter.toLowerCase()))
+                  (group === 'all' ||
+                    (category.group?.id || category.groupId) === group) &&
+                  (!filter ||
+                    category.title
+                      .toLowerCase()
+                      .includes(filter.toLowerCase())) &&
+                  category.enableTodo
               )
-              .map((category) => <CategorySelectItem key={category.id} {...category} />)
+              .map((category) => (
+                <CategorySelectItem key={category.id} {...category} />
+              ))
           )}
         </ul>
       </Suspense>
@@ -100,7 +113,12 @@ const CategorySelectOverlay = () => {
   );
 };
 
-const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) => {
+const CategorySelectItem = ({
+  id,
+  title,
+  icon,
+  group,
+}: Partial<CategoryType>) => {
   const router = useRouter();
 
   const pathname = usePathname();
@@ -123,8 +141,14 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
   };
 
   return (
-    <li key={title} className="w-full flex items-center justify-between cursor-pointer">
-      <div className="w-full flex gap-2 items-center" onClick={selectCategoryHandler}>
+    <li
+      key={title}
+      className="w-full flex items-center justify-between cursor-pointer"
+    >
+      <div
+        className="w-full flex gap-2 items-center"
+        onClick={selectCategoryHandler}
+      >
         <IconHolder isCircle={true}>{icon}</IconHolder>
         <div className="text-left w-full">
           <p className="text-xs font-semibold">{group?.title || 'etc.'}</p>
@@ -135,7 +159,7 @@ const CategorySelectItem = ({ id, title, icon, group }: Partial<CategoryType>) =
         className="px-2 py-1 text-xs rounded-md shrink-0"
         onClick={selectCategoryHandler}
       >
-        Add Plot
+        Add Todo
       </Button>
     </li>
   );

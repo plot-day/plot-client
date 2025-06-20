@@ -2,8 +2,7 @@
 
 import Overlay from '@/components/overlay/Overlay';
 import { useSearchParams } from 'next/navigation';
-import TagsFieldInput from './TagsFieldInputOverlay';
-import CheckButton from '@/components/button/CheckButton';
+import TagFieldInputOverlay from './TagFieldInputOverlay';
 
 const FieldInputOverlay = () => {
   const params = useSearchParams();
@@ -16,8 +15,7 @@ const FieldInputOverlay = () => {
       {type === 'text' && <TextFieldInput />}
       {type === 'date' && <DateFieldInput />}
       {type === 'timestamp' && <TimestampFieldInput />}
-      {type === 'tags' && <TagsFieldInput fieldId={fieldId} />}
-      {type === 'options' && <OptionsFieldInput />}
+      {type === 'tag' && <TagFieldInputOverlay fieldId={fieldId} />}
       {type === 'image' && <ImageFieldInput />}
       {type === 'url' && <UrlFieldInput />}
     </Overlay>
@@ -38,10 +36,6 @@ const DateFieldInput = () => {
 
 const TimestampFieldInput = () => {
   return <div>TimestampFieldInput</div>;
-};
-
-const OptionsFieldInput = () => {
-  return <div>OptionsFieldInput</div>;
 };
 
 const ImageFieldInput = () => {
