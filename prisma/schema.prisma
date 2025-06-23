@@ -6,7 +6,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -21,13 +20,13 @@ model User {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   Account       Account[]
-  Session       Session[]
-  Plot          Plot[]
   Category      Category[]
-  Group         Group[]
-  Todo          Todo[]
-  Goal          Goal[]
   Filter        Filter[]
+  Goal          Goal[]
+  Group         Group[]
+  Plot          Plot[]
+  Session       Session[]
+  Todo          Todo[]
   Tracker       Tracker[]
 }
 
@@ -74,7 +73,6 @@ model Plot {
   title        String
   description  String?
   categoryId   String
-  category     Category  @relation(fields: [categoryId], references: [id])
   type         String
   status       String?
   date         String?
@@ -83,11 +81,11 @@ model Plot {
   todayRank    String?
   inboxRank    String?
   categoryRank String?
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  category     Category  @relation(fields: [categoryId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
 }
 
 model Todo {
@@ -96,21 +94,20 @@ model Todo {
   title        String
   description  String?
   categoryId   String
-  category     Category  @relation(fields: [categoryId], references: [id])
   status       String?
   date         String?
   dueDate      DateTime?
   fieldValues  Json?
   rank         String?
   categoryRank String?
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   isGoal       Boolean   @default(false)
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Filter    Filter?  @relation(fields: [projectId], references: [id])
-  projectId String?
+  projectId    String?
+  category     Category  @relation(fields: [categoryId], references: [id])
+  Filter       Filter?   @relation(fields: [projectId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
 }
 
 model Goal {
@@ -119,16 +116,15 @@ model Goal {
   title       String
   description String?
   categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
   date        String?
   fieldValues Json?
   rank        String?
   isActive    Boolean  @default(true)
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  category    Category @relation(fields: [categoryId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Tracker {
@@ -137,71 +133,61 @@ model Tracker {
   title       String
   description String?
   categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
   date        String?
   fieldValues Json?
   rank        String?
   isActive    Boolean  @default(true)
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  category    Category @relation(fields: [categoryId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Filter {
-  id         String  @id @default(cuid())
+  id         String   @id @default(cuid())
   icon       String?
   title      String
-  filter     Json[] // { field: string, condition: 'eq' | 'gt' | 'lt' | 'gte' | 'lte', target: any, operator?: 'and' | 'or',  }[]
   rank       String?
-  isActive   Boolean @default(true)
-  hideIfZero Boolean @default(false)
-  hideTodos  Boolean @default(false)
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  isActive   Boolean  @default(true)
+  hideTodos  Boolean  @default(true)
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  hideIfZero Boolean  @default(false)
+  query      Json?
+  user       User     @relation(fields: [userId], references: [id])
   Todo       Todo[]
-  Category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?
 }
 
 model Category {
-  id         String  @id @default(cuid())
+  id         String    @id @default(cuid())
   icon       String
   title      String
-  group      Group   @relation(fields: [groupId], references: [id])
   groupId    String
-  enableTodo Boolean @default(true)
   fields     Json[]
   isDefault  Boolean
   rank       String
-
-  Plot Plot[]
-
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  Todo      Todo[]
-  Goal      Goal[]
-  Tracker   Tracker[]
-  Filter    Filter[]
+  userId     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  enableTodo Boolean   @default(true)
+  group      Group     @relation(fields: [groupId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+  Goal       Goal[]
+  Plot       Plot[]
+  Todo       Todo[]
+  Tracker    Tracker[]
 }
 
 model Group {
-  id        String  @id @default(cuid())
+  id        String     @id @default(cuid())
   title     String
   isDefault Boolean
   rank      String
-
-  Category Category[]
-
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Category  Category[]
+  user      User       @relation(fields: [userId], references: [id])
 }

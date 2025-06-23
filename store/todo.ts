@@ -7,6 +7,7 @@ import { atomWithMutation, atomWithQuery } from 'jotai-tanstack-query';
 import { LexoRank } from 'lexorank';
 import { categoryAtom, CategoryType } from './category';
 import { categoryPageAtom, todayAtom } from './ui';
+import { filterAtom, filtersAtom, FilterType } from './filter';
 
 export interface TodoType {
   id: string;
@@ -49,6 +50,31 @@ export const todosTodayAtom = atomWithQuery<TodoType[]>((get) => {
           };
         }),
         'todayRank'
+      );
+    },
+  };
+});
+
+export const filteredTodosAtom = atomWithQuery<TodoType[]>((get) => {
+  return {
+    queryKey: ['todo', get(filterAtom)],
+    queryFn: async ({ queryKey: [, filter] }) => {
+      console.log({ filter });
+      let query = (filter as FilterType)?.query;
+      if (!query) {
+        query = get(filtersAtom)?.data?.[0]?.query;
+        if (!query) {
+          return [];
+        }
+      }
+
+      const res = await fetch(`/api/todo?filter=${JSON.stringify(query)}`);
+      const data = await res.json();
+      return (
+        sortRank(
+          data.map((item: any) => parseRank(item)),
+          'todayRank'
+        ) || []
       );
     },
   };
@@ -126,6 +152,7 @@ export const todoMutation = atomWithMutation<
   },
   onSuccess: (data) => {
     updateTodoAtom(data, ['todo', get(todayAtom)]);
+    get(filteredTodosAtom).refetch();
     updateCategoryTodoAtom(data, ['todo', get(categoryPageAtom)?.id]);
   },
 }));

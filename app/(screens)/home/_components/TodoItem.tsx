@@ -33,7 +33,7 @@ const TodoItem = (todo: TodoType) => {
     <div className="todo-item w-full flex justify-between items-center">
       <Link
         href={`${pathname}?todo-input=show`}
-        className="w-full flex items-center gap-4"
+        className="w-full flex gap-4"
         onClick={() => {
           setFormData(todo);
         }}
@@ -85,8 +85,12 @@ const TodoItem = (todo: TodoType) => {
         </div>
       </Link>
       <div
-        className={`w-[1rem] h-[1rem] border-black flex justify-center items-center text-white text-xs border rounded-[0.25rem] ${
-          status === 'done' || status === 'dismiss' ? 'bg-primary' : ''
+        className={`w-[1rem] h-[1rem] flex justify-center items-center text-xs rounded-[0.25rem] ${
+          status === 'done'
+            ? 'bg-primary text-white'
+            : status === 'dismiss'
+            ? 'bg-gray-200 text-gray-400'
+            : 'border border-black'
         }`}
         onClick={
           status === 'todo'

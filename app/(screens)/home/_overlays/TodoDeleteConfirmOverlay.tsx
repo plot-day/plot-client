@@ -1,7 +1,8 @@
 'use client';
 
 import OverlayForm from '@/components/overlay/OverlayForm';
-import { todosTodayAtom } from '@/store/todo';
+import { filterAtom } from '@/store/filter';
+import { filteredTodosAtom, todosTodayAtom } from '@/store/todo';
 import { todoFormDataAtom } from '@/store/todo';
 import { categoryPageAtom, todayAtom } from '@/store/ui';
 import { removeAtom } from '@/util/query';
@@ -21,6 +22,7 @@ const TodoDeleteConformOverlay = () => {
 
   const defaultValues = useAtomValue(todoFormDataAtom);
   const today = useAtomValue(todayAtom);
+  const { refetch: refetchFilteredTodo } = useAtomValue(filteredTodosAtom);
   const categoryPage = useAtomValue(categoryPageAtom);
 
   const [isPending, setIsPending] = useState(false);
@@ -47,6 +49,7 @@ const TodoDeleteConformOverlay = () => {
       defaultValues?.id && removeAtom(defaultValues?.id, ['todo-overdue']);
       defaultValues?.id &&
         removeAtom(defaultValues?.id, ['todo', categoryPage?.id]);
+      refetchFilteredTodo();
       setIsPending(false);
     } catch (error) {
       setIsPending(false);
