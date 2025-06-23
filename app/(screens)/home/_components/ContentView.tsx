@@ -3,15 +3,15 @@ import { cn } from '@/util/cn';
 import { motion } from 'framer-motion';
 import React, { MouseEventHandler, PropsWithChildren } from 'react';
 
-interface ContentBoxInterface extends ClassNameProps {
+interface ContentViewInterface extends ClassNameProps {
   onClick?: MouseEventHandler<HTMLDivElement>;
 }
 
-const ContentBox = ({
+const ContentView = ({
   onClick,
   className,
   children,
-}: PropsWithChildren<ContentBoxInterface>) => {
+}: PropsWithChildren<ContentViewInterface>) => {
   return (
     <motion.div
       layoutId="content-box"
@@ -26,4 +26,4 @@ const ContentBox = ({
   );
 };
 
-export default ContentBox;
+export default ContentView;

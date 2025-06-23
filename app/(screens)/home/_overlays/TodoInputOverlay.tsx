@@ -121,7 +121,7 @@ const TodoInputOverlay = () => {
         ...values,
         id: defaultValue?.id || undefined,
         icon: emoji.get(EMOJI_ID) || '',
-        date: values.date && getDashDate(values.date),
+        date: (values.date && getDashDate(values.date)) || null,
         categoryId: category?.id || defaultCategory?.id,
         ...ranks,
       });
@@ -214,6 +214,8 @@ const TodoInputOverlay = () => {
         ? defaultValue?.icon || ''
         : category?.icon || defaultCategory?.icon || ''
     );
+
+    form.setValue('fieldValues', null);
   }, [category, defaultCategory]);
 
   useEffect(() => {

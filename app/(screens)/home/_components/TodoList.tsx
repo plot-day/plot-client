@@ -1,5 +1,5 @@
 import { ClassNameProps } from '@/types/className';
-import { useState } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import { FaChevronDown, FaChevronRight, FaChevronUp } from 'react-icons/fa6';
 import TodoItem from './TodoItem';
 import { TodoType } from '@/store/todo';
