@@ -124,7 +124,6 @@ const TagFieldInput = ({ fieldId }: TagFieldInputProps) => {
   };
 
   useEffect(() => {
-    console.log(field?.option);
     setTags((field?.option as TagOptionType)?.tags || []);
   }, [fieldId]);
 

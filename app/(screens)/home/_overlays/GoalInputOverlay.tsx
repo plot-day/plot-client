@@ -11,7 +11,7 @@ import Loader from '@/components/loader/Loader';
 import OverlayForm from '@/components/overlay/OverlayForm';
 import Tab from '@/components/tab/Tab';
 import { FIELD_TYPES } from '@/constants/field';
-import { categoryAtom, categoryMutation, FieldType } from '@/store/category';
+import { goalsAtom, goalMutation } from '@/store/goal';
 import { emojiAtom, emojiIdMemoryAtom } from '@/store/emoji';
 import { groupAtom } from '@/store/group';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,8 +24,9 @@ import { useForm } from 'react-hook-form';
 import { FaPencil, FaPlus, FaTrashCan } from 'react-icons/fa6';
 import { v4 as uuidv4 } from 'uuid';
 import * as z from 'zod';
+import { FieldType } from '@/store/category';
 
-const EMOJI_ID = 'category-emoji';
+const EMOJI_ID = 'goal-emoji';
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -33,18 +34,18 @@ const formSchema = z.object({
   title: z.string().min(1, 'Please enter the title.'),
   groupId: z.string().optional(),
   fields: z.array(z.any()).optional(),
-  isDefault: z.boolean().optional(),
+  isActive: z.boolean().optional(),
   rank: z.string().optional(),
 });
 
-export type categoryFormSchemaType = z.infer<typeof formSchema>;
+export type goalFormSchemaType = z.infer<typeof formSchema>;
 
-const CategoryInputOverlay = () => {
+const GoalInputOverlay = () => {
   const pathname = usePathname();
 
   const { data: groups, isPending, isError } = useAtomValue(groupAtom);
-  const { data: categories } = useAtomValue(categoryAtom);
-  const { mutate, isPending: isSubmitting } = useAtomValue(categoryMutation);
+  const { data: categories } = useAtomValue(goalsAtom);
+  const { mutate, isPending: isSubmitting } = useAtomValue(goalMutation);
   const [emoji, setEmoji] = useAtom(emojiAtom);
   const setEmojiIdMemeory = useSetAtom(emojiIdMemoryAtom);
 
@@ -55,16 +56,16 @@ const CategoryInputOverlay = () => {
   const [error, setError] = useState('');
 
   const params = useSearchParams();
-  const categoryId = params.get('categoryId') || '';
+  const goalId = params.get('goalId') || '';
   const title = params.get('title') || '';
   const rank = params.get('rank') || '';
-  const showOverlay = params.get('category-input') || '';
+  const showOverlay = params.get('goal-input') || '';
 
-  const form = useForm<categoryFormSchemaType>({
+  const form = useForm<goalFormSchemaType>({
     resolver: zodResolver(formSchema),
   });
 
-  const submitHandler = async (values: categoryFormSchemaType) => {
+  const submitHandler = async (values: goalFormSchemaType) => {
     setError('');
 
     try {
@@ -77,19 +78,17 @@ const CategoryInputOverlay = () => {
       const sortedCategories = categories?.sort((a, b) =>
         a.rank?.compareTo(b.rank)
       );
-      const lastCategory =
+      const lastGoal =
         sortedCategories && sortedCategories[sortedCategories.length - 1];
 
       await mutate({
         ...values,
-        id: categoryId || undefined,
+        id: goalId || undefined,
         groupId: group,
         fields,
-        rank: categoryId
+        rank: goalId
           ? undefined
-          : lastCategory?.rank.genNext().toString() ||
-            LexoRank.middle().toString(),
-        isDefault: categoryId ? undefined : false,
+          : lastGoal?.rank.genNext().toString() || LexoRank.middle().toString(),
       });
     } catch (error: any) {
       setError(
@@ -115,18 +114,16 @@ const CategoryInputOverlay = () => {
     if (showOverlay) {
       setError('');
       setEmojiIdMemeory((prev) => [...prev, EMOJI_ID]);
-      if (categoryId) {
-        const category = categories?.find(
-          (category) => category.id === categoryId
-        );
-        setEmoji(EMOJI_ID, category?.icon || '');
-        form.setValue('icon', category?.icon || '');
+      if (goalId) {
+        const goal = categories?.find((goal) => goal.id === goalId);
+        setEmoji(EMOJI_ID, goal?.icon || '');
+        form.setValue('icon', goal?.icon || '');
         setGroup(
-          category?.groupId || groups?.find((item) => item.isDefault)?.id || ''
+          goal?.groupId || groups?.find((item) => item.isDefault)?.id || ''
         );
-        form.setValue('title', category?.title || '');
-        form.setValue('fields', category?.fields);
-        setFields(category?.fields || []);
+        form.setValue('title', goal?.title || '');
+        form.setValue('fields', goal?.fields);
+        setFields(goal?.fields || []);
       } else {
         setGroup(groups?.find((item) => item.isDefault)?.id || '');
         setEmoji(EMOJI_ID, '');
@@ -138,7 +135,7 @@ const CategoryInputOverlay = () => {
         (prev) => (prev.length && [...prev].slice(0, prev.length - 1)) || []
       );
     }
-  }, [showOverlay, categoryId]);
+  }, [showOverlay, goalId]);
 
   useEffect(() => {
     if (!showOverlay) {
@@ -156,23 +153,21 @@ const CategoryInputOverlay = () => {
   }, [emoji.get(EMOJI_ID)]);
 
   useEffect(() => {
-    if (categoryId) {
-      const category = categories?.find(
-        (category) => category.id === categoryId
-      );
-      if (category?.fields) {
-        setFields(category.fields);
+    if (goalId) {
+      const goal = categories?.find((goal) => goal.id === goalId);
+      if (goal?.fields) {
+        setFields(goal.fields);
       }
     }
   }, [params.toString()]);
 
   return (
     <OverlayForm
-      id="category-input"
+      id="goal-input"
       className={`[&>form]:flex [&>form]:flex-col [&>form]:px-8 [&>form]:items-center [&>form]:gap-4 ${
         isSubmitting ? 'pointer-events-none' : ''
       }`}
-      title={categoryId ? 'Edit category' : 'Add category'}
+      title={goalId ? 'Edit goal' : 'Add goal'}
       form={form}
       onSubmit={submitHandler}
       isRight={true}
@@ -182,7 +177,7 @@ const CategoryInputOverlay = () => {
         {/* Emoji */}
         <EmojiInput
           id={EMOJI_ID}
-          params={`${params.toString()}&category-input=show${
+          params={`${params.toString()}&goal-input=show${
             group ? '&groupId=' + group : ''
           }`}
           isCircle={true}
@@ -204,7 +199,7 @@ const CategoryInputOverlay = () => {
           </Link>
         </div>
         <Tab
-          id="category-input-group"
+          id="goal-input-group"
           value={group}
           setValue={setGroup}
           className="text-sm w-full [&_label]:font-semibold [&>li]:p-1"
@@ -261,7 +256,7 @@ const CategoryInputOverlay = () => {
             key={key}
             className="w-full p-2 text-sm bg-red-50 text-red-400 font-bold text-center rounded-lg"
           >
-            {form.formState.errors[key as keyof categoryFormSchemaType]?.message
+            {form.formState.errors[key as keyof goalFormSchemaType]?.message
               ?.split('\n')
               .map((line, i) => (
                 <p key={i}>
@@ -368,4 +363,4 @@ const FieldItem = ({
   );
 };
 
-export default CategoryInputOverlay;
+export default GoalInputOverlay;

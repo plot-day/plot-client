@@ -74,7 +74,9 @@ const Overlay = ({
               onClick={closeHandler}
               className={`fixed top-0 bottom-0 left-0 right-0 bg-black lg:bg-white`}
               initial={{ opacity: 0 }}
-              animate={{ opacity: backdropOpacity === 0 ? 0 : backdropOpacity || 0.7 }}
+              animate={{
+                opacity: backdropOpacity === 0 ? 0 : backdropOpacity || 0.7,
+              }}
               exit={{ opacity: 0 }}
             />
             {/* Overlay */}
@@ -104,7 +106,9 @@ const Overlay = ({
                   onClick={backLink ? goBackLinkHandler : undefined}
                 >
                   <div className="flex gap-2 items-center">
-                    {backLink && <span className="text-xs font-extrabold">&lt;</span>}
+                    {backLink && (
+                      <span className="text-xs font-extrabold">&lt;</span>
+                    )}
                     {title && <h3 className="w-full text-left">{title}</h3>}
                   </div>
                   {!hideX && (

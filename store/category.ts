@@ -14,7 +14,6 @@ export interface CategoryType {
   group: GroupType;
   groupId: string;
   userId?: string;
-  enableTodo: boolean;
   fields: FieldType[];
   isDefault: boolean;
   rank: LexoRank;

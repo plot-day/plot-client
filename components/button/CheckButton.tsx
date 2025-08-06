@@ -6,13 +6,18 @@ export interface CheckButtonProps extends ClassNameProps {
   checked: boolean;
   onChecked: (checked: boolean) => void;
   checkedCheckClass?: string;
+  uncheckedClass?: string;
+  checkedClass?: string;
 }
 
 const CheckButton = ({
   checked,
   onChecked,
+
   checkedCheckClass,
   className,
+  uncheckedClass,
+  checkedClass,
 }: CheckButtonProps) => {
   const checkHandler = () => {
     onChecked(!checked);
@@ -26,6 +31,7 @@ const CheckButton = ({
         checked
           ? `${checkedCheckClass || 'text-white'} bg-primary`
           : 'text-gray-300 bg-gray-100',
+        checked ? checkedClass || '' : uncheckedClass || '',
         className
       )}
       onClick={checkHandler}

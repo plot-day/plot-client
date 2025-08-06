@@ -23,10 +23,12 @@ model User {
   Category      Category[]
   Filter        Filter[]
   Goal          Goal[]
+  GoalLog       GoalLog[]
   Group         Group[]
   Plot          Plot[]
   Session       Session[]
   Todo          Todo[]
+  TrackLog      TrackLog[]
   Tracker       Tracker[]
 }
 
@@ -89,46 +91,55 @@ model Plot {
 }
 
 model Todo {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   icon         String?
-  title        String
+  title        String?
   description  String?
   categoryId   String
   status       String?
   date         String?
-  dueDate      DateTime?
   fieldValues  Json?
   rank         String?
   categoryRank String?
   userId       String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  isGoal       Boolean   @default(false)
-  projectId    String?
-  category     Category  @relation(fields: [categoryId], references: [id])
-  Filter       Filter?   @relation(fields: [projectId], references: [id])
-  user         User      @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  category     Category @relation(fields: [categoryId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
 }
 
 model Goal {
+  id        String    @id @default(cuid())
+  icon      String?
+  title     String
+  rank      String?
+  isActive  Boolean   @default(true)
+  userId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  fields    Json[]
+  groupId   String
+  group     Group     @relation(fields: [groupId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  GoalLog   GoalLog[]
+}
+
+model GoalLog {
   id          String   @id @default(cuid())
-  icon        String?
-  title       String
   description String?
-  categoryId  String
-  date        String?
+  date        String
   fieldValues Json?
-  rank        String?
-  isActive    Boolean  @default(true)
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  category    Category @relation(fields: [categoryId], references: [id])
+  goalId      String
+  status      String   @default("todo")
+  goal        Goal     @relation(fields: [goalId], references: [id])
   user        User     @relation(fields: [userId], references: [id])
 }
 
 model Tracker {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   icon        String?
   title       String
   description String?
@@ -136,11 +147,25 @@ model Tracker {
   date        String?
   fieldValues Json?
   rank        String?
-  isActive    Boolean  @default(true)
+  isActive    Boolean    @default(true)
+  userId      String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  TrackLog    TrackLog[]
+  category    Category   @relation(fields: [categoryId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
+}
+
+model TrackLog {
+  id          String   @id @default(cuid())
+  description String?
+  date        String?
+  fieldValues Json?
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  category    Category @relation(fields: [categoryId], references: [id])
+  trackerId   String
+  tracker     Tracker  @relation(fields: [trackerId], references: [id])
   user        User     @relation(fields: [userId], references: [id])
 }
 
@@ -157,27 +182,24 @@ model Filter {
   hideIfZero Boolean  @default(false)
   query      Json?
   user       User     @relation(fields: [userId], references: [id])
-  Todo       Todo[]
 }
 
 model Category {
-  id         String    @id @default(cuid())
-  icon       String
-  title      String
-  groupId    String
-  fields     Json[]
-  isDefault  Boolean
-  rank       String
-  userId     String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  enableTodo Boolean   @default(true)
-  group      Group     @relation(fields: [groupId], references: [id])
-  user       User      @relation(fields: [userId], references: [id])
-  Goal       Goal[]
-  Plot       Plot[]
-  Todo       Todo[]
-  Tracker    Tracker[]
+  id        String    @id @default(cuid())
+  icon      String
+  title     String
+  groupId   String
+  fields    Json[]
+  isDefault Boolean
+  rank      String
+  userId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  group     Group     @relation(fields: [groupId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  Plot      Plot[]
+  Todo      Todo[]
+  Tracker   Tracker[]
 }
 
 model Group {
@@ -189,5 +211,6 @@ model Group {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   Category  Category[]
+  Goal      Goal[]
   user      User       @relation(fields: [userId], references: [id])
 }
