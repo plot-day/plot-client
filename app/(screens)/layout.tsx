@@ -14,6 +14,8 @@ import FieldInputOverlay from './home/_overlays/FieldInputOverlay';
 import InformOverlay from './home/_overlays/InformOverlay';
 import { AnimatePresence, motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import GoalInputOverlay from './home/_overlays/GoalInputOverlay';
+import GoalLogInputOverlay from './home/_overlays/GoalLogInputOverlay';
 
 export default function RootLayout({
   children,
@@ -25,9 +27,13 @@ export default function RootLayout({
   return (
     <div className="relative max-w-[1280px] mx-auto">
       {/* content */}
-      <main className="w-full h-[calc(100dvh-6rem)] overflow-scroll relative">
+      <main className="w-full h-[calc(100dvh-6rem)] overflow-hidden relative">
         <AnimatePresence mode="wait">
-          <motion.div key={pathname} transition={{ duration: 0.4 }}>
+          <motion.div
+            className="w-full h-full"
+            key={pathname}
+            transition={{ duration: 0.4 }}
+          >
             {children}
           </motion.div>
         </AnimatePresence>
@@ -46,6 +52,8 @@ export default function RootLayout({
           <CategorySelectOverlay />
           <CategoryListOverlay />
           <CategoryInputOverlay />
+          <GoalInputOverlay />
+          <GoalLogInputOverlay />
           <FieldInputOverlay />
           <GroupListOverlay />
           <EmojiOverlay />

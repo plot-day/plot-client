@@ -14,7 +14,6 @@ export interface TodoType {
   icon: string;
   title: string;
   description?: string;
-  logs?: LogType[];
   categoryId: string;
   category: CategoryType;
   type: string;
@@ -24,13 +23,6 @@ export interface TodoType {
   fieldValues: any;
   rank: LexoRank;
   categoryRank: LexoRank;
-}
-
-export interface LogType {
-  id: string;
-  content: string;
-  todoId: string;
-  todo: TodoType;
 }
 
 export type StatusType = 'todo' | 'done' | 'dismiss';
@@ -59,7 +51,6 @@ export const filteredTodosAtom = atomWithQuery<TodoType[]>((get) => {
   return {
     queryKey: ['todo', get(filterAtom)],
     queryFn: async ({ queryKey: [, filter] }) => {
-      console.log({ filter });
       let query = (filter as FilterType)?.query;
       if (!query) {
         query = get(filtersAtom)?.data?.[0]?.query;

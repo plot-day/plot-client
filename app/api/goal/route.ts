@@ -13,15 +13,16 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const data = await prisma.filter.findMany({
+    const data = await prisma.goal.findMany({
       where: { userId: session.user.id },
+      include: { group: true },
       orderBy: [{ rank: 'asc' }],
     });
 
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to fetch filters', { status: 500 });
+    return new Response('Failed to fetch goals', { status: 500 });
   }
 }
 
@@ -40,7 +41,7 @@ export async function PUT(req: Request) {
   try {
     for (let i = 0; i < reqData.length; i++) {
       if (reqData[i].id) {
-        const data = await prisma.filter.update({
+        const data = await prisma.goal.update({
           where: {
             id: reqData[i].id,
           },
@@ -48,7 +49,7 @@ export async function PUT(req: Request) {
         });
         resData.push(data);
       } else {
-        const data = await prisma.filter.create({
+        const data = await prisma.goal.create({
           data: {
             ...reqData[i],
             userId: session.user.id,
@@ -61,7 +62,7 @@ export async function PUT(req: Request) {
     return new Response(JSON.stringify(resData), { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to put filters', { status: 500 });
+    return new Response('Failed to put goals', { status: 500 });
   }
 }
 
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
 
   const reqData = await req.json();
   try {
-    const data = await prisma.filter.create({
+    const data = await prisma.goal.create({
       data: {
         ...reqData,
         userId: session.user.id,
@@ -86,6 +87,6 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify(data), { status: 201 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to create filter', { status: 500 });
+    return new Response('Failed to create goal', { status: 500 });
   }
 }

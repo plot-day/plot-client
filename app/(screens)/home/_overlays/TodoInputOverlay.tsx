@@ -48,18 +48,36 @@ import * as z from 'zod';
 
 const EMOJI_ID = 'todo-emoji';
 
-const formSchema = z.object({
-  id: z.string().optional(),
-  icon: z.string().optional(),
-  title: z.string().min(1, 'Please enter the title.'),
-  date: z.string().optional().nullable(),
-  categoryId: z.string().optional(),
-  fieldValues: z.any().optional(),
-  description: z.string().optional().nullable(),
-  status: z.string().optional(),
-  rank: z.string().optional(),
-  categoryRank: z.string().optional(),
-});
+const formSchema = z
+  .object({
+    id: z.string().optional(),
+    icon: z.string().optional(),
+    title: z.string().optional(),
+    date: z.string().optional().nullable(),
+    categoryId: z.string().optional(),
+    fieldValues: z.any().optional(),
+    description: z.string().optional().nullable(),
+    status: z.string().optional(),
+    rank: z.string().optional(),
+    categoryRank: z.string().optional(),
+  })
+  .refine(
+    ({ title, fieldValues }) => {
+      if (!title) {
+        for (const key in fieldValues) {
+          if (fieldValues[key] === 0 || fieldValues[key]) {
+            return true;
+          }
+        }
+        return false;
+      }
+      return true;
+    },
+    {
+      path: ['title'],
+      message: 'Please enter the title or field values.',
+    }
+  );
 
 export type todoFormSchemaType = z.infer<typeof formSchema>;
 
@@ -96,7 +114,6 @@ const TodoInputOverlay = () => {
 
   const fieldInputHandler = (key: string) => {
     const setFieldFunc = (v: string | number | boolean) => {
-      console.log({ key, v });
       form.setValue('fieldValues', { ...form.watch('fieldValues'), [key]: v });
     };
     return setFieldFunc;
@@ -147,7 +164,6 @@ const TodoInputOverlay = () => {
       } else if ((error as Error)?.message) {
         setError((error as Error).message);
       }
-      console.error(error);
       throw error;
     }
   };

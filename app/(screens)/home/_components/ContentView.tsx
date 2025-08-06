@@ -16,7 +16,7 @@ const ContentView = ({
     <motion.div
       layoutId="content-box"
       className={cn(
-        'absolute bottom-0 w-full max-h-[calc(100dvh-23rem)] p-8 bg-white rounded-tl-3xl rounded-tr-3xl',
+        'absolute bottom-0 w-full max-h-[calc(100dvh-23rem)] p-8 px-4 bg-white rounded-tl-3xl rounded-tr-3xl',
         className
       )}
       onClick={onClick}

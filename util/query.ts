@@ -2,14 +2,23 @@ import { queryClient } from '@/lib/query';
 import { parseRank, sortRank } from './convert';
 import { getDashDate } from './date';
 
-export const updateAtom = (data: any, key: string | any[]) => {
+export const updateAtom = (
+  data: any,
+  key: string | any[],
+  noRank?: boolean
+) => {
   queryClient.setQueryData(
     typeof key === 'string' ? [key] : key,
     (prev: any) => {
-      return [
-        ...prev.filter((item: any) => item.id !== data.id),
-        parseRank(data),
-      ];
+      return noRank
+        ? [...prev.filter((item: any) => item.id !== data.id), data]
+        : sortRank(
+            [
+              ...prev.filter((item: any) => item.id !== data.id),
+              parseRank(data),
+            ],
+            'rank'
+          );
     }
   );
 };

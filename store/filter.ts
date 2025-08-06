@@ -28,21 +28,3 @@ export const filtersAtom = atomWithQuery<FilterType[]>(() => {
 });
 
 export const filterAtom = atom<FilterType | undefined>();
-
-export const filterMutation = atomWithMutation<FilterType, any>(() => ({
-  mutationKey: ['filter'],
-  mutationFn: async (filters) => {
-    try {
-      const res = await fetch(`/api/filter`, {
-        method: 'PUT',
-        body: JSON.stringify(filters),
-      });
-      return await res.json();
-    } catch (error) {
-      throw error;
-    }
-  },
-  onSuccess: (data) => {
-    replaceAtom(data, 'filter');
-  },
-}));

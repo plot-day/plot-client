@@ -12,6 +12,7 @@ export const GET = async (
       where: {
         id,
       },
+      include: { category: true },
     });
 
     return NextResponse.json({ todo });

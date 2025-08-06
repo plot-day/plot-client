@@ -1,6 +1,5 @@
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/prisma/client';
-import { JsonValue } from '@prisma/client/runtime/library';
 import { getServerSession } from 'next-auth';
 import { NextRequest } from 'next/server';
 
@@ -61,8 +60,6 @@ export async function GET(req: NextRequest) {
       orderBy: [{ createdAt: 'asc' }],
     });
 
-    console.log({ fieldValues });
-
     if (fieldValues.length > 0 && condition === 'AND') {
       const filtered = data.filter((item) => {
         if (
@@ -91,7 +88,7 @@ export async function GET(req: NextRequest) {
           return false;
         });
       });
-      console.log({ filtered });
+
       return new Response(JSON.stringify(filtered), { status: 200 });
     } else {
       return new Response(JSON.stringify(data), { status: 200 });

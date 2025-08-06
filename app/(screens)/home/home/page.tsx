@@ -8,13 +8,14 @@ import { useEffect, useState } from 'react';
 import FilterView from './_components/FilterView';
 import OverdueView from './_components/OverdueView';
 import TodoView from './_components/TodoView';
+import GoalIconList from './_components/GoalIconList';
 
 export type HomeViewType = 'todo' | 'overdue' | 'filter';
 
 const DEFAULT_TODO_HEIGHT = 'max-h-[calc(100dvh-17rem)]';
 const SHRINKED_TODO_HEIGHT = 'max-h-[calc(100dvh-20rem)]'; // view === 'overdue'
 
-const DEFAULT_OVERDUE_HEIGHT = 'h-[38rem]';
+const DEFAULT_OVERDUE_HEIGHT = 'h-[35rem]';
 const MINIMIZED_OVERDUE_HEIGHT = 'h-[6.75rem]'; // view === 'filter'
 
 const DEFAULT_FILTER_HEIGHT = 'h-[calc(100dvh-14rem)]';
@@ -77,7 +78,9 @@ const Page = () => {
           view={view}
           setView={setView}
           height={todoHeight}
-        />
+        >
+          <GoalIconList />
+        </TodoView>
       </div>
     </div>
   );

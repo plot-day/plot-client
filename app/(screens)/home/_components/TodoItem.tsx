@@ -34,9 +34,7 @@ const TodoItem = (todo: TodoType) => {
       <Link
         href={`${pathname}?todo-input=show`}
         className="w-full flex gap-4"
-        onClick={() => {
-          setFormData(todo);
-        }}
+        onClick={setFormData.bind(null, todo)}
       >
         {/* <PlayButton /> */}
         <IconHolder>{icon}</IconHolder>

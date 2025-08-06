@@ -22,17 +22,6 @@ const NAV_DATA: { [key: string]: any }[] = [
   { path: '/home/goal', icon: <FaFlag />, title: 'Goal' },
   // { path: '/home/tracker', icon: <FaChartSimple />, title: 'Tracker' },
   // { path: '/home/category', icon: <IoGrid />, title: 'Category' },
-  {
-    plus: (pathname: string) => (
-      <Link
-        href={`${pathname}?todo-input=show`}
-        key="add"
-        className="shrink-0 bg-primary w-9 h-9 mb-2 rounded-md"
-      >
-        <FaPlus className="text-base text-white" />
-      </Link>
-    ),
-  },
 ];
 
 const Nav = ({ className }: ClassNameProps) => {
@@ -48,22 +37,31 @@ const Nav = ({ className }: ClassNameProps) => {
         className
       )}
     >
-      {NAV_DATA.map(({ path, icon, title, plus }) =>
-        path ? (
-          <Link
-            href={path}
-            key={path}
-            className={pathname === path ? 'text-primary w-full' : 'w-full'}
-          >
-            {icon}
-            <span>{title}</span>
-          </Link>
-        ) : plus ? (
-          plus(pathname)
-        ) : (
-          icon
-        )
-      )}
+      {NAV_DATA.map(({ path, icon, title }) => (
+        <Link
+          href={path}
+          key={path}
+          className={pathname === path ? 'text-primary w-full' : 'w-full'}
+        >
+          {icon}
+          <span>{title}</span>
+        </Link>
+      ))}
+      <Link
+        href={`${pathname}${
+          pathname.includes('home/home')
+            ? '?todo-input=show'
+            : pathname.includes('goal')
+            ? '?goal-input=show'
+            : pathname.includes('tracker')
+            ? '?tracker-input=show'
+            : ''
+        }`}
+        key="add"
+        className="shrink-0 bg-primary w-9 h-9 mb-2 rounded-md"
+      >
+        <FaPlus className="text-base text-white" />
+      </Link>
     </nav>
   );
 };

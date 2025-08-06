@@ -60,10 +60,7 @@ const CategorySelectOverlay = () => {
                   (group === 'all' ||
                     (category.group?.id || category.groupId) === group) &&
                   (!filter ||
-                    category.title
-                      .toLowerCase()
-                      .includes(filter.toLowerCase())) &&
-                  category.enableTodo
+                    category.title.toLowerCase().includes(filter.toLowerCase()))
               )
               .map((category) => (
                 <CategorySelectItem key={category.id} {...category} />

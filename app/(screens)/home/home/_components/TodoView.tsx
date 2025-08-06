@@ -1,5 +1,6 @@
 import React, {
   Dispatch,
+  PropsWithChildren,
   SetStateAction,
   useEffect,
   useMemo,
@@ -29,7 +30,13 @@ interface TodoViewProps {
   height: string;
 }
 
-const TodoView = ({ pathname, view, setView, height }: TodoViewProps) => {
+const TodoView = ({
+  pathname,
+  view,
+  setView,
+  height,
+  children,
+}: PropsWithChildren<TodoViewProps>) => {
   const { data, isFetching } = useAtomValue(todosTodayAtom);
   const today = useAtomValue(todayAtom);
   const { mutate: updateTodo } = useAtomValue(todoMutation);
@@ -78,6 +85,7 @@ const TodoView = ({ pathname, view, setView, height }: TodoViewProps) => {
           {data ? data?.length - (todos || [])?.length : 0}
         </button>
       </div>
+      {children}
       {isFetching ? (
         <div
           className={cn(
